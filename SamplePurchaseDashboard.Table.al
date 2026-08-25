@@ -19,7 +19,7 @@ table 50330 "Sample Purchase Dashboard"
             Editable = false;
         }
 
-        field(3; "Count of Total Domestic Purchase"; Integer)
+        field(3; "Count Domestic Purchase"; Integer)
         {
             Caption = 'Count of Total Domestic Purchase';
             FieldClass = FlowField;

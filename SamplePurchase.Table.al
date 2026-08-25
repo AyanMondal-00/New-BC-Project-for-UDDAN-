@@ -124,7 +124,7 @@ table 50300 "Sample Purchase"
     }
     trigger OnInsert()
     begin
-        if "Entry No." = 0 then
+        if "Entry No." <= 0 then
             "Entry No." := GetNextEntryNo();
     end;
 
@@ -132,8 +132,10 @@ table 50300 "Sample Purchase"
     var
         SamplePurchase: Record "Sample Purchase";
     begin
+        SamplePurchase.Reset();
         if SamplePurchase.FindLast() then
-            exit(SamplePurchase."Entry No." + 1);
+            if SamplePurchase."Entry No." >= 1 then
+                exit(SamplePurchase."Entry No." + 1);
 
         exit(1);
     end;

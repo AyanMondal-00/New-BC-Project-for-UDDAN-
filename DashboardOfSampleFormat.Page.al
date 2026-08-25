@@ -19,7 +19,7 @@ page 50340 "Dashboard of Sample Format"
                 {
                     ApplicationArea = All;
                     DrillDownPageId = "Sample Purchase List";
-                    Image = CashFlow;
+                    Image = Cash;
                     Style = StandardAccent;
                     StyleExpr = true;
                     ShowCaption = false;
@@ -31,10 +31,10 @@ page 50340 "Dashboard of Sample Format"
                 Caption = 'Count of Total Domestic Purchase';
                 CuegroupLayout = Wide;
 
-                field("Count of Total Domestic Purchase"; Rec."Count of Total Domestic Purchase")
+                field("Count Domestic Purchase"; Rec."Count Domestic Purchase")
                 {
                     ApplicationArea = All;
-                    Image = Task;
+                    Image = Checklist;
                     Style = Favorable;
                     StyleExpr = true;
                     ShowCaption = false;
@@ -57,7 +57,7 @@ page 50340 "Dashboard of Sample Format"
                 field("Total International Purchase"; Rec."Total International Purchase")
                 {
                     ApplicationArea = All;
-                    Image = Tile;
+                    Image = Document;
                     Style = Ambiguous;
                     StyleExpr = true;
                     ShowCaption = false;
@@ -106,7 +106,7 @@ page 50340 "Dashboard of Sample Format"
 
         Rec.CalcFields(
             "Total Purchase Amount",
-            "Count of Total Domestic Purchase",
+            "Count Domestic Purchase",
             "Total International Purchase",
             "Total Intl. Other Charges"
         );

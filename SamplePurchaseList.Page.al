@@ -16,6 +16,7 @@ page 50310 "Sample Purchase List"
                 field("Entry No."; Rec."Entry No.")
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
 
                 field("Purchase Date"; Rec."Purchase Date")
@@ -123,4 +124,18 @@ page 50310 "Sample Purchase List"
             }
         }
     }
+
+    trigger OnNewRecord(BelowxRec: Boolean)
+    var
+        SamplePurchase: Record "Sample Purchase";
+    begin
+        SamplePurchase.Reset();
+        if SamplePurchase.FindLast() then
+            if SamplePurchase."Entry No." >= 1 then
+                Rec."Entry No." := SamplePurchase."Entry No." + 1
+            else
+                Rec."Entry No." := 1
+        else
+            Rec."Entry No." := 1;
+    end;
 }
