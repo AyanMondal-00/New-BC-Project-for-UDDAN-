@@ -45,6 +45,32 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            var
+                ContainsLetter: Boolean;
+                ContainsDigit: Boolean;
+                i: Integer;
+            begin
+                if PNR <> '' then begin
+                    if StrLen(PNR) <> 6 then
+                        Error('The PNR length must be exactly 6 characters.');
+
+                    for i := 1 to StrLen(PNR) do begin
+                        if PNR[i] in ['A' .. 'Z'] then
+                            ContainsLetter := true
+                        else if PNR[i] in ['0' .. '9'] then
+                            ContainsDigit := true
+                        else
+                            Error('The PNR must only contain alphanumeric characters.');
+                    end;
+
+                    if not (ContainsLetter and ContainsDigit) then
+                        Error('The PNR must contain a mix of letters and numbers.');
+
+                    CheckDuplicatePNR();
+                end;
+            end;
         }
 
         field(8; Passenger; Text[100])
@@ -182,5 +208,38 @@ table 50402 "Third-Party Supplier Sales"
         end;
 
         "Total Amount" := "Base Fare" + "Other Charges" + CGST + SGST + IGST;
+    end;
+
+    local procedure CheckDuplicatePNR()
+    var
+        SamplePurchase: Record "Sample Purchase";
+        NormalSales: Record "Normal Sales";
+        APISalesFormat: Record "API Sales Format";
+        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+    begin
+        if PNR = '' then
+            exit;
+
+        ThirdPartySupplierSales.Reset();
+        ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
+        if Rec."Entry No." <> 0 then
+            ThirdPartySupplierSales.SetFilter("Entry No.", '<>%1', Rec."Entry No.");
+        if not ThirdPartySupplierSales.IsEmpty() then
+            Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+
+        SamplePurchase.Reset();
+        SamplePurchase.SetRange(PNR, Rec.PNR);
+        if not SamplePurchase.IsEmpty() then
+            Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
+
+        NormalSales.Reset();
+        NormalSales.SetRange(PNR, Rec.PNR);
+        if not NormalSales.IsEmpty() then
+            Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
+
+        APISalesFormat.Reset();
+        APISalesFormat.SetRange(PNR, Rec.PNR);
+        if not APISalesFormat.IsEmpty() then
+            Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
     end;
 }
