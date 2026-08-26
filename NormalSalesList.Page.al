@@ -86,26 +86,31 @@ page 50410 "Normal Sales List"
                 field("Taxable Basis"; Rec."Taxable Basis")
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
 
                 field(CGST; Rec.CGST)
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
 
                 field(SGST; Rec.SGST)
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
 
                 field(IGST; Rec.IGST)
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
 
                 field("Total Amount"; Rec."Total Amount")
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
             }
         }

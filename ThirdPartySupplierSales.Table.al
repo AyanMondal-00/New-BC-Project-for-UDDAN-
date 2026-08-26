@@ -76,48 +76,68 @@ table 50402 "Third-Party Supplier Sales"
             Caption = 'Type';
             OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
         }
 
         field(13; "Base Fare"; Decimal)
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
         }
 
         field(14; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
         }
 
         field(15; "Taxable Basis"; Decimal)
         {
             Caption = 'Taxable Basis';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(16; CGST; Decimal)
         {
             Caption = 'CGST';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(17; SGST; Decimal)
         {
             Caption = 'SGST';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(18; IGST; Decimal)
         {
             Caption = 'IGST';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(19; "Total Amount"; Decimal)
         {
             Caption = 'Total Amount';
             DataClassification = CustomerContent;
+            Editable = false;
         }
     }
 
@@ -145,5 +165,22 @@ table 50402 "Third-Party Supplier Sales"
                 exit(ThirdPartySupplierSales."Entry No." + 1);
 
         exit(1);
+    end;
+
+    procedure CalculateGST()
+    begin
+        if Type = Type::Domestic then begin
+            "Taxable Basis" := "Base Fare" * 0.05;
+            CGST := "Taxable Basis" * 0.09;
+            SGST := "Taxable Basis" * 0.09;
+            IGST := 0;
+        end else begin
+            "Taxable Basis" := "Base Fare" * 0.10;
+            CGST := 0;
+            SGST := 0;
+            IGST := "Taxable Basis" * 0.18;
+        end;
+
+        "Total Amount" := "Base Fare" + "Other Charges" + CGST + SGST + IGST;
     end;
 }
