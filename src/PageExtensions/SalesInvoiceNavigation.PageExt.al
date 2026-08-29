@@ -28,6 +28,18 @@ pageextension 50420 "Sales Invoice Navigation" extends "Business Manager Role Ce
                     Caption = 'Third-Party Sales ';
                     RunObject = page "3rd Party Supplier Sales List";
                 }
+
+            }
+            group(PostedSalesReturn)
+            {
+                Caption = 'Posted Sales Return';
+
+                action("Sales Return")
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Sales Return';
+                    RunObject = page "Sales Return List";
+                }
             }
         }
     }

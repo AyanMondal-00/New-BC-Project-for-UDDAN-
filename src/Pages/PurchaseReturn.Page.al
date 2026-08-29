@@ -12,6 +12,11 @@ page 50312 "Purchase Return"
         {
             repeater(General)
             {
+                field("Entry No."; Rec."Entry No.")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
                 field("Entry Date"; Rec."Entry Date")
                 {
                     ApplicationArea = All;
