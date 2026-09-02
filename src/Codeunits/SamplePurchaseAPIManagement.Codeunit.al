@@ -80,7 +80,7 @@ codeunit 50320 "Sample Purchase API Management"
                 SamplePurchase.Airline :=
                     GetJsonText(JsonObject, 'airline');
 
-                SamplePurchase."Supplier ID" :=
+                SamplePurchase."Agency ID" :=
                     GetJsonText(JsonObject, 'supplierId');
 
                 SamplePurchase.PNR := PnrVal;

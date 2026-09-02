@@ -29,9 +29,9 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
         }
 
-        field(5; "Supplier ID"; Code[20])
+        field(5; "Agency ID"; Code[20])
         {
-            Caption = 'Supplier ID';
+            Caption = 'Agency ID';
             DataClassification = CustomerContent;
         }
 

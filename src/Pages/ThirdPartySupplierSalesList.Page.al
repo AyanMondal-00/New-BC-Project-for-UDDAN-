@@ -28,7 +28,7 @@ page 50412 "3rd Party Supplier Sales List"
                     ApplicationArea = All;
                 }
 
-                field("Agency ID"; Rec."Agency ID")
+                field("Supplier ID"; Rec."Supplier ID")
                 {
                     ApplicationArea = All;
                 }

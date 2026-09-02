@@ -23,9 +23,9 @@ table 50400 "Normal Sales"
             DataClassification = CustomerContent;
         }
 
-        field(4; "Agency ID"; Code[30])
+        field(4; "Supplier ID"; Code[30])
         {
-            Caption = 'Agency ID';
+            Caption = 'Supplier ID';
             DataClassification = CustomerContent;
         }
 

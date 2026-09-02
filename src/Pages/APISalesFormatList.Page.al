@@ -28,7 +28,7 @@ page 50411 "API Sales Format List"
                     ApplicationArea = All;
                 }
 
-                field("Agency ID"; Rec."Agency ID")
+                field("Supplier ID"; Rec."Supplier ID")
                 {
                     ApplicationArea = All;
                 }

@@ -52,7 +52,7 @@ page 50310 "Sample Purchase List"
                     end;
                 }
 
-                field("Supplier ID"; Rec."Supplier ID")
+                field("Agency ID"; Rec."Agency ID")
                 {
                     ApplicationArea = All;
                 }
