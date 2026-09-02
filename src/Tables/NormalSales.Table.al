@@ -68,7 +68,7 @@ table 50400 "Normal Sales"
                     if not (ContainsLetter and ContainsDigit) then
                         Error('The PNR must contain a mix of letters and numbers.');
 
-                    CheckDuplicatePNR();
+                    
                 end;
             end;
         }

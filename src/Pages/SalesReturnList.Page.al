@@ -162,10 +162,7 @@ page 50413 "Sales Return List"
                     ApplicationArea = All;
                 }
 
-                field("From API"; Rec."From API")
-                {
-                    ApplicationArea = All;
-                }
+
             }
         }
     }

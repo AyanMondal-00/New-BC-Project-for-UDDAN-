@@ -187,11 +187,7 @@ table 50403 "Sales Return"
             DataClassification = CustomerContent;
         }
 
-        field(31; "From API"; Boolean)
-        {
-            Caption = 'From API';
-            DataClassification = CustomerContent;
-        }
+
     }
 
     keys

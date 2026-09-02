@@ -68,7 +68,7 @@ table 50401 "API Sales Format"
                     if not (ContainsLetter and ContainsDigit) then
                         Error('The PNR must contain a mix of letters and numbers.');
 
-                    CheckDuplicatePNR();
+                   
                 end;
             end;
         }
@@ -213,33 +213,33 @@ table 50401 "API Sales Format"
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";
-        NormalSales: Record "Normal Sales";
-        APISalesFormat: Record "API Sales Format";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        // NormalSales: Record "Normal Sales";
+        // APISalesFormat: Record "API Sales Format";
+        // ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
     begin
         if PNR = '' then
             exit;
 
-        APISalesFormat.Reset();
-        APISalesFormat.SetRange(PNR, Rec.PNR);
-        if Rec."Entry No." <> 0 then
-            APISalesFormat.SetFilter("Entry No.", '<>%1', Rec."Entry No.");
-        if not APISalesFormat.IsEmpty() then
-            Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
+        // APISalesFormat.Reset();
+        // APISalesFormat.SetRange(PNR, Rec.PNR);
+        // if Rec."Entry No." <> 0 then
+        //     APISalesFormat.SetFilter("Entry No.", '<>%1', Rec."Entry No.");
+        // if not APISalesFormat.IsEmpty() then
+        //     Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, Rec.PNR);
         if not SamplePurchase.IsEmpty() then
             Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
 
-        NormalSales.Reset();
-        NormalSales.SetRange(PNR, Rec.PNR);
-        if not NormalSales.IsEmpty() then
-            Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
+        // NormalSales.Reset();
+        // NormalSales.SetRange(PNR, Rec.PNR);
+        // if not NormalSales.IsEmpty() then
+        //     Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
 
-        ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
-        if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+        // ThirdPartySupplierSales.Reset();
+        // ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
+        // if not ThirdPartySupplierSales.IsEmpty() then
+        //     Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
     end;
 }

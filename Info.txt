@@ -1,0 +1,4 @@
+  • Fastest for Dev/Testing: Business Central-er Extension Management page-e giye Uninstall & Delete    
+  Data kora.                                                                                            
+  • Production / Client DB-er jonno: ObsoleteState = Removed; bebohar kora (jate client-er purano data  
+  nosto na hoy). 
