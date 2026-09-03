@@ -48,9 +48,19 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                 }
 
-                field(Passenger; Rec.Passenger)
+                field("View Passenger"; ViewPassengerText)
                 {
                     ApplicationArea = All;
+                    Caption = 'View Passenger';
+                    Editable = false;
+
+                    trigger OnDrillDown()
+                    var
+                        PassengerList: Page "Own Sales Passenger List Name";
+                    begin
+                        PassengerList.SetInvoiceNumber(Rec."Invoice Number");
+                        PassengerList.RunModal();
+                    end;
                 }
 
                 field(Pax; Rec.Pax)
@@ -115,6 +125,10 @@ page 50410 "Normal Sales List"
             }
         }
     }
+    trigger OnAfterGetRecord()
+    begin
+        ViewPassengerText := 'View Passenger';
+    end;
 
     trigger OnNewRecord(BelowxRec: Boolean)
     var
@@ -129,4 +143,19 @@ page 50410 "Normal Sales List"
         else
             Rec."Entry No." := 1;
     end;
+
+    var
+        ViewPassengerText: Text[30];
 }
+
+
+
+
+
+
+
+
+
+
+
+

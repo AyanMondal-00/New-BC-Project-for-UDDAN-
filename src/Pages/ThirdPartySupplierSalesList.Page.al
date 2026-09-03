@@ -1,4 +1,4 @@
-page 50412 "3rd Party Supplier Sales List"
+page 50414 "3rd Party Supplier Sales List"
 {
     Caption = 'Third-Party Supplier Sales Format';
     PageType = List;
