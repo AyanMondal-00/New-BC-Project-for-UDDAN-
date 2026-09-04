@@ -1,6 +1,6 @@
 ﻿page 50412 "Own Sales Passenger List Name"
 {
-    Caption = 'Passenger Name List';
+    Caption = ' Own Sale Passenger Name List';
     PageType = List;
     SourceTable = "Own Sales Passenger Name";
     ApplicationArea = All;
