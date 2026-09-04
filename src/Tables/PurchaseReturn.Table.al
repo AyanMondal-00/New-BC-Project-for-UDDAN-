@@ -1,13 +1,13 @@
-table 50302 "Purchase Return"
+﻿table 50302 "Purchase Return"
 {
     Caption = 'Purchase Return';
     DataClassification = CustomerContent;
 
     fields
     {
-        field(1; "Entry No."; Integer)
+        field(1; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -166,7 +166,7 @@ table 50302 "Purchase Return"
 
     keys
     {
-        key(PK; "Entry No.")
+        key(PK; "Serial No.")
         {
             Clustered = true;
         }
@@ -174,19 +174,19 @@ table 50302 "Purchase Return"
 
     trigger OnInsert()
     begin
-        if "Entry No." <= 0 then
-            "Entry No." := GetNextEntryNo();
+        if "Serial No." <= 0 then
+            "Serial No." := GetNextSerialNo();
     end;
 
-    local procedure GetNextEntryNo(): Integer
+    local procedure GetNextSerialNo(): Integer
     var
         PurchaseReturn: Record "Purchase Return";
     begin
         PurchaseReturn.Reset();
 
         if PurchaseReturn.FindLast() then
-            if PurchaseReturn."Entry No." >= 1 then
-                exit(PurchaseReturn."Entry No." + 1);
+            if PurchaseReturn."Serial No." >= 1 then
+                exit(PurchaseReturn."Serial No." + 1);
 
         exit(1);
     end;

@@ -1,13 +1,13 @@
-table 50400 "Normal Sales"
+﻿table 50400 "Normal Sales"
 {
     Caption = 'Normal Sales';
     DataClassification = CustomerContent;
 
     fields
     {
-        field(1; "Entry No."; Integer)
+        field(1; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -169,7 +169,7 @@ table 50400 "Normal Sales"
 
     keys
     {
-        key(PK; "Entry No.")
+        key(PK; "Serial No.")
         {
             Clustered = true;
         }
@@ -177,18 +177,18 @@ table 50400 "Normal Sales"
 
     trigger OnInsert()
     begin
-        if "Entry No." <= 0 then
-            "Entry No." := GetNextEntryNo();
+        if "Serial No." <= 0 then
+            "Serial No." := GetNextSerialNo();
     end;
 
-    local procedure GetNextEntryNo(): Integer
+    local procedure GetNextSerialNo(): Integer
     var
         NormalSales: Record "Normal Sales";
     begin
         NormalSales.Reset();
         if NormalSales.FindLast() then
-            if NormalSales."Entry No." >= 1 then
-                exit(NormalSales."Entry No." + 1);
+            if NormalSales."Serial No." >= 1 then
+                exit(NormalSales."Serial No." + 1);
 
         exit(1);
     end;
@@ -222,8 +222,8 @@ table 50400 "Normal Sales"
 
         NormalSales.Reset();
         NormalSales.SetRange(PNR, Rec.PNR);
-        if Rec."Entry No." <> 0 then
-            NormalSales.SetFilter("Entry No.", '<>%1', Rec."Entry No.");
+        if Rec."Serial No." <> 0 then
+            NormalSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
         if not NormalSales.IsEmpty() then
             Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
 

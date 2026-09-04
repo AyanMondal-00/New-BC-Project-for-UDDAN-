@@ -1,13 +1,13 @@
-table 50402 "Third-Party Supplier Sales"
+﻿table 50402 "Third-Party Supplier Sales"
 {
     Caption = 'Third-Party Supplier Sales';
     DataClassification = CustomerContent;
 
     fields
     {
-        field(1; "Entry No."; Integer)
+        field(1; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -169,7 +169,7 @@ table 50402 "Third-Party Supplier Sales"
 
     keys
     {
-        key(PK; "Entry No.")
+        key(PK; "Serial No.")
         {
             Clustered = true;
         }
@@ -177,18 +177,18 @@ table 50402 "Third-Party Supplier Sales"
 
     trigger OnInsert()
     begin
-        if "Entry No." <= 0 then
-            "Entry No." := GetNextEntryNo();
+        if "Serial No." <= 0 then
+            "Serial No." := GetNextSerialNo();
     end;
 
-    local procedure GetNextEntryNo(): Integer
+    local procedure GetNextSerialNo(): Integer
     var
         ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
     begin
         ThirdPartySupplierSales.Reset();
         if ThirdPartySupplierSales.FindLast() then
-            if ThirdPartySupplierSales."Entry No." >= 1 then
-                exit(ThirdPartySupplierSales."Entry No." + 1);
+            if ThirdPartySupplierSales."Serial No." >= 1 then
+                exit(ThirdPartySupplierSales."Serial No." + 1);
 
         exit(1);
     end;
@@ -222,8 +222,8 @@ table 50402 "Third-Party Supplier Sales"
 
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
-        if Rec."Entry No." <> 0 then
-            ThirdPartySupplierSales.SetFilter("Entry No.", '<>%1', Rec."Entry No.");
+        if Rec."Serial No." <> 0 then
+            ThirdPartySupplierSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
         if not ThirdPartySupplierSales.IsEmpty() then
             Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
 

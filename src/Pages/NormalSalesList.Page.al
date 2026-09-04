@@ -1,4 +1,4 @@
-page 50410 "Normal Sales List"
+﻿page 50410 "Normal Sales List"
 {
     Caption = 'Normal Sales';
     PageType = List;
@@ -12,7 +12,7 @@ page 50410 "Normal Sales List"
         {
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+                field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -136,17 +136,18 @@ page 50410 "Normal Sales List"
     begin
         NormalSales.Reset();
         if NormalSales.FindLast() then
-            if NormalSales."Entry No." >= 1 then
-                Rec."Entry No." := NormalSales."Entry No." + 1
+            if NormalSales."Serial No." >= 1 then
+                Rec."Serial No." := NormalSales."Serial No." + 1
             else
-                Rec."Entry No." := 1
+                Rec."Serial No." := 1
         else
-            Rec."Entry No." := 1;
+            Rec."Serial No." := 1;
     end;
 
     var
         ViewPassengerText: Text[30];
 }
+
 
 
 

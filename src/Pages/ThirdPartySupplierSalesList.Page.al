@@ -1,4 +1,4 @@
-page 50414 "3rd Party Supplier Sales List"
+﻿page 50414 "3rd Party Supplier Sales List"
 {
     Caption = 'Third-Party Supplier Sales Format';
     PageType = List;
@@ -12,7 +12,7 @@ page 50414 "3rd Party Supplier Sales List"
         {
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+                field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -122,11 +122,11 @@ page 50414 "3rd Party Supplier Sales List"
     begin
         ThirdPartySupplierSales.Reset();
         if ThirdPartySupplierSales.FindLast() then
-            if ThirdPartySupplierSales."Entry No." >= 1 then
-                Rec."Entry No." := ThirdPartySupplierSales."Entry No." + 1
+            if ThirdPartySupplierSales."Serial No." >= 1 then
+                Rec."Serial No." := ThirdPartySupplierSales."Serial No." + 1
             else
-                Rec."Entry No." := 1
+                Rec."Serial No." := 1
         else
-            Rec."Entry No." := 1;
+            Rec."Serial No." := 1;
     end;
 }

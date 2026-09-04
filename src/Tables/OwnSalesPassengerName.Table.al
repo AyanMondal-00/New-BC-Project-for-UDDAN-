@@ -1,4 +1,4 @@
-table 50404 "Own Sales Passenger Name"
+﻿table 50404 "Own Sales Passenger Name"
 {
     Caption = 'Own Sales Passenger Name';
     DataClassification = CustomerContent;
@@ -11,9 +11,9 @@ table 50404 "Own Sales Passenger Name"
             DataClassification = CustomerContent;
         }
 
-        field(2; "Entry No."; Integer)
+        field(2; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -26,7 +26,7 @@ table 50404 "Own Sales Passenger Name"
 
     keys
     {
-        key(PK; "Invoice Number", "Entry No.")
+        key(PK; "Invoice Number", "Serial No.")
         {
             Clustered = true;
         }

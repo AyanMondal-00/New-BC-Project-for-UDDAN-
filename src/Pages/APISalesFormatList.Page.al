@@ -1,4 +1,4 @@
-page 50411 "API Sales Format List"
+﻿page 50411 "API Sales Format List"
 {
     Caption = 'API Sales Format';
     PageType = List;
@@ -12,7 +12,7 @@ page 50411 "API Sales Format List"
         {
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+                field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -122,11 +122,11 @@ page 50411 "API Sales Format List"
     begin
         APISalesFormat.Reset();
         if APISalesFormat.FindLast() then
-            if APISalesFormat."Entry No." >= 1 then
-                Rec."Entry No." := APISalesFormat."Entry No." + 1
+            if APISalesFormat."Serial No." >= 1 then
+                Rec."Serial No." := APISalesFormat."Serial No." + 1
             else
-                Rec."Entry No." := 1
+                Rec."Serial No." := 1
         else
-            Rec."Entry No." := 1;
+            Rec."Serial No." := 1;
     end;
 }

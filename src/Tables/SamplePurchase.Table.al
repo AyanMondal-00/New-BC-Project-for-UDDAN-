@@ -1,13 +1,13 @@
-table 50300 "Sample Purchase"
+﻿table 50300 "Sample Purchase"
 {
     Caption = 'Sample Purchase';
     DataClassification = CustomerContent;
 
     fields
     {
-        field(1; "Entry No."; Integer)
+        field(1; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -119,25 +119,25 @@ table 50300 "Sample Purchase"
 
     keys
     {
-        key(PK; "Entry No.")
+        key(PK; "Serial No.")
         {
             Clustered = true;
         }
     }
     trigger OnInsert()
     begin
-        if "Entry No." <= 0 then
-            "Entry No." := GetNextEntryNo();
+        if "Serial No." <= 0 then
+            "Serial No." := GetNextSerialNo();
     end;
 
-    local procedure GetNextEntryNo(): Integer
+    local procedure GetNextSerialNo(): Integer
     var
         SamplePurchase: Record "Sample Purchase";
     begin
         SamplePurchase.Reset();
         if SamplePurchase.FindLast() then
-            if SamplePurchase."Entry No." >= 1 then
-                exit(SamplePurchase."Entry No." + 1);
+            if SamplePurchase."Serial No." >= 1 then
+                exit(SamplePurchase."Serial No." + 1);
 
         exit(1);
     end;
@@ -154,8 +154,8 @@ table 50300 "Sample Purchase"
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, Rec.PNR);
-        if Rec."Entry No." <> 0 then
-            SamplePurchase.SetFilter("Entry No.", '<>%1', Rec."Entry No.");
+        if Rec."Serial No." <> 0 then
+            SamplePurchase.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
         if not SamplePurchase.IsEmpty() then
             Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
 

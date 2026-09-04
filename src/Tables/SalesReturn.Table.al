@@ -1,13 +1,13 @@
-table 50403 "Sales Return"
+﻿table 50403 "Sales Return"
 {
     Caption = 'Sales Return';
     DataClassification = CustomerContent;
 
     fields
     {
-        field(1; "Entry No."; Integer)
+        field(1; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -192,7 +192,7 @@ table 50403 "Sales Return"
 
     keys
     {
-        key(PK; "Entry No.")
+        key(PK; "Serial No.")
         {
             Clustered = true;
         }
@@ -200,19 +200,19 @@ table 50403 "Sales Return"
 
     trigger OnInsert()
     begin
-        if "Entry No." <= 0 then
-            "Entry No." := GetNextEntryNo();
+        if "Serial No." <= 0 then
+            "Serial No." := GetNextSerialNo();
     end;
 
-    local procedure GetNextEntryNo(): Integer
+    local procedure GetNextSerialNo(): Integer
     var
         SalesReturn: Record "Sales Return";
     begin
         SalesReturn.Reset();
 
         if SalesReturn.FindLast() then
-            if SalesReturn."Entry No." >= 1 then
-                exit(SalesReturn."Entry No." + 1);
+            if SalesReturn."Serial No." >= 1 then
+                exit(SalesReturn."Serial No." + 1);
 
         exit(1);
     end;

@@ -1,13 +1,13 @@
-table 50303 "Airline Inventory Payment Due"
+﻿table 50303 "Airline Inventory Payment Due"
 {
     Caption = 'Airline Inventory and Payment Due Format';
     DataClassification = CustomerContent;
 
     fields
     {
-        field(1; "Entry No."; Integer)
+        field(1; "Serial No."; Integer)
         {
-            Caption = 'Entry No.';
+            Caption = 'Serial No.';
             DataClassification = SystemMetadata;
         }
 
@@ -101,7 +101,7 @@ table 50303 "Airline Inventory Payment Due"
 
     keys
     {
-        key(PK; "Entry No.")
+        key(PK; "Serial No.")
         {
             Clustered = true;
         }
@@ -109,21 +109,21 @@ table 50303 "Airline Inventory Payment Due"
 
     trigger OnInsert()
     begin
-        if "Entry No." <= 0 then
-            "Entry No." := GetNextEntryNo();
+        if "Serial No." <= 0 then
+            "Serial No." := GetNextSerialNo();
 
         CalculateAmounts();
     end;
 
-    local procedure GetNextEntryNo(): Integer
+    local procedure GetNextSerialNo(): Integer
     var
         AirlineInventoryPaymentDue: Record "Airline Inventory Payment Due";
     begin
         AirlineInventoryPaymentDue.Reset();
 
         if AirlineInventoryPaymentDue.FindLast() then
-            if AirlineInventoryPaymentDue."Entry No." >= 1 then
-                exit(AirlineInventoryPaymentDue."Entry No." + 1);
+            if AirlineInventoryPaymentDue."Serial No." >= 1 then
+                exit(AirlineInventoryPaymentDue."Serial No." + 1);
 
         exit(1);
     end;

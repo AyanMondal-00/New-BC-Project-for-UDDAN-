@@ -1,4 +1,4 @@
-page 50312 "Purchase Return"
+﻿page 50312 "Purchase Return"
 {
     PageType = List;
     ApplicationArea = All;
@@ -12,7 +12,7 @@ page 50312 "Purchase Return"
         {
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+                field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
                     Editable = false;

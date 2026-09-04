@@ -1,4 +1,4 @@
-page 50310 "Sample Purchase List"
+﻿page 50310 "Sample Purchase List"
 {
     Caption = 'Sample Purchase Format';
     PageType = List;
@@ -13,7 +13,7 @@ page 50310 "Sample Purchase List"
         {
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+                field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -131,11 +131,11 @@ page 50310 "Sample Purchase List"
     begin
         SamplePurchase.Reset();
         if SamplePurchase.FindLast() then
-            if SamplePurchase."Entry No." >= 1 then
-                Rec."Entry No." := SamplePurchase."Entry No." + 1
+            if SamplePurchase."Serial No." >= 1 then
+                Rec."Serial No." := SamplePurchase."Serial No." + 1
             else
-                Rec."Entry No." := 1
+                Rec."Serial No." := 1
         else
-            Rec."Entry No." := 1;
+            Rec."Serial No." := 1;
     end;
 }

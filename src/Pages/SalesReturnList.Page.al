@@ -1,4 +1,4 @@
-page 50413 "Sales Return List"
+﻿page 50413 "Sales Return List"
 {
     Caption = 'Sales Return / Cancellation Charge Format';
     PageType = List;
@@ -12,7 +12,7 @@ page 50413 "Sales Return List"
         {
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+                field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -174,11 +174,11 @@ page 50413 "Sales Return List"
         SalesReturn.Reset();
 
         if SalesReturn.FindLast() then
-            if SalesReturn."Entry No." >= 1 then
-                Rec."Entry No." := SalesReturn."Entry No." + 1
+            if SalesReturn."Serial No." >= 1 then
+                Rec."Serial No." := SalesReturn."Serial No." + 1
             else
-                Rec."Entry No." := 1
+                Rec."Serial No." := 1
         else
-            Rec."Entry No." := 1;
+            Rec."Serial No." := 1;
     end;
 }

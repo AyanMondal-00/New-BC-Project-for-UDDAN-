@@ -1,10 +1,10 @@
-page 50412 "Own Sales Passenger List Name"
+﻿page 50412 "Own Sales Passenger List Name"
 {
     Caption = 'Passenger Name List';
     PageType = List;
     SourceTable = "Own Sales Passenger Name";
     ApplicationArea = All;
-    UsageCategory = None;
+    UsageCategory = Lists;
 
     layout
     {
@@ -24,8 +24,15 @@ page 50412 "Own Sales Passenger List Name"
 
             repeater(General)
             {
-                field("Entry No."; Rec."Entry No.")
+
+                field("Invoice Number"; Rec."Invoice Number")
                 {
+                    ApplicationArea = All;
+                }
+                field("Serial No."; Rec."Serial No.")
+                {
+
+
                     ApplicationArea = All;
                     Editable = false;
                 }
@@ -48,9 +55,9 @@ page 50412 "Own Sales Passenger List Name"
         Passenger.SetRange("Invoice Number", CurrentInvoiceNumber);
 
         if Passenger.FindLast() then
-            Rec."Entry No." := Passenger."Entry No." + 1
+            Rec."Serial No." := Passenger."Serial No." + 1
         else
-            Rec."Entry No." := 1;
+            Rec."Serial No." := 1;
     end;
 
     procedure SetInvoiceNumber(InvoiceNo: Code[50])
