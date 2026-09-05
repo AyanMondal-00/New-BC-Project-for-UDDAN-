@@ -1,4 +1,4 @@
-﻿page 50410 "Normal Sales List"
+page 50410 "Normal Sales List"
 {
     Caption = 'Normal Sales';
     PageType = List;
@@ -58,7 +58,7 @@
                     var
                         PassengerList: Page "Own Sales Passenger List Name";
                     begin
-                        PassengerList.SetInvoiceNumber(Rec."Invoice Number");
+                        PassengerList.SetRefNoAQNumber(Rec."Ref No./AQ Number", Rec.PNR);
                         PassengerList.RunModal();
                     end;
                 }
