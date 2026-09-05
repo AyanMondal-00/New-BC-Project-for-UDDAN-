@@ -1,4 +1,4 @@
-﻿table 50402 "Third-Party Supplier Sales"
+table 50402 "Third-Party Supplier Sales"
 {
     Caption = 'Third-Party Supplier Sales';
     DataClassification = CustomerContent;
@@ -39,6 +39,11 @@
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CheckDuplicateRefNoAQNumber();
+            end;
         }
 
         field(7; PNR; Code[20])
@@ -241,5 +246,32 @@
         APISalesFormat.SetRange(PNR, Rec.PNR);
         if not APISalesFormat.IsEmpty() then
             Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
+    end;
+
+    local procedure CheckDuplicateRefNoAQNumber()
+    var
+        NormalSales: Record "Normal Sales";
+        APISalesFormat: Record "API Sales Format";
+        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+    begin
+        if "Ref No./AQ Number" = '' then
+            exit;
+
+        ThirdPartySupplierSales.Reset();
+        ThirdPartySupplierSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        if Rec."Serial No." <> 0 then
+            ThirdPartySupplierSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+        if not ThirdPartySupplierSales.IsEmpty() then
+            Error('The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.', Rec."Ref No./AQ Number");
+
+        NormalSales.Reset();
+        NormalSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        if not NormalSales.IsEmpty() then
+            Error('The Ref No./AQ Number %1 already exists in Normal Sales.', Rec."Ref No./AQ Number");
+
+        APISalesFormat.Reset();
+        APISalesFormat.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        if not APISalesFormat.IsEmpty() then
+            Error('The Ref No./AQ Number %1 already exists in API Sales Format.', Rec."Ref No./AQ Number");
     end;
 }

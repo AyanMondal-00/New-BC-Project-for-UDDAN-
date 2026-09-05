@@ -1,4 +1,38 @@
-  • Fastest for Dev/Testing: Business Central-er Extension Management page-e giye Uninstall & Delete    
-  Data kora.                                                                                            
-  • Production / Client DB-er jonno: ObsoleteState = Removed; bebohar kora (jate client-er purano data  
-  nosto na hoy). 
+==================================================================================================================================================================================================
+                                                                            BUSINESS CENTRAL PROJECT OBJECT MAPPING
+==================================================================================================================================================================================================
+
+Developer Notes:
+• Fastest for Dev/Testing: Business Central-er Extension Management page-e giye Uninstall & Delete Data kora.
+• Production / Client DB-er jonno: ObsoleteState = Removed; bebohar kora (jate client-er purano data nosto na hoy).
+
+==================================================================================================================================================================================================
+                                                                              CATEGORY / SECTION WISE OBJECT TABLE
+==================================================================================================================================================================================================
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Category / Section          | Table Name                     | Table ID | Page Name                      | Page ID | Page Extension                 | Ext ID | Codeunit                         | Codeunit ID |
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Purchase & Inventory        | Sample Purchase                | 50300    | Sample Purchase List           | 50310   | Sample Purchase Navigation     | 50320  | Sample Purchase API Management   | 50320       |
+| Purchase & Inventory        | Sample Purchase Cue            | 50301    | -                              | -       | -                              | -      | -                                | -           |
+| Purchase & Inventory        | Purchase Return                | 50302    | Purchase Return                | 50312   | -                              | -      | -                                | -           |
+| Purchase & Inventory        | Airline Inventory Payment Due  | 50303    | Airline Inventory Payment Due  | 50313   | Airline Inventory Navigation   | 50321  | Sample Purchase Inventory Sync   | 50321       |
+| Purchase & Inventory        | Sample Purchase Dashboard      | 50330    | Dashboard of Sample Format     | 50340   | -                              | -      | -                                | -           |
+| Normal Sales (Own Sales)    | Normal Sales                   | 50400    | Normal Sales List              | 50410   | Sales Invoice Navigation       | 50420  | -                                | -           |
+| Normal Sales (Own Sales)    | Own Sales Passenger Name       | 50404    | Own Sales Passenger List Name  | 50412   | -                              | -      | -                                | -           |
+| API Sales                   | API Sales Format               | 50401    | API Sales Format List          | 50411   | -                              | -      | -                                | -           |
+| API Sales                   | API Sales Passenger Name       | 50405    | API Sales Passenger Name List  | 50415   | -                              | -      | -                                | -           |
+| Third Party Sales           | Third-Party Supplier Sales     | 50402    | 3rd Party Supplier Sales List  | 50414   | -                              | -      | -                                | -           |
+| Third Party Sales           | Third Party Passenger Name     | 50406    | Third Party Passenger Name List| 50416   | -                              | -      | -                                | -           |
+| Sales Return                | Sales Return                   | 50403    | Sales Return List              | 50413   | -                              | -      | -                                | -           |
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+==================================================================================================================================================================================================
+                                                                             SYSTEM & PERMISSION OBJECTS
+==================================================================================================================================================================================================
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Category / Section          | Object Type                    | Object Name                      | Object ID                                                                                    |
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Security & Permissions      | PermissionSet                  | GeneratedPermission              | 50300                                                                                        |
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
