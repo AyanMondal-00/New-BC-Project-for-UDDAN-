@@ -26,7 +26,7 @@ pageextension 50420 "Sales Invoice Navigation" extends "Business Manager Role Ce
                 {
                     ApplicationArea = Basic, Suite;
                     Caption = 'Third-Party Sales ';
-                    RunObject = page "3rd Party Supplier Sales List";
+                    RunObject = page "Third Party Sales List";
                 }
 
             }

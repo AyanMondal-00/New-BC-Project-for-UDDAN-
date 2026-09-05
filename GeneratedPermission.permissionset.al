@@ -23,7 +23,7 @@ permissionset 50300 GeneratedPermission
         table "Third-Party Supplier Sales"=X,
         codeunit "Sample Purchase API Management"=X,
         codeunit "Sample Purchase Inventory Sync"=X,
-        page "3rd Party Supplier Sales List"=X,
+        page "Third Party Sales List"=X,
         page "Airline Inventory Payment Due"=X,
         page "API Sales Format List"=X,
         page "Dashboard of Sample Format"=X,

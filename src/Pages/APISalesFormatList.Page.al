@@ -1,4 +1,4 @@
-﻿page 50411 "API Sales Format List"
+page 50411 "API Sales Format List"
 {
     Caption = 'API Sales Format';
     PageType = List;
@@ -48,9 +48,19 @@
                     ApplicationArea = All;
                 }
 
-                field(Passenger; Rec.Passenger)
+                field("View Passenger"; ViewPassengerText)
                 {
                     ApplicationArea = All;
+                    Caption = 'View Passenger';
+                    Editable = false;
+
+                    trigger OnDrillDown()
+                    var
+                        PassengerList: Page "API Sales Passenger Name List";
+                    begin
+                        PassengerList.SetRefNoAQNumber(Rec."Ref No./AQ Number", Rec.PNR);
+                        PassengerList.RunModal();
+                    end;
                 }
 
                 field(Pax; Rec.Pax)
@@ -116,6 +126,11 @@
         }
     }
 
+    trigger OnAfterGetRecord()
+    begin
+        ViewPassengerText := 'View Passenger';
+    end;
+
     trigger OnNewRecord(BelowxRec: Boolean)
     var
         APISalesFormat: Record "API Sales Format";
@@ -129,4 +144,7 @@
         else
             Rec."Serial No." := 1;
     end;
+
+    var
+        ViewPassengerText: Text[30];
 }
