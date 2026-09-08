@@ -36,3 +36,51 @@ Developer Notes:
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Security & Permissions      | PermissionSet                  | GeneratedPermission              | 50300                                                                                        |
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### 1. app.json File-e Version Increment Koro                                                                               
+                                                                                                                              
+  Production-e notun build upload korar aage tomar project-er app.json file-e app version barate hobe:                        
+                                                                                                                              
+  • version: "1.0.0.0" theke change kore "1.0.0.1" ba "1.0.1.0" koro.                                                         
+  ──────                                                                                                                      
+  ### 2. Notun .app Package Build Koro                                                                                        
+                                                                                                                              
+  • VS Code-e Ctrl + Shift + B press koro ba Command Palette (Ctrl + Shift + P) open kore AL: Package run koro.               
+  • Tomar project root folder-e notun version-er .app file (e.g. ALProject2_1.0.0.1.app) toiri hobe.                          
+  ──────                                                                                                                      
+  ### 3. Field Remove / Edit & Data Safety Rules                                                                              
+                                                                                                                              
+  Business Central Production-e data protect korar jonno AL Language-er kisu strict rule ache:                                
+                                                                                                                              
+  1. Never Delete/Rename Existing Fields Directly:                                                                            
+      • Business Central Production-e erokom breaking change allow kore na. Direct field delete korle deploy fail korbe.      
+  2. Obsolete Property Use Koro:                                                                                              
+      • Kono field soriye nite chaile, field-ti AL code theke ekbare delete na kore niche dewa property set koro:             
+          • ObsoleteState = Pending; (ba Removed)                                                                             
+          • ObsoleteReason = 'Field is no longer used';                                                                       
+                                                                                                                              
+  3. Data Migration (Upgrade Codeunit):                                                                                       
+      • Field-er data-type change korle ba edit korle, old data notun field-e transer korar jonno Upgrade Codeunit (Subtype = 
+      Upgrade) toiri korte hoy. Etar fole existing data as-is notun schema-te transfer hoye jay.                              
+                                                                                                                              
+  ──────                                                                                                                      
+  ### 4. Production Environment-e Upload & Publish                                                                            
+                                                                                                                              
+  VS Code theke direct F5 / Ctrl+F5 sudhu Sandbox environment-er jonno. Production-er jonno niche step follow koro:           
+                                                                                                                              
+  1. Business Central Production Environment-e login koro.                                                                    
+  2. Tell Me (Search icon Alt+Q) theke Extension Management search kore open koro.                                            
+  3. Top menu bar-e Manage -> Upload Extension-e click koro.                                                                  
+  4. Browse kore tomar VS Code output .app file-ti select koro.                                                               
+  5. Deploy Target options-e Current version ba Next major version Select koro.                                               
+  │ Note: Production-e Business Central default-e Safe Schema Sync (Add Mode) use kore. Er fole existing Table/Data-te kono   
+  │ harmful effect pore na, sudhu notun added Fields/Tables gulo append hoy.                                                  
+                                                                                                                              
+  6. Accept terms and conditions check box-e tick dao ebong Deploy button-e click koro.                                       
+  ──────                                                                                                                      
+  ### Summary Checklist:                                                                                                      
+                                                                                                                              
+  [✓] app.json-e Version number update kora ache.                                                                             
+  [✓] Breakable schema changes (field rename/delete) sorasori na kore Obsolete mark kora ache.                                
+  [✓] VS Code-e .app package generate kora hoyeche.                                                                           
+  [✓] BC Production-er Extension Management page theke .app file upload kora hoyeche. 

@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Microsoft cloud sandbox",
+            "name": "Microsoft cloud production",
             "request": "launch",
             "type": "al",
-            "environmentType": "Sandbox",
-            "environmentName": "sandbox",
+            "environmentType": "Production",
+            "environmentName": "production",
             "startupObjectId": 22,
             "startupObjectType": "Page",
             "breakOnError": "All",
