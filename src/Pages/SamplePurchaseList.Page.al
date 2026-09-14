@@ -52,7 +52,7 @@
                     end;
                 }
 
-                field("Agency ID"; Rec."Agency ID")
+                field("Supplier ID"; Rec."Supplier ID")
                 {
                     ApplicationArea = All;
                 }
@@ -101,6 +101,10 @@
                 {
                     ApplicationArea = All;
                 }
+                field("Create Purchase Invoice"; Rec."Create Purchase Invoice")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
     }
@@ -122,7 +126,39 @@
                     CurrPage.Update(false);
                 end;
             }
+
+            action("Create Items")
+
+            {
+                ApplicationArea = All;
+                Caption = 'Create Items';
+                Image = NewItem;
+
+                trigger OnAction()
+                var
+                    SamplePurchaseItemManagement: Codeunit "Sample Purchase Item Mngt";
+                begin
+                    SamplePurchaseItemManagement.CreateItems();
+                    CurrPage.Update(false);
+                end;
+            }
+            action("Create Purchase Invoice action")
+            {
+                ApplicationArea = All;
+                Caption = 'Create Purchase Invoice';
+                Image = CreateDocument;
+
+                trigger OnAction()
+                var
+                    SamplePurchaseInvoiceMgt: Codeunit "Sample Purchase Invoice Mngt";
+                begin
+                    SamplePurchaseInvoiceMgt.CreatePurchaseInvoices();
+                    CurrPage.Update(false);
+                end;
+            }
+
         }
+
     }
 
     trigger OnNewRecord(BelowxRec: Boolean)

@@ -28,12 +28,21 @@
             Caption = 'Airline';
             DataClassification = CustomerContent;
         }
-
+        //////////////////////////////////////////////////////////////////////////////
         field(5; "Agency ID"; Code[20])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
+            ObsoleteState = Removed;
         }
+        ///////////////////////////////////////////////////////////////////////////////        
+        field(15; "Supplier ID"; Code[20])
+        {
+            Caption = 'Supplier ID';
+            DataClassification = CustomerContent;
+
+        }
+
 
         field(6; PNR; Code[20])
         {
@@ -114,6 +123,25 @@
             Caption = 'Type';
             OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
+        }
+        field(16; "Create Purchase Invoice"; Boolean)
+        {
+            Caption = 'Create Purchase Invoice';
+            DataClassification = CustomerContent;
+        }
+
+        field(17; "Purchase Invoice Created"; Boolean)
+        {
+            Caption = 'Purchase Invoice Created';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+
+        field(18; "Purchase Invoice No."; Code[20])
+        {
+            Caption = 'Purchase Invoice No.';
+            DataClassification = CustomerContent;
+            Editable = false;
         }
     }
 

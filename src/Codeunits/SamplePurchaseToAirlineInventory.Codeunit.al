@@ -32,7 +32,7 @@ codeunit 50321 "Sample Purchase Inventory Sync"
             AirlineInventory."PAX Count" := SamplePurchase."Total Pax";
             AirlineInventory."Per PAX Rate" := SamplePurchase.Rate;
             AirlineInventory.Airline := SamplePurchase.Airline;
-            AirlineInventory."Agency ID" := SamplePurchase."Agency ID";
+            AirlineInventory."Agency ID" := SamplePurchase."Supplier ID";
             AirlineInventory.Insert(true);
         end;
     end;
@@ -48,7 +48,7 @@ codeunit 50321 "Sample Purchase Inventory Sync"
         AirlineInventory."PAX Count" := SamplePurchase."Total Pax";
         AirlineInventory."Per PAX Rate" := SamplePurchase.Rate;
         AirlineInventory.Airline := SamplePurchase.Airline;
-        AirlineInventory."Agency ID" := SamplePurchase."Agency ID";
+        AirlineInventory."Agency ID" := SamplePurchase."Supplier ID";
 
         AirlineInventory."Total Value" :=
             AirlineInventory."PAX Count" * AirlineInventory."Per PAX Rate";
