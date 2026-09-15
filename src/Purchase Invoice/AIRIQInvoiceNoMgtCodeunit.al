@@ -5,10 +5,11 @@ codeunit 50338 "AIRIQ Invoice No. Mgt"
         Counter: Record "AIRIQ Invoice Counter";
         FinancialYear: Code[5];
         NextNo: BigInteger;
-        AIRIQInvoiceNoMgt: Codeunit "AIRIQ Invoice No. Mgt";
+
     begin
         FinancialYear := GetFinancialYear();
-
+        if FinancialYear = '' then
+            Error('Failed to determine Financial Year.');
         Counter.LockTable();
 
         if Counter.Get(FinancialYear) then begin
@@ -23,7 +24,25 @@ codeunit 50338 "AIRIQ Invoice No. Mgt"
             Counter.Insert(true);
         end;
 
+        while VendorInvoiceNoExists(
+    StrSubstNo('AIRIQ/VI%1/%2', NextNo, FinancialYear)) do begin
+
+            Counter."Last Invoice No." += 1;
+            NextNo := Counter."Last Invoice No.";
+            Counter.Modify(true);
+        end;
+
         exit(StrSubstNo('AIRIQ/VI%1/%2', NextNo, FinancialYear));
+    end;
+
+    local procedure VendorInvoiceNoExists(VendorInvoiceNo: Code[35]): Boolean
+    var
+        PurchHeader: Record "Purchase Header";
+    begin
+        PurchHeader.Reset();
+        PurchHeader.SetRange("Vendor Invoice No.", VendorInvoiceNo);
+
+        exit(not PurchHeader.IsEmpty());
     end;
 
     local procedure GetFinancialYear(): Code[5]

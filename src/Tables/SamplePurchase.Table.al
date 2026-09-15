@@ -143,6 +143,12 @@
             DataClassification = CustomerContent;
             Editable = false;
         }
+        field(19; "Item Created"; Boolean)
+        {
+            Caption = 'Item Created';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
     }
 
     keys

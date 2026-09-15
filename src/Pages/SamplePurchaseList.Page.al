@@ -105,6 +105,18 @@
                 {
                     ApplicationArea = All;
                 }
+                field("Invoice Created"; InvoiceCreatedText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Invoice Created';
+                    Editable = false;
+                }
+                field("Item Created"; ItemCreatedText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Item Created';
+                    Editable = false;
+                }
             }
         }
     }
@@ -160,10 +172,27 @@
         }
 
     }
+    var
+        InvoiceCreatedText: Text[3];
+        ItemCreatedText: Text[3];
+
+    trigger OnAfterGetRecord()
+    begin
+        if Rec."Purchase Invoice Created" then
+            InvoiceCreatedText := 'Yes'
+        else
+            InvoiceCreatedText := 'No';
+
+        if Rec."Item Created" then
+            ItemCreatedText := 'Yes'
+        else
+            ItemCreatedText := 'No';
+    end;
 
     trigger OnNewRecord(BelowxRec: Boolean)
     var
         SamplePurchase: Record "Sample Purchase";
+
     begin
         SamplePurchase.Reset();
         if SamplePurchase.FindLast() then
