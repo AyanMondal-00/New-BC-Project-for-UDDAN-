@@ -1,4 +1,4 @@
-﻿page 50310 "Sample Purchase List"
+page 50310 "Sample Purchase List"
 {
     Caption = 'Sample Purchase Format';
     PageType = List;
@@ -181,21 +181,12 @@
 
     trigger OnAfterGetRecord()
     begin
-        if Rec."Purchase Invoice Created" then
-            InvoiceCreatedText := 'Yes'
-        else
-            InvoiceCreatedText := 'No';
-
-        if Rec."Item Created" then
-            ItemCreatedText := 'Yes'
-        else
-            ItemCreatedText := 'No';
+        SetCreatedStatusText();
     end;
 
     trigger OnNewRecord(BelowxRec: Boolean)
     var
         SamplePurchase: Record "Sample Purchase";
-
     begin
         SamplePurchase.Reset();
         if SamplePurchase.FindLast() then
@@ -205,5 +196,20 @@
                 Rec."Serial No." := 1
         else
             Rec."Serial No." := 1;
+
+        SetCreatedStatusText();
+    end;
+
+    local procedure SetCreatedStatusText()
+    begin
+        if Rec."Purchase Invoice Created" then
+            InvoiceCreatedText := 'Yes'
+        else
+            InvoiceCreatedText := 'No';
+
+        if Rec."Item Created" then
+            ItemCreatedText := 'Yes'
+        else
+            ItemCreatedText := 'No';
     end;
 }
