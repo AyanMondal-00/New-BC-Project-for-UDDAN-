@@ -140,7 +140,6 @@
             }
 
             action("Create Items")
-
             {
                 ApplicationArea = All;
                 Caption = 'Create Items';
@@ -149,8 +148,12 @@
                 trigger OnAction()
                 var
                     SamplePurchaseItemManagement: Codeunit "Sample Purchase Item Mngt";
+                    SelectedSamplePurchase: Record "Sample Purchase";
                 begin
-                    SamplePurchaseItemManagement.CreateItems();
+                    CurrPage.SetSelectionFilter(SelectedSamplePurchase);
+
+                    SamplePurchaseItemManagement.CreateItems(SelectedSamplePurchase);
+
                     CurrPage.Update(false);
                 end;
             }
