@@ -101,7 +101,7 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
                 }
-                field("Create Purchase Invoice"; Rec."Create Purchase Invoice")
+                field("Select"; Rec."Select")
                 {
                     ApplicationArea = All;
                 }
@@ -202,10 +202,7 @@ page 50310 "Sample Purchase List"
 
     local procedure SetCreatedStatusText()
     begin
-        if Rec."Purchase Invoice Created" then
-            InvoiceCreatedText := 'Yes'
-        else
-            InvoiceCreatedText := 'No';
+        InvoiceCreatedText := 'No';
 
         if Rec."Item Created" then
             ItemCreatedText := 'Yes'

@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Microsoft cloud production",
+            "name": "AIRIQ Sandbox",
             "request": "launch",
             "type": "al",
             "environmentType": "Sandbox",
-            "environmentName": "sandbox",
+            "environmentName": "Sandbox1",
             "startupObjectId": 22,
             "startupObjectType": "Page",
             "breakOnError": "All",

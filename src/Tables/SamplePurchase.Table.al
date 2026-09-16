@@ -124,17 +124,11 @@
             OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
         }
-        field(16; "Create Purchase Invoice"; Boolean)
-        {
-            Caption = 'Create Purchase Invoice';
-            DataClassification = CustomerContent;
-        }
 
-        field(17; "Purchase Invoice Created"; Boolean)
+        field(16; "Select"; Boolean)
         {
-            Caption = 'Purchase Invoice Created';
+            Caption = 'Select';
             DataClassification = CustomerContent;
-            Editable = false;
         }
 
         field(18; "Purchase Invoice No."; Code[20])

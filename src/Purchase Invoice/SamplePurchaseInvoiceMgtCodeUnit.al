@@ -12,8 +12,8 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
         ErrorCount: Integer;
         ErrorMessages: Text;
     begin
-        SamplePurchase.SetRange("Create Purchase Invoice", true);
-        SamplePurchase.SetRange("Purchase Invoice Created", false);
+        SamplePurchase.SetRange("Select", true);
+        SamplePurchase.SetRange("Select", true);
 
         if SamplePurchase.FindSet() then
             repeat
@@ -86,8 +86,7 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
 
                         CreatedCount += 1;
 
-                        SamplePurchase."Purchase Invoice Created" := true;
-                        SamplePurchase."Purchase Invoice No." := PurchHeader."No.";
+                        SamplePurchase."Select" := false;
                         SamplePurchase.Modify(true);
                     end;
                 end;
