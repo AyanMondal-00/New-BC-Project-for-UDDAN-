@@ -56,7 +56,22 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
                 }
-
+                field("Select"; Rec."Select")
+                {
+                    ApplicationArea = All;
+                }
+                field("Invoice Created"; InvoiceCreatedText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Invoice Created';
+                    Editable = false;
+                }
+                field("Item Created"; ItemCreatedText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Item Created';
+                    Editable = false;
+                }
                 field(PNR; Rec.PNR)
                 {
                     ApplicationArea = All;
@@ -101,22 +116,7 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
                 }
-                field("Select"; Rec."Select")
-                {
-                    ApplicationArea = All;
-                }
-                field("Invoice Created"; InvoiceCreatedText)
-                {
-                    ApplicationArea = All;
-                    Caption = 'Invoice Created';
-                    Editable = false;
-                }
-                field("Item Created"; ItemCreatedText)
-                {
-                    ApplicationArea = All;
-                    Caption = 'Item Created';
-                    Editable = false;
-                }
+
             }
         }
     }
@@ -150,7 +150,10 @@ page 50310 "Sample Purchase List"
                     SamplePurchaseItemManagement: Codeunit "Sample Purchase Item Mngt";
                     SelectedSamplePurchase: Record "Sample Purchase";
                 begin
-                    CurrPage.SetSelectionFilter(SelectedSamplePurchase);
+                    SelectedSamplePurchase.Reset();
+                    SelectedSamplePurchase.SetRange("Select", true);
+                    if SelectedSamplePurchase.IsEmpty() then
+                        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
 
                     SamplePurchaseItemManagement.CreateItems(SelectedSamplePurchase);
 
@@ -166,8 +169,15 @@ page 50310 "Sample Purchase List"
                 trigger OnAction()
                 var
                     SamplePurchaseInvoiceMgt: Codeunit "Sample Purchase Invoice Mngt";
+                    SelectedSamplePurchase: Record "Sample Purchase";
                 begin
-                    SamplePurchaseInvoiceMgt.CreatePurchaseInvoices();
+                    SelectedSamplePurchase.Reset();
+                    SelectedSamplePurchase.SetRange("Select", true);
+                    if SelectedSamplePurchase.IsEmpty() then
+                        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
+
+                    SamplePurchaseInvoiceMgt.CreatePurchaseInvoices(SelectedSamplePurchase);
+
                     CurrPage.Update(false);
                 end;
             }
@@ -202,7 +212,10 @@ page 50310 "Sample Purchase List"
 
     local procedure SetCreatedStatusText()
     begin
-        InvoiceCreatedText := 'No';
+        if Rec."Purchase Invoice No." <> '' then
+            InvoiceCreatedText := 'Yes'
+        else
+            InvoiceCreatedText := 'No';
 
         if Rec."Item Created" then
             ItemCreatedText := 'Yes'

@@ -42,6 +42,24 @@
             DataClassification = CustomerContent;
 
         }
+                field(16; "Select"; Boolean)
+        {
+            Caption = 'Select';
+            DataClassification = CustomerContent;
+        }
+
+        field(18; "Purchase Invoice No."; Code[20])
+        {
+            Caption = 'Purchase Invoice No.';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+        field(19; "Item Created"; Boolean)
+        {
+            Caption = 'Item Created';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
 
 
         field(6; PNR; Code[20])
@@ -125,24 +143,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(16; "Select"; Boolean)
-        {
-            Caption = 'Select';
-            DataClassification = CustomerContent;
-        }
 
-        field(18; "Purchase Invoice No."; Code[20])
-        {
-            Caption = 'Purchase Invoice No.';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
-        field(19; "Item Created"; Boolean)
-        {
-            Caption = 'Item Created';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
     }
 
     keys

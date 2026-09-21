@@ -3,6 +3,13 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
     procedure CreatePurchaseInvoices()
     var
         SamplePurchase: Record "Sample Purchase";
+    begin
+        CreatePurchaseInvoices(SamplePurchase);
+    end;
+
+    procedure CreatePurchaseInvoices(var SelectedSamplePurchase: Record "Sample Purchase")
+    var
+        ProcessRec: Record "Sample Purchase";
         PurchHeader: Record "Purchase Header";
         PurchLine: Record "Purchase Line";
         Vendor: Record Vendor;
@@ -11,198 +18,148 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
         CreatedCount: Integer;
         DuplicateCount: Integer;
         ErrorCount: Integer;
-        ErrorMessages: Text;
+        ErrorDetails: Text;
+        SummaryMsg: Text;
         ExistingInvoiceNo: Code[20];
     begin
-        SamplePurchase.SetRange("Select", true);
+        ProcessRec.Copy(SelectedSamplePurchase);
 
-        if not SamplePurchase.FindSet() then begin
-            Message('No Sample Purchase records selected.');
+        if (ProcessRec.Count = 1) and (not ProcessRec."Select") then begin
+            ProcessRec.Reset();
+            ProcessRec.SetRange("Select", true);
+            if ProcessRec.IsEmpty() then
+                ProcessRec.Copy(SelectedSamplePurchase);
+        end;
+
+        if ProcessRec.IsEmpty() then begin
+            Message('No Sample Purchase records found to process.');
             exit;
         end;
 
-        repeat
-            // Strong PNR duplicate check.
-            if PNRInvoiceExists(
-                SamplePurchase.PNR,
-                ExistingInvoiceNo)
-            then begin
-
-                DuplicateCount += 1;
-
-                SamplePurchase."Select" := false;
-                
-                SamplePurchase."Purchase Invoice No." := ExistingInvoiceNo;
-                SamplePurchase.Modify(true);
-
-            end else begin
-
-                // Vendor check.
-                Vendor.Reset();
-                Vendor.SetRange(Name, SamplePurchase.Airline);
-
-                if not Vendor.FindFirst() then begin
-                    ErrorCount += 1;
-
-                    ErrorMessages += StrSubstNo(
-                        'Serial No. %1: Vendor not found for Airline %2.\',
-                        SamplePurchase."Serial No.",
-                        SamplePurchase.Airline);
-
+        if ProcessRec.FindSet() then
+            repeat
+                // Strong PNR duplicate check
+                if PNRInvoiceExists(ProcessRec.PNR, ExistingInvoiceNo) then begin
+                    DuplicateCount += 1;
+                    ProcessRec."Purchase Invoice No." := ExistingInvoiceNo;
+                    ProcessRec.Modify(true);
                 end else begin
 
-                    // Item check.
-                    Item.Reset();
-                    Item.SetRange(
-                        Description,
-                        SamplePurchase.PNR);
+                    // Smart Vendor lookup: First by Supplier ID (No.), then by Airline (Name)
+                    Vendor.Reset();
+                    if ProcessRec."Supplier ID" <> '' then
+                        if Vendor.Get(ProcessRec."Supplier ID") then;
 
-                    if not Item.FindFirst() then begin
+                    if Vendor."No." = '' then begin
+                        Vendor.Reset();
+                        Vendor.SetRange(Name, ProcessRec.Airline);
+                        if not Vendor.FindFirst() then;
+                    end;
+
+                    if Vendor."No." = '' then begin
                         ErrorCount += 1;
-
-                        ErrorMessages += StrSubstNo(
-                            'Serial No. %1: Item not found for PNR %2.\',
-                            SamplePurchase."Serial No.",
-                            SamplePurchase.PNR);
-
+                        ErrorDetails += StrSubstNo(
+                            '\- Serial No. %1: Vendor not found for Airline "%2" / Supplier ID "%3".',
+                            ProcessRec."Serial No.",
+                            ProcessRec.Airline,
+                            ProcessRec."Supplier ID");
                     end else begin
 
-                        // Create Purchase Invoice Header.
-                        PurchHeader.Init();
+                        // Item check
+                        Item.Reset();
+                        Item.SetRange(Description, ProcessRec.PNR);
 
-                        PurchHeader."Document Type" :=
-                            PurchHeader."Document Type"::Invoice;
+                        if not Item.FindFirst() then begin
+                            ErrorCount += 1;
+                            ErrorDetails += StrSubstNo(
+                                '\- Serial No. %1: Item not found for PNR "%2". Please run "Create Items" first.',
+                                ProcessRec."Serial No.",
+                                ProcessRec.PNR);
+                        end else begin
 
-                        PurchHeader.Insert(true);
+                            if ProcessRec."Total Pax" <= 0 then begin
+                                ErrorCount += 1;
+                                ErrorDetails += StrSubstNo(
+                                    '\- Serial No. %1: Total Pax must be greater than 0.',
+                                    ProcessRec."Serial No.");
+                            end else begin
 
-                        PurchHeader.Validate(
-                            "Buy-from Vendor No.",
-                            Vendor."No.");
+                                // Create Purchase Invoice Header
+                                PurchHeader.Init();
+                                PurchHeader."Document Type" := PurchHeader."Document Type"::Invoice;
+                                PurchHeader.Validate("Buy-from Vendor No.", Vendor."No.");
+                                PurchHeader.Validate(
+                                    "Vendor Invoice No.",
+                                    AIRIQInvoiceNoMgt.GetNextInvoiceNo());
+                                PurchHeader.Insert(true);
 
-                        PurchHeader.Validate(
-                            "Vendor Invoice No.",
-                            AIRIQInvoiceNoMgt.GetNextInvoiceNo());
+                                // Create Purchase Invoice Line
+                                PurchLine.Init();
+                                PurchLine."Document Type" := PurchHeader."Document Type";
+                                PurchLine."Document No." := PurchHeader."No.";
+                                PurchLine."Line No." := 10000;
 
-                        PurchHeader.Modify(true);
+                                PurchLine.Validate(Type, PurchLine.Type::Item);
+                                PurchLine.Validate("No.", Item."No.");
+                                PurchLine.Description := ProcessRec.PNR;
+                                PurchLine.Validate(Quantity, ProcessRec."Total Pax");
+                                PurchLine.Validate("Direct Unit Cost", ProcessRec.Rate);
 
-                        // Create Purchase Invoice Line.
-                        PurchLine.Init();
+                                // AIRIQ custom fields
+                                PurchLine."Sample Purchase Date" := ProcessRec."Purchase Date";
+                                PurchLine."Sample Entry Date" := ProcessRec."Entry Date";
+                                PurchLine."Sample Travel Date" := ProcessRec."Travel Date";
+                                PurchLine."Sample Airline" := ProcessRec.Airline;
+                                PurchLine."Sample Sector" := ProcessRec.Sector;
+                                PurchLine."Sample Flight Type" := ProcessRec.Type;
+                                PurchLine."Sample Supplier ID" := ProcessRec."Supplier ID";
+                                PurchLine."Sample Base Fare" := ProcessRec."Base Fare";
+                                PurchLine."Sample Other Charges" := ProcessRec."Other Charges";
 
-                        PurchLine."Document Type" :=
-                            PurchLine."Document Type"::Invoice;
+                                PurchLine.Insert(true);
 
-                        PurchLine."Document No." :=
-                            PurchHeader."No.";
+                                if ProcessRec."Other Charges" <> 0 then begin
+                                    PurchLine.Get(
+                                        PurchLine."Document Type",
+                                        PurchLine."Document No.",
+                                        PurchLine."Line No.");
 
-                        PurchLine."Line No." := 10000;
+                                    PurchLine.Validate(
+                                        "Line Amount",
+                                        (ProcessRec."Total Pax" * ProcessRec.Rate) +
+                                        ProcessRec."Other Charges");
 
-                        PurchLine.Validate(
-                            Type,
-                            PurchLine.Type::Item);
+                                    PurchLine.Modify(true);
+                                end;
 
-                        PurchLine.Validate(
-                            "No.",
-                            Item."No.");
+                                CreatedCount += 1;
 
-                        PurchLine.Description :=
-                            SamplePurchase.PNR;
-
-                        PurchLine.Validate(
-                            Quantity,
-                            SamplePurchase."Total Pax");
-
-                        PurchLine.Validate(
-                            "Direct Unit Cost",
-                            SamplePurchase.Rate);
-
-                        // AIRIQ custom fields.
-                        PurchLine."Sample Purchase Date" :=
-                            SamplePurchase."Purchase Date";
-
-                        PurchLine."Sample Entry Date" :=
-                            SamplePurchase."Entry Date";
-
-                        PurchLine."Sample Travel Date" :=
-                            SamplePurchase."Travel Date";
-
-                        PurchLine."Sample Airline" :=
-                            SamplePurchase.Airline;
-
-                        PurchLine."Sample Sector" :=
-                            SamplePurchase.Sector;
-
-                        PurchLine."Sample Flight Type" :=
-                            SamplePurchase.Type;
-
-                        PurchLine."Sample Supplier ID" :=
-                            SamplePurchase."Supplier ID";
-
-                        PurchLine."Sample Base Fare" :=
-                            SamplePurchase."Base Fare";
-
-                        PurchLine."Sample Other Charges" :=
-                            SamplePurchase."Other Charges";
-
-                        PurchLine.Insert(true);
-
-                        PurchLine.Get(
-                            PurchLine."Document Type",
-                            PurchLine."Document No.",
-                            PurchLine."Line No.");
-
-                        // Total = Qty × Rate + Other Charges.
-                        PurchLine.Validate(
-                            "Line Amount",
-                            (SamplePurchase."Total Pax" *
-                            SamplePurchase.Rate) +
-                            SamplePurchase."Other Charges");
-
-                        PurchLine.Modify(true);
-
-                        // Mark Sample Purchase as invoiced.
-                        SamplePurchase."Select" := false;
-                  
-                        SamplePurchase."Purchase Invoice No." :=
-                            PurchHeader."No.";
-
-                        SamplePurchase.Modify(true);
-
-                        CreatedCount += 1;
+                                ProcessRec."Purchase Invoice No." := PurchHeader."No.";
+                                ProcessRec.Modify(true);
+                            end;
+                        end;
                     end;
                 end;
-            end;
+            until ProcessRec.Next() = 0;
 
-        until SamplePurchase.Next() = 0;
-
-        // Result message.
-        if (CreatedCount > 0) and
-           (DuplicateCount = 0) and
-           (ErrorCount = 0)
-        then begin
-
-            Message(
-                'Success! %1 Purchase Invoice(s) created successfully.',
-                CreatedCount);
-
-        end else begin
-
-            ErrorMessages :=
-                StrSubstNo(
-                    'Purchase Invoice Creation Summary:\Created: %1\Already Invoiced: %2\Errors: %3',
-                    CreatedCount,
-                    DuplicateCount,
-                    ErrorCount);
+        // Display Result Alerts
+        if (CreatedCount > 0) and (DuplicateCount = 0) and (ErrorCount = 0) then
+            Message('Success! %1 Purchase Invoice(s) created successfully.', CreatedCount)
+        else if (CreatedCount = 0) and (DuplicateCount > 0) and (ErrorCount = 0) then
+            Message('Already Invoiced! All %1 selected record(s) have already been invoiced.', DuplicateCount)
+        else begin
+            SummaryMsg := StrSubstNo(
+                'Purchase Invoice Creation Summary:\- Created: %1\- Already Invoiced: %2\- Errors: %3',
+                CreatedCount,
+                DuplicateCount,
+                ErrorCount);
 
             if ErrorCount > 0 then
-                ErrorMessages +=
-                    StrSubstNo(
-                        '\Details:\%1',
-                        ErrorMessages);
+                SummaryMsg += StrSubstNo('\Details:%1', ErrorDetails);
 
-            Message(ErrorMessages);
+            Message(SummaryMsg);
         end;
     end;
-
 
     local procedure PNRInvoiceExists(
         PNR: Code[20];
@@ -213,28 +170,22 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
     begin
         ExistingInvoiceNo := '';
 
-        // Check Open Purchase Invoices.
+        if PNR = '' then
+            exit(false);
+
+        // Check Open Purchase Invoices
         PurchLine.Reset();
-
-        PurchLine.SetRange(
-            "Document Type",
-            PurchLine."Document Type"::Invoice);
-
-        PurchLine.SetRange(
-            Description,
-            PNR);
+        PurchLine.SetRange("Document Type", PurchLine."Document Type"::Invoice);
+        PurchLine.SetRange(Description, PNR);
 
         if PurchLine.FindFirst() then begin
             ExistingInvoiceNo := PurchLine."Document No.";
             exit(true);
         end;
 
-        // Check Posted Purchase Invoices.
+        // Check Posted Purchase Invoices
         PurchInvLine.Reset();
-
-        PurchInvLine.SetRange(
-            Description,
-            PNR);
+        PurchInvLine.SetRange(Description, PNR);
 
         if PurchInvLine.FindFirst() then begin
             ExistingInvoiceNo := PurchInvLine."Document No.";
