@@ -152,10 +152,18 @@ page 50310 "Sample Purchase List"
                 begin
                     SelectedSamplePurchase.Reset();
                     SelectedSamplePurchase.SetRange("Select", true);
-                    if SelectedSamplePurchase.IsEmpty() then
+
+                    if SelectedSamplePurchase.IsEmpty() then begin
                         CurrPage.SetSelectionFilter(SelectedSamplePurchase);
 
-                    SamplePurchaseItemManagement.CreateItems(SelectedSamplePurchase);
+                        if SelectedSamplePurchase.IsEmpty() then begin
+                            Message('Please select at least one Sample Purchase record.');
+                            exit;
+                        end;
+                    end;
+
+                    SamplePurchaseItemManagement.CreateItems(
+                        SelectedSamplePurchase);
 
                     CurrPage.Update(false);
                 end;
@@ -173,10 +181,18 @@ page 50310 "Sample Purchase List"
                 begin
                     SelectedSamplePurchase.Reset();
                     SelectedSamplePurchase.SetRange("Select", true);
-                    if SelectedSamplePurchase.IsEmpty() then
+
+                    if SelectedSamplePurchase.IsEmpty() then begin
                         CurrPage.SetSelectionFilter(SelectedSamplePurchase);
 
-                    SamplePurchaseInvoiceMgt.CreatePurchaseInvoices(SelectedSamplePurchase);
+                        if SelectedSamplePurchase.IsEmpty() then begin
+                            Message('Please select at least one Sample Purchase record.');
+                            exit;
+                        end;
+                    end;
+
+                    SamplePurchaseInvoiceMgt.CreatePurchaseInvoices(
+                        SelectedSamplePurchase);
 
                     CurrPage.Update(false);
                 end;
