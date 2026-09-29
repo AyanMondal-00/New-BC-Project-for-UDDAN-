@@ -165,6 +165,7 @@ page 50310 "Sample Purchase List"
                     SamplePurchaseItemManagement.CreateItems(
                         SelectedSamplePurchase);
 
+
                     CurrPage.Update(false);
                 end;
             }
@@ -239,3 +240,7 @@ page 50310 "Sample Purchase List"
             ItemCreatedText := 'No';
     end;
 }
+
+
+
+
