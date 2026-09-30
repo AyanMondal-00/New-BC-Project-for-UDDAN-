@@ -40,8 +40,10 @@
         {
             Caption = 'Supplier ID';
             DataClassification = CustomerContent;
+           
 
         }
+  
                 field(16; "Select"; Boolean)
         {
             Caption = 'Select';

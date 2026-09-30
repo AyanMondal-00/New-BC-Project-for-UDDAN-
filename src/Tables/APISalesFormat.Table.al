@@ -27,6 +27,13 @@ table 50401 "API Sales Format"
         {
             Caption = 'Supplier ID';
             DataClassification = CustomerContent;
+            ObsoleteState = Removed;
+        }
+        field(22; "Agency ID"; Code[30])
+        {
+            Caption = 'Agency ID';
+            DataClassification = CustomerContent;
+
         }
 
         field(5; "Agency Name"; Text[100])
@@ -73,7 +80,7 @@ table 50401 "API Sales Format"
                     if not (ContainsLetter and ContainsDigit) then
                         Error('The PNR must contain a mix of letters and numbers.');
 
-                    
+
                 end;
             end;
         }

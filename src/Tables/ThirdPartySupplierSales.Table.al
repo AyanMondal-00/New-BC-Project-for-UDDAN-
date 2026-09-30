@@ -27,6 +27,13 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Supplier ID';
             DataClassification = CustomerContent;
+            ObsoleteState = Removed;
+        }
+              field(22; "Agency ID"; Code[30])
+        {
+            Caption = 'Agency ID';
+            DataClassification = CustomerContent;
+
         }
 
         field(5; "Agency Name"; Text[100])
