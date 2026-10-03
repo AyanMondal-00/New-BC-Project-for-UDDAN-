@@ -2,19 +2,19 @@ tableextension 50323 "Purchase Line Ext" extends "Purchase Line"
 {
     fields
     {
-        field(50324; "Sample Purchase Date"; Date)
+        field(50324; "Sample Purchase Date"; DateTime)
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
         }
 
-        field(50325; "Sample Entry Date"; Date)
+        field(50325; "Sample Entry Date"; DateTime)
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
         }
 
-        field(50326; "Sample Travel Date"; Date)
+        field(50326; "Sample Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;

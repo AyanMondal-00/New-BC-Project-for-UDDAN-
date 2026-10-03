@@ -1,4 +1,4 @@
-﻿table 50303 "Airline Inventory Payment Due"
+table 50303 "Airline Inventory Payment Due"
 {
     Caption = 'Airline Inventory and Payment Due Format';
     DataClassification = CustomerContent;
@@ -11,13 +11,13 @@
             DataClassification = SystemMetadata;
         }
 
-        field(2; "Purchase Date"; Date)
+        field(2; "Purchase Date"; DateTime)
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
         }
 
-        field(3; "Travel Date"; Date)
+        field(3; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
@@ -29,7 +29,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(5; PNR; Code[20])
+        field(5; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;

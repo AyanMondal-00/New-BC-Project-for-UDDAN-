@@ -1,4 +1,4 @@
-﻿table 50302 "Purchase Return"
+table 50302 "Purchase Return"
 {
     Caption = 'Purchase Return';
     DataClassification = CustomerContent;
@@ -11,13 +11,13 @@
             DataClassification = SystemMetadata;
         }
 
-        field(2; "Entry Date"; Date)
+        field(2; "Entry Date"; DateTime)
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
         }
 
-        field(3; "Purchase Date"; Date)
+        field(3; "Purchase Date"; DateTime)
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
@@ -66,7 +66,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(11; PNR; Code[20])
+        field(11; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
@@ -126,7 +126,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(21; "Travel Date"; Date)
+        field(21; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;

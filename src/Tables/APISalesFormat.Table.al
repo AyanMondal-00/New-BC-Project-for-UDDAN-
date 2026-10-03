@@ -11,7 +11,7 @@ table 50401 "API Sales Format"
             DataClassification = SystemMetadata;
         }
 
-        field(2; "Date"; Date)
+        field(2; "Date"; DateTime)
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
@@ -42,7 +42,7 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
         }
 
-        field(6; "Ref No./AQ Number"; Code[50])
+        field(6; "Ref No./AQ Number"; Integer)
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;
@@ -53,7 +53,7 @@ table 50401 "API Sales Format"
             end;
         }
 
-        field(7; PNR; Code[20])
+        field(7; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
@@ -80,7 +80,7 @@ table 50401 "API Sales Format"
                     if not (ContainsLetter and ContainsDigit) then
                         Error('The PNR must contain a mix of letters and numbers.');
 
-
+                    CheckDuplicatePNR();
                 end;
             end;
         }
@@ -97,7 +97,7 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
         }
 
-        field(10; "Travel Date"; Date)
+        field(10; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
@@ -261,7 +261,7 @@ table 50401 "API Sales Format"
         APISalesFormat: Record "API Sales Format";
         ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
     begin
-        if "Ref No./AQ Number" = '' then
+        if "Ref No./AQ Number" = 0 then
             exit;
 
         APISalesFormat.Reset();

@@ -61,8 +61,8 @@ page 50423 "Inventory Consumption Pasenger"
     end;
 
     procedure SetRefNoAQNumber(
-        AQNumber: Code[50];
-        PNRNo: Code[10])
+        AQNumber: Integer;
+        PNRNo: Text[10])
     begin
         CurrentRefNo_AQNumber := AQNumber;
         CurrentPNR := PNRNo;
@@ -77,6 +77,6 @@ page 50423 "Inventory Consumption Pasenger"
     end;
 
     var
-        CurrentRefNo_AQNumber: Code[50];
-        CurrentPNR: Code[10];
+        CurrentRefNo_AQNumber: Integer;
+        CurrentPNR: Text[10];
 }

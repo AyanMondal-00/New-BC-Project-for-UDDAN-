@@ -36,7 +36,7 @@ codeunit 50320 "Sample Purchase API Management"
         SamplePurchase: Record "Sample Purchase";
         ExistingSamplePurchase: Record "Sample Purchase";
         Url: Text;
-        PnrVal: Code[20];
+        PnrVal: Text[10];
         ImportedCount: Integer;
         SkippedCount: Integer;
     begin
@@ -72,10 +72,10 @@ codeunit 50320 "Sample Purchase API Management"
                 SamplePurchase.Init();
 
                 SamplePurchase."Purchase Date" :=
-                    GetJsonDate(JsonObject, 'purchaseDate');
+                    GetJsonDateTime(JsonObject, 'purchaseDate');
 
                 SamplePurchase."Entry Date" :=
-                    GetJsonDate(JsonObject, 'entryDate');
+                    GetJsonDateTime(JsonObject, 'entryDate');
 
                 SamplePurchase.Airline :=
                     GetJsonText(JsonObject, 'airline');
@@ -89,7 +89,7 @@ codeunit 50320 "Sample Purchase API Management"
                     GetJsonInteger(JsonObject, 'totalPax');
 
                 SamplePurchase."Travel Date" :=
-                    GetJsonDate(JsonObject, 'travelDate');
+                    GetJsonDateTime(JsonObject, 'travelDate');
 
                 SamplePurchase.Sector :=
                     GetJsonText(JsonObject, 'sector');
@@ -147,14 +147,14 @@ codeunit 50320 "Sample Purchase API Management"
         exit(0);
     end;
 
-    local procedure GetJsonDate(JsonObject: JsonObject; KeyName: Text): Date
+    local procedure GetJsonDateTime(JsonObject: JsonObject; KeyName: Text): DateTime
     var
         JsonToken: JsonToken;
     begin
         if JsonObject.Get(KeyName, JsonToken) then
             if not JsonToken.AsValue().IsNull() then
-                exit(JsonToken.AsValue().AsDate());
-        exit(0D);
+                exit(JsonToken.AsValue().AsDateTime());
+        exit(0DT);
     end;
 
     local procedure GetJsonOption(JsonObject: JsonObject; KeyName: Text): Option

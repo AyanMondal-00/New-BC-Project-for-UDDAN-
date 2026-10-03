@@ -1,4 +1,4 @@
-﻿table 50300 "Sample Purchase"
+table 50300 "Sample Purchase"
 {
     Caption = 'Sample Purchase';
     DataClassification = CustomerContent;
@@ -11,13 +11,13 @@
             DataClassification = SystemMetadata;
         }
 
-        field(2; "Purchase Date"; Date)
+        field(2; "Purchase Date"; DateTime)
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
         }
 
-        field(3; "Entry Date"; Date)
+        field(3; "Entry Date"; DateTime)
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
@@ -64,7 +64,7 @@
         }
 
 
-        field(6; PNR; Code[20])
+        field(6; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
@@ -102,7 +102,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(8; "Travel Date"; Date)
+        field(8; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;

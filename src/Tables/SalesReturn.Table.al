@@ -1,4 +1,4 @@
-﻿table 50403 "Sales Return"
+table 50403 "Sales Return"
 {
     Caption = 'Sales Return';
     DataClassification = CustomerContent;
@@ -11,7 +11,7 @@
             DataClassification = SystemMetadata;
         }
 
-        field(2; "Entry Date"; Date)
+        field(2; "Entry Date"; DateTime)
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
@@ -78,7 +78,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(13; "Travel Date"; Date)
+        field(13; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
@@ -102,7 +102,7 @@
             DataClassification = CustomerContent;
         }
 
-        field(17; PNR; Code[20])
+        field(17; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;

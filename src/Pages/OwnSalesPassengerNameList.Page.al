@@ -1,4 +1,4 @@
-﻿page 50412 "Own Sales Passenger List Name"
+page 50412 "Own Sales Passenger List Name"
 {
     Caption = 'Own Sale Passenger Name List';
     PageType = List;
@@ -55,7 +55,7 @@
             Rec."SL No." := 1;
     end;
 
-    procedure SetRefNoAQNumber(AQNumber: Code[50]; PNRNo: Code[10])
+    procedure SetRefNoAQNumber(AQNumber: Integer; PNRNo: Text[10])
     begin
         CurrentRefNo_AQNumber := AQNumber;
         CurrentPNR := PNRNo;
@@ -65,6 +65,6 @@
     end;
 
     var
-        CurrentRefNo_AQNumber: Code[50];
-        CurrentPNR: Code[10];
+        CurrentRefNo_AQNumber: Integer;
+        CurrentPNR: Text[10];
 }

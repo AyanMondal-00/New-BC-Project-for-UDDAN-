@@ -125,6 +125,42 @@ page 50410 "Normal Sales List"
             }
         }
     }
+
+    actions
+    {
+        area(Processing)
+        {
+            action("Import Own Sales Data from API")
+            {
+                ApplicationArea = All;
+                Caption = 'Import Own Sales Data from API';
+                Image = Import;
+
+                trigger OnAction()
+                var
+                    OwnSalesAPIMgt: Codeunit "Own Sales API Mgt.";
+                begin
+                    OwnSalesAPIMgt.ImportOneNormalSale();
+                    CurrPage.Update(false);
+                end;
+            }
+            action("Check BC Public IP")
+            {
+                ApplicationArea = All;
+                Caption = 'Check BC Public IP';
+
+                trigger OnAction()
+                var
+                    BCPublicIPTest: Codeunit "BC Public IP Test";
+                begin
+                    BCPublicIPTest.GetBCPublicIP();
+                end;
+            }
+        }
+
+    }
+
+
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';

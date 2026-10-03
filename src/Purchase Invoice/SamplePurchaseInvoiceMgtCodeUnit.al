@@ -280,7 +280,7 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
     end;
 
     local procedure PNRInvoiceExists(
-        PNR: Code[20];
+        PNR: Text[10];
         var ExistingInvoiceNo: Code[20]): Boolean
     var
         PurchLine: Record "Purchase Line";

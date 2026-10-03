@@ -5,13 +5,13 @@ table 50404 "Own Sales Passenger Name"
 
     fields
     {
-        field(1; "Ref No./AQ Number"; Code[50])
+        field(1; "Ref No./AQ Number"; Integer)
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;
         }
 
-        field(2; "PNR"; Code[10])
+        field(2; "PNR"; Text[10])
         {
             Caption = 'PNR';
             DataClassification = SystemMetadata;

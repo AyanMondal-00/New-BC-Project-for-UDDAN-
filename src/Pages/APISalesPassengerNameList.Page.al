@@ -60,7 +60,7 @@ page 50415 "API Sales Passenger Name List"
             Rec."SL No." := 1;
     end;
 
-    procedure SetRefNoAQNumber(AQNumber: Code[50]; PNRNo: Code[10])
+    procedure SetRefNoAQNumber(AQNumber: Integer; PNRNo: Text[10])
     begin
         CurrentRefNo_AQNumber := AQNumber;
         CurrentPNR := PNRNo;
@@ -70,6 +70,6 @@ page 50415 "API Sales Passenger Name List"
     end;
 
     var
-        CurrentRefNo_AQNumber: Code[50];
-        CurrentPNR: Code[10];
+        CurrentRefNo_AQNumber: Integer;
+        CurrentPNR: Text[10];
 }

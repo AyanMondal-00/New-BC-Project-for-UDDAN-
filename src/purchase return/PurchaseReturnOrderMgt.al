@@ -127,7 +127,7 @@ codeunit 50422 "Purchase Return Order Mgt."
 
         PurchHeader.Validate(
             "Document Date",
-            Consumption.Date);
+            DT2Date(Consumption.Date));
 
         if Consumption."Invoice Number" <> '' then
             PurchHeader.Validate(
