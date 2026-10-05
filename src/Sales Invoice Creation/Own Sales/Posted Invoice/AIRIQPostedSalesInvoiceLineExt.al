@@ -1,4 +1,4 @@
-tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
+tableextension 50430 "AIRIQ Posted Sales Line Ext" extends "Sales Invoice Line"
 {
     fields
     {
@@ -8,7 +8,7 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             DataClassification = CustomerContent;
         }
 
-        field(50425; Sector; Code[20])
+        field(50425; Sector; Text[20])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;
@@ -17,7 +17,7 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
         field(50426; FlightType; Option)
         {
             Caption = 'Flight Type';
-            OptionMembers = Domestic,International;
+            OptionMembers = Domestic, International;
             DataClassification = CustomerContent;
         }
 

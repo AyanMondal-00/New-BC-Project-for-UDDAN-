@@ -47,9 +47,10 @@ page 50411 "API Sales Format List"
                     ApplicationArea = All;
                 }
 
-                field("Sales Invoice Created"; Rec."Sales Invoice Created")
+                field("Sales Invoice Created"; SalesInvoiceCreatedText)
                 {
                     ApplicationArea = All;
+                    Caption = 'Sales Invoice Created';
                     Editable = false;
                 }
 
@@ -139,6 +140,10 @@ page 50411 "API Sales Format List"
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';
+        if Rec."Sales Invoice Created" then
+            SalesInvoiceCreatedText := 'Yes'
+        else
+            SalesInvoiceCreatedText := 'No';
     end;
 
     trigger OnNewRecord(BelowxRec: Boolean)
@@ -157,4 +162,5 @@ page 50411 "API Sales Format List"
 
     var
         ViewPassengerText: Text[30];
+        SalesInvoiceCreatedText: Text[3];
 }

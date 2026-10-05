@@ -1,4 +1,4 @@
-tableextension 50424 "AIRIQ Sales Header Ext" extends "Sales Header"
+tableextension 50429 "AIRIQ Posted Sales Header Ext" extends "Sales Invoice Header"
 {
     fields
     {
@@ -8,7 +8,7 @@ tableextension 50424 "AIRIQ Sales Header Ext" extends "Sales Header"
             DataClassification = CustomerContent;
         }
 
-        field(50425; "Agency ID"; Code[30])
+        field(50425; "Agency ID"; Code[20])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
@@ -17,7 +17,7 @@ tableextension 50424 "AIRIQ Sales Header Ext" extends "Sales Header"
         field(50426; "Sales Type"; Option)
         {
             Caption = 'Sales Type';
-            OptionMembers = "Own Sales","API Sales","Third Party Sales";
+            OptionMembers = "Own Sales", "API Sales", "Third Party Sales";
             DataClassification = CustomerContent;
         }
     }
