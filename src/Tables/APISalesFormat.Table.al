@@ -52,6 +52,17 @@ table 50401 "API Sales Format"
                 CheckDuplicateRefNoAQNumber();
             end;
         }
+        field(23; "Select"; Boolean)
+        {
+            Caption = 'Select';
+            DataClassification = CustomerContent;
+        }
+
+        field(24; "Sales Invoice Created"; Boolean)
+        {
+            Caption = 'Sales Invoice Created';
+            DataClassification = CustomerContent;
+        }
 
         field(7; PNR; Text[10])
         {

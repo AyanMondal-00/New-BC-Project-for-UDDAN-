@@ -29,7 +29,7 @@ table 50402 "Third-Party Supplier Sales"
             DataClassification = CustomerContent;
             ObsoleteState = Removed;
         }
-              field(22; "Agency ID"; Code[30])
+        field(22; "Agency ID"; Code[30])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
@@ -51,6 +51,17 @@ table 50402 "Third-Party Supplier Sales"
             begin
                 CheckDuplicateRefNoAQNumber();
             end;
+        }
+        field(23; "Select"; Boolean)
+        {
+            Caption = 'Select';
+            DataClassification = CustomerContent;
+        }
+
+        field(24; "Sales Invoice Created"; Boolean)
+        {
+            Caption = 'Sales Invoice Created';
+            DataClassification = CustomerContent;
         }
 
         field(7; PNR; Text[10])

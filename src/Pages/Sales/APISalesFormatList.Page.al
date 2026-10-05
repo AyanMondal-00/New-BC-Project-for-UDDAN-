@@ -42,6 +42,16 @@ page 50411 "API Sales Format List"
                 {
                     ApplicationArea = All;
                 }
+                field("Select"; Rec."Select")
+                {
+                    ApplicationArea = All;
+                }
+
+                field("Sales Invoice Created"; Rec."Sales Invoice Created")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
 
                 field(PNR; Rec.PNR)
                 {

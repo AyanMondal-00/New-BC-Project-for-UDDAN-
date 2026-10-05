@@ -42,6 +42,16 @@ page 50410 "Normal Sales List"
                 {
                     ApplicationArea = All;
                 }
+                field("Select"; Rec."Select")
+                {
+                    ApplicationArea = All;
+                }
+
+                field("Sales Invoice Created"; Rec."Sales Invoice Created")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
 
                 field(PNR; Rec.PNR)
                 {
@@ -154,6 +164,24 @@ page 50410 "Normal Sales List"
                     BCPublicIPTest: Codeunit "BC Public IP Test";
                 begin
                     BCPublicIPTest.GetBCPublicIP();
+                end;
+            }
+            action("Create Sales Invoice")
+            {
+                ApplicationArea = All;
+                Caption = 'Create Sales Invoice';
+                Image = CreateDocument;
+
+                trigger OnAction()
+                var
+                    SelectedNormalSales: Record "Normal Sales";
+                    SalesInvoiceMgt: Codeunit "AIRIQ Sales Invoice Mgt";
+                begin
+                    CurrPage.SetSelectionFilter(SelectedNormalSales);
+
+                    SalesInvoiceMgt.CreateOwnSalesInvoices(SelectedNormalSales);
+
+                    CurrPage.Update(false);
                 end;
             }
         }
