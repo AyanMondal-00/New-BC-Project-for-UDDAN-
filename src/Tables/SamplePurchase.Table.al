@@ -40,11 +40,11 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Supplier ID';
             DataClassification = CustomerContent;
-           
+
 
         }
-  
-                field(16; "Select"; Boolean)
+
+        field(16; "Select"; Boolean)
         {
             Caption = 'Select';
             DataClassification = CustomerContent;
