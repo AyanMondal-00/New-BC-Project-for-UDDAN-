@@ -181,9 +181,9 @@ page 50420 "Inventory Consumption List"
         ViewPassengerText := 'View Passenger';
 
         if Rec."Purchase Return Order Created" then
-            PurchaseReturnOrderCreatedText := 'Yes'
+            PurchaseReturnOrderCreatedText := 'No'
         else
-            PurchaseReturnOrderCreatedText := 'No';
+            PurchaseReturnOrderCreatedText := 'Yes';
     end;
 
     trigger OnNewRecord(BelowxRec: Boolean)

@@ -167,10 +167,10 @@ page 50410 "Normal Sales List"
                     BCPublicIPTest.GetBCPublicIP();
                 end;
             }
-            action("Create Sales Invoice")
+            action("Create Own Sales Invoice")
             {
                 ApplicationArea = All;
-                Caption = 'Create Sales Invoice';
+                Caption = 'Create Own Sales Invoice';
                 Image = CreateDocument;
 
                 trigger OnAction()
@@ -188,7 +188,6 @@ page 50410 "Normal Sales List"
         }
 
     }
-
 
     trigger OnAfterGetRecord()
     begin
