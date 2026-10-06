@@ -137,6 +137,32 @@ page 50411 "API Sales Format List"
         }
     }
 
+    actions
+    {
+        area(Processing)
+        {
+            action("Create Sales Invoice")
+            {
+                ApplicationArea = All;
+                Caption = 'Create Sales Invoice';
+                Image = CreateDocument;
+
+                trigger OnAction()
+                var
+                    SelectedAPISales: Record "API Sales Format";
+                    SalesInvoiceMgt: Codeunit "AIRIQ API Sales Invoice Mgt";
+                begin
+                    CurrPage.SetSelectionFilter(SelectedAPISales);
+
+                    SalesInvoiceMgt.CreateAPISalesInvoices(SelectedAPISales);
+
+                    CurrPage.Update(false);
+                end;
+            }
+        }
+        
+    }
+    
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';

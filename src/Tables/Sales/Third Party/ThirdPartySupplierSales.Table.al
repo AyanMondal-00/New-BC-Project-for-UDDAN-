@@ -76,6 +76,7 @@ table 50402 "Third-Party Supplier Sales"
                 i: Integer;
             begin
                 if PNR <> '' then begin
+                     PNR := UpperCase(PNR);
                     if StrLen(PNR) <> 6 then
                         Error('The PNR length must be exactly 6 characters.');
 
@@ -91,7 +92,7 @@ table 50402 "Third-Party Supplier Sales"
                     if not (ContainsLetter and ContainsDigit) then
                         Error('The PNR must contain a mix of letters and numbers.');
 
-                    CheckDuplicatePNR();
+                    
                 end;
             end;
         }

@@ -76,6 +76,7 @@ table 50400 "Normal Sales"
                 i: Integer;
             begin
                 if PNR <> '' then begin
+                     PNR := UpperCase(PNR);
                     if StrLen(PNR) <> 6 then
                         Error('The PNR length must be exactly 6 characters.');
 
