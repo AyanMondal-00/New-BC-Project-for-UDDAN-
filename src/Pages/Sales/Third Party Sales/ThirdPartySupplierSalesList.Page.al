@@ -137,6 +137,31 @@ page 50414 "Third Party Sales List"
         }
     }
 
+    actions
+    {
+        area(Processing)
+        {
+            action("Create Sales Invoice")
+            {
+                ApplicationArea = All;
+                Caption = 'Create Sales Invoice';
+                Image = CreateDocument;
+
+                trigger OnAction()
+                var
+                    SelectedThirdPartySales: Record "Third-Party Supplier Sales";
+                    SalesInvoiceMgt: Codeunit "Third Party Sales Invoice Mgt";
+                begin
+                    CurrPage.SetSelectionFilter(SelectedThirdPartySales);
+
+                    SalesInvoiceMgt.CreateThirdPartySalesInvoices(SelectedThirdPartySales);
+
+                    CurrPage.Update(false);
+                end;
+            }
+        }
+    }
+
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';
