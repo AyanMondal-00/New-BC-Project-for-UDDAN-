@@ -84,11 +84,15 @@ codeunit 50420 "Own Sales API Mgt."
         // Insert into Normal Sales
         NormalSales.Init();
 
+
         NormalSales.Validate(
             "Ref No./AQ Number",
             Token.AsValue().AsInteger()
         );
-
+        NormalSales.Validate(
+       "PNR",
+       Token.AsValue().AsText()
+   );
         NormalSales.Insert(true);
 
         Message(
