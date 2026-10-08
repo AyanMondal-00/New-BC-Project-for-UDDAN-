@@ -71,10 +71,9 @@ table 50403 "Sales Return"
             DataClassification = CustomerContent;
         }
 
-        field(12; Type; Option)
+        field(12; Type; Text[50])
         {
             Caption = 'Type';
-            OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
         }
 

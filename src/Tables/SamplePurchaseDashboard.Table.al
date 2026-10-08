@@ -23,7 +23,7 @@ table 50330 "Sample Purchase Dashboard"
         {
             Caption = 'Count of Total Domestic Purchase';
             FieldClass = FlowField;
-            CalcFormula = Count("Sample Purchase" WHERE(Type = CONST(Domestic)));
+            CalcFormula = Count("Sample Purchase" WHERE(Type = CONST('Domestic')));
             Editable = false;
         }
 
@@ -32,7 +32,7 @@ table 50330 "Sample Purchase Dashboard"
             Caption = 'Total International Purchase';
             FieldClass = FlowField;
             CalcFormula = Sum("Sample Purchase"."Total Amount"
-                WHERE(Type = CONST(International)));
+                WHERE(Type = CONST('International')));
             Editable = false;
         }
 
@@ -41,7 +41,7 @@ table 50330 "Sample Purchase Dashboard"
             Caption = 'Total International Other Charges';
             FieldClass = FlowField;
             CalcFormula = Sum("Sample Purchase"."Other Charges"
-                WHERE(Type = CONST(International)));
+                WHERE(Type = CONST('International')));
             Editable = false;
         }
     }

@@ -138,10 +138,9 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
         }
 
-        field(14; Type; Option)
+        field(14; Type; Text[50])
         {
             Caption = 'Type';
-            OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
         }
 

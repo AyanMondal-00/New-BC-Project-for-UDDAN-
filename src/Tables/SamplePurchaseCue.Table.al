@@ -22,28 +22,28 @@ table 50301 "Sample Purchase Cue"
         {
             Caption = 'Total Domestic Purchases';
             FieldClass = FlowField;
-            CalcFormula = count("Sample Purchase" where(Type = const(Domestic)));
+            CalcFormula = count("Sample Purchase" where(Type = const('Domestic')));
         }
 
         field(4; "Total Domestic Amount"; Decimal)
         {
             Caption = 'Total Domestic Purchase Amount';
             FieldClass = FlowField;
-            CalcFormula = sum("Sample Purchase"."Total Amount" where(Type = const(Domestic)));
+            CalcFormula = sum("Sample Purchase"."Total Amount" where(Type = const('Domestic')));
         }
 
         field(5; "Total Intl. Purchases"; Integer)
         {
             Caption = 'Total International Purchases';
             FieldClass = FlowField;
-            CalcFormula = count("Sample Purchase" where(Type = const(International)));
+            CalcFormula = count("Sample Purchase" where(Type = const('International')));
         }
 
         field(6; "Total Intl. Amount"; Decimal)
         {
             Caption = 'Total International Purchase Amount';
             FieldClass = FlowField;
-            CalcFormula = sum("Sample Purchase"."Total Amount" where(Type = const(International)));
+            CalcFormula = sum("Sample Purchase"."Total Amount" where(Type = const('International')));
         }
     }
 

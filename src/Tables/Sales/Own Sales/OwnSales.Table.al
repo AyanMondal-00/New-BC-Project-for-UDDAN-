@@ -69,32 +69,6 @@ table 50400 "Normal Sales"
             Caption = 'PNR';
             DataClassification = CustomerContent;
 
-            trigger OnValidate()
-            var
-                ContainsLetter: Boolean;
-                ContainsDigit: Boolean;
-                i: Integer;
-            begin
-                if PNR <> '' then begin
-                     PNR := UpperCase(PNR);
-                    if StrLen(PNR) <> 6 then
-                        Error('The PNR length must be exactly 6 characters.');
-
-                    for i := 1 to StrLen(PNR) do begin
-                        if PNR[i] in ['A' .. 'Z'] then
-                            ContainsLetter := true
-                        else if PNR[i] in ['0' .. '9'] then
-                            ContainsDigit := true
-                        else
-                            Error('The PNR must only contain alphanumeric characters.');
-                    end;
-
-                    if not (ContainsLetter and ContainsDigit) then
-                        Error('The PNR must contain a mix of letters and numbers.');
-
-                    
-                end;
-            end;
         }
 
         field(8; Passenger; Text[100])
@@ -121,10 +95,9 @@ table 50400 "Normal Sales"
             DataClassification = CustomerContent;
         }
 
-        field(12; Type; Option)
+        field(12; Type; Text[50])
         {
             Caption = 'Type';
-            OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
 
             trigger OnValidate()
@@ -219,7 +192,7 @@ table 50400 "Normal Sales"
 
     procedure CalculateGST()
     begin
-        if Type = Type::Domestic then begin
+        if UpperCase(Type) = 'DOMESTIC' then begin
             "Taxable Basis" := "Base Fare" * 0.05;
             CGST := "Taxable Basis" * 0.09;
             SGST := "Taxable Basis" * 0.09;

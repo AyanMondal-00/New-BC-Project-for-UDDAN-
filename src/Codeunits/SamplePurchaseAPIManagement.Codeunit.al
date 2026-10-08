@@ -107,7 +107,7 @@ codeunit 50320 "Sample Purchase API Management"
                     GetJsonDecimal(JsonObject, 'totalAmount');
 
                 SamplePurchase.Type :=
-                    GetJsonOption(JsonObject, 'type');
+                    GetJsonText(JsonObject, 'type');
 
                 SamplePurchase.Insert(true);
                 ImportedCount += 1;

@@ -14,10 +14,9 @@ tableextension 50430 "AIRIQ Posted Sales Line Ext" extends "Sales Invoice Line"
             DataClassification = CustomerContent;
         }
 
-        field(50426; FlightType; Option)
+        field(50426; FlightType; Text[50])
         {
             Caption = 'Flight Type';
-            OptionMembers = Domestic, International;
             DataClassification = CustomerContent;
         }
 

@@ -31,10 +31,9 @@ tableextension 50323 "Purchase Line Ext" extends "Purchase Line"
             Caption = 'Sector';
             DataClassification = CustomerContent;
         }
-        field(50330; "Sample Flight Type"; Option)
+        field(50330; "Sample Flight Type"; Text[50])
         {
             Caption = 'Flight Type';
-            OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
         }
 

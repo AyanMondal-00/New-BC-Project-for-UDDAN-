@@ -43,7 +43,7 @@ page 50340 "Dashboard of Sample Format"
                     var
                         SamplePurchase: Record "Sample Purchase";
                     begin
-                        SamplePurchase.SetRange(Type, SamplePurchase.Type::Domestic);
+                        SamplePurchase.SetRange(Type, 'Domestic');
                         Page.Run(Page::"Sample Purchase List", SamplePurchase);
                     end;
                 }
@@ -66,7 +66,7 @@ page 50340 "Dashboard of Sample Format"
                     var
                         SamplePurchase: Record "Sample Purchase";
                     begin
-                        SamplePurchase.SetRange(Type, SamplePurchase.Type::International);
+                        SamplePurchase.SetRange(Type, 'International');
                         Page.Run(Page::"Sample Purchase List", SamplePurchase);
                     end;
                 }
@@ -89,7 +89,7 @@ page 50340 "Dashboard of Sample Format"
                     var
                         SamplePurchase: Record "Sample Purchase";
                     begin
-                        SamplePurchase.SetRange(Type, SamplePurchase.Type::International);
+                        SamplePurchase.SetRange(Type, 'International');
                         Page.Run(Page::"Sample Purchase List", SamplePurchase);
                     end;
                 }

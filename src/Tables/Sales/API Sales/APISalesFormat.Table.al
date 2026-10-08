@@ -122,10 +122,9 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
         }
 
-        field(12; Type; Option)
+        field(12; Type; Text[50])
         {
             Caption = 'Type';
-            OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
 
             trigger OnValidate()
@@ -220,7 +219,7 @@ table 50401 "API Sales Format"
 
     procedure CalculateGST()
     begin
-        if Type = Type::Domestic then begin
+        if UpperCase(Type) = 'DOMESTIC' then begin
             "Taxable Basis" := "Base Fare" * 0.05;
             CGST := "Taxable Basis" * 0.09;
             SGST := "Taxable Basis" * 0.09;

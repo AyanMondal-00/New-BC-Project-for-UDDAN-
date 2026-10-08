@@ -12,7 +12,7 @@ codeunit 50420 "Own Sales API Mgt."
         DataArray: JsonArray;
         RowObject: JsonObject;
         Token: JsonToken;
-
+        i: Integer;
         NormalSales: Record "Normal Sales";
 
         Base64Convert: Codeunit "Base64 Convert";
@@ -73,31 +73,100 @@ codeunit 50420 "Own Sales API Mgt."
             Error('No sales data was returned by the API.');
 
         // Get first data record
-        DataArray.Get(0, Token);
+        for i := 0 to DataArray.Count() - 1
+             do begin
+            DataArray.Get(i, Token);
+            RowObject := Token.AsObject();
 
-        RowObject := Token.AsObject();
+            // Insert into Normal Sales
+            NormalSales.Init();
+            if not RowObject.Get('EntryDateTime', Token) then
+                Error('EntryDateTime was not found in API response.');
 
-        // Get RefNo
-        if not RowObject.Get('RefNo', Token) then
-            Error('RefNo was not found in API response.');
+            NormalSales.Validate(
+                "Date",
+                Token.AsValue().AsDateTime()
+            );
+            // Get RefNo
+            if not RowObject.Get('RefNo', Token) then
+                Error('RefNo was not found in API response.');
 
-        // Insert into Normal Sales
-        NormalSales.Init();
+            NormalSales.Validate(
+                "Ref No./AQ Number",
+                Token.AsValue().AsInteger()
+            );
 
+            // Get Bill No.
+            if not RowObject.Get('BillNo', Token) then
+                Error('BillNo was not found in API response.');
 
-        NormalSales.Validate(
-            "Ref No./AQ Number",
-            Token.AsValue().AsInteger()
+            NormalSales.Validate(
+                "Invoice Number",
+                Token.AsValue().AsText()
+            );
+
+            // Get PNR
+            if not RowObject.Get('PNR', Token) then
+                Error('PNR was not found in API response.');
+
+            NormalSales.Validate(
+                "PNR",
+                Token.AsValue().AsText()
+            );
+
+            // Get Agency ID
+            if not RowObject.Get('AgencyID', Token) then
+                Error('AgencyID was not found in API response.');
+
+            NormalSales.Validate(
+                "Agency ID",
+                Format(Token.AsValue().AsInteger())
+            );
+
+            // Get Agency Name
+            if not RowObject.Get('AgencyName', Token) then
+                Error('AgencyName was not found in API response.');
+
+            NormalSales.Validate(
+                "Agency Name",
+                Token.AsValue().AsText()
+            );
+
+            // Get Pax
+            if not RowObject.Get('Pax', Token) then
+                Error('Pax was not found in API response.');
+
+            NormalSales.Validate(
+                "Pax",
+                Token.AsValue().AsInteger()
+            );
+            // Get Sector 
+            if not RowObject.Get('Sector', Token) then
+                Error('Sector was not found in API response.');
+
+            NormalSales.Validate(
+            "Sector",
+            Token.AsValue().AsText()
         );
-        NormalSales.Validate(
-       "PNR",
-       Token.AsValue().AsText()
-   );
-        NormalSales.Insert(true);
-
-        Message(
-            'Successfully imported Ref No./AQ Number: %1',
-            NormalSales."Ref No./AQ Number"
+            // Get Travel Date
+            if not RowObject.Get('TravelDate', Token) then
+                Error('TravelDate was not found in API response.');
+            NormalSales.Validate(
+                "Travel Date",
+                Token.AsValue().AsDateTime()
+            );
+            //Get Type 
+            if not RowObject.Get('Type', Token) then
+                Error('Type was not found in API response.');
+            NormalSales.Validate(
+            "Type",
+            Token.AsValue().AsText()
         );
+
+            // Insert record
+            NormalSales.Insert(true);
+        end;
+
+        Message('Successfully imported %1 records.', DataArray.Count());
     end;
 }

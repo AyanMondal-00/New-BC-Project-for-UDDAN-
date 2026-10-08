@@ -53,10 +53,9 @@ table 50302 "Purchase Return"
             DataClassification = CustomerContent;
         }
 
-        field(9; Type; Option)
+        field(9; Type; Text[50])
         {
             Caption = 'Type';
-            OptionMembers = Domestic,International;
             DataClassification = CustomerContent;
         }
 
