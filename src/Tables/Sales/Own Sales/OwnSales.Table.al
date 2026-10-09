@@ -183,9 +183,10 @@ table 50400 "Normal Sales"
         NormalSales: Record "Normal Sales";
     begin
         NormalSales.Reset();
+        NormalSales.SetCurrentKey("Serial No.");
+
         if NormalSales.FindLast() then
-            if NormalSales."Serial No." >= 1 then
-                exit(NormalSales."Serial No." + 1);
+            exit(NormalSales."Serial No." + 1);
 
         exit(1);
     end;

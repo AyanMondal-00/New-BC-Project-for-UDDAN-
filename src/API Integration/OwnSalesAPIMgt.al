@@ -1,3 +1,4 @@
+
 codeunit 50420 "Own Sales API Mgt."
 {
     procedure ImportOneNormalSale()
@@ -6,17 +7,20 @@ codeunit 50420 "Own Sales API Mgt."
         Request: HttpRequestMessage;
         Response: HttpResponseMessage;
         Headers: HttpHeaders;
-
+        RecordCount: Integer;
+        ImportedCount: Integer;
+        SkippedCount: Integer;
+        RefNoValue: Integer;
         ResponseText: Text;
+        SkippedRefNos: Text;
         RootObject: JsonObject;
         DataArray: JsonArray;
         RowObject: JsonObject;
         Token: JsonToken;
         i: Integer;
         NormalSales: Record "Normal Sales";
-
+        ExistingNormalSales: Record "Normal Sales";
         Base64Convert: Codeunit "Base64 Convert";
-
         APIUrl: Text;
         Username: Text;
         Password: Text;
@@ -33,7 +37,6 @@ codeunit 50420 "Own Sales API Mgt."
         // Create GET request
         Request.SetRequestUri(APIUrl);
         Request.Method := 'GET';
-
         Request.GetHeaders(Headers);
 
         Headers.Add(
@@ -42,12 +45,11 @@ codeunit 50420 "Own Sales API Mgt."
         );
 
         // Send request
-        if not Client.Send(Request, Response) then begin
+        if not Client.Send(Request, Response) then
             Error(
                 'Unable to connect to API.\URL: %1',
                 APIUrl
             );
-        end;
 
         // Check response
         if not Response.IsSuccessStatusCode() then
@@ -69,104 +71,157 @@ codeunit 50420 "Own Sales API Mgt."
 
         DataArray := Token.AsArray();
 
-        if DataArray.Count() = 0 then
-            Error('No sales data was returned by the API.');
+        if DataArray.Count() = 0 then begin
+            Message('No sales data was returned by the API.');
+            exit;
+        end;
 
-        // Get first data record
-        for i := 0 to DataArray.Count() - 1
-             do begin
+        // Process maximum first 5 records
+        RecordCount := DataArray.Count();
+        if RecordCount > 6 then
+            RecordCount := 6;
+
+        for i := 0 to RecordCount - 1 do begin
             DataArray.Get(i, Token);
             RowObject := Token.AsObject();
 
-            // Insert into Normal Sales
-            NormalSales.Init();
-            if not RowObject.Get('EntryDateTime', Token) then
-                Error('EntryDateTime was not found in API response.');
-
-            NormalSales.Validate(
-                "Date",
-                Token.AsValue().AsDateTime()
-            );
             // Get RefNo
             if not RowObject.Get('RefNo', Token) then
                 Error('RefNo was not found in API response.');
 
-            NormalSales.Validate(
+            RefNoValue := Token.AsValue().AsInteger();
+
+            // Check whether Ref No. already exists
+            ExistingNormalSales.Reset();
+            ExistingNormalSales.SetRange(
                 "Ref No./AQ Number",
-                Token.AsValue().AsInteger()
+                RefNoValue
             );
 
-            // Get Bill No.
-            if not RowObject.Get('BillNo', Token) then
-                Error('BillNo was not found in API response.');
+            if ExistingNormalSales.FindFirst() then begin
+                // Skip duplicate record
+                SkippedCount += 1;
 
-            NormalSales.Validate(
-                "Invoice Number",
-                Token.AsValue().AsText()
-            );
+                if SkippedRefNos <> '' then
+                    SkippedRefNos += ', ';
 
-            // Get PNR
-            if not RowObject.Get('PNR', Token) then
-                Error('PNR was not found in API response.');
+                SkippedRefNos += Format(RefNoValue);
+            end else begin
+                // Clear previous record values and primary key
+                Clear(NormalSales);
+                NormalSales.Reset();
+                NormalSales.Init();
 
-            NormalSales.Validate(
-                "PNR",
-                Token.AsValue().AsText()
-            );
+                // Set Ref No.
+                NormalSales.Validate(
+                    "Ref No./AQ Number",
+                    RefNoValue
+                );
 
-            // Get Agency ID
-            if not RowObject.Get('AgencyID', Token) then
-                Error('AgencyID was not found in API response.');
+                // Get EntryDateTime
+                if not RowObject.Get('EntryDateTime', Token) then
+                    Error('EntryDateTime was not found in API response.');
 
-            NormalSales.Validate(
-                "Agency ID",
-                Format(Token.AsValue().AsInteger())
-            );
+                NormalSales.Validate(
+                    "Date",
+                    Token.AsValue().AsDateTime()
+                );
 
-            // Get Agency Name
-            if not RowObject.Get('AgencyName', Token) then
-                Error('AgencyName was not found in API response.');
+                // Get BillNo
+                if not RowObject.Get('BillNo', Token) then
+                    Error('BillNo was not found in API response.');
 
-            NormalSales.Validate(
-                "Agency Name",
-                Token.AsValue().AsText()
-            );
+                NormalSales.Validate(
+                    "Invoice Number",
+                    Token.AsValue().AsText()
+                );
 
-            // Get Pax
-            if not RowObject.Get('Pax', Token) then
-                Error('Pax was not found in API response.');
+                // Get PNR
+                if not RowObject.Get('PNR', Token) then
+                    Error('PNR was not found in API response.');
 
-            NormalSales.Validate(
-                "Pax",
-                Token.AsValue().AsInteger()
-            );
-            // Get Sector 
-            if not RowObject.Get('Sector', Token) then
-                Error('Sector was not found in API response.');
+                NormalSales.Validate(
+                    PNR,
+                    Token.AsValue().AsText()
+                );
 
-            NormalSales.Validate(
-            "Sector",
-            Token.AsValue().AsText()
-        );
-            // Get Travel Date
-            if not RowObject.Get('TravelDate', Token) then
-                Error('TravelDate was not found in API response.');
-            NormalSales.Validate(
-                "Travel Date",
-                Token.AsValue().AsDateTime()
-            );
-            //Get Type 
-            if not RowObject.Get('Type', Token) then
-                Error('Type was not found in API response.');
-            NormalSales.Validate(
-            "Type",
-            Token.AsValue().AsText()
-        );
+                // Get AgencyID
+                if not RowObject.Get('AgencyID', Token) then
+                    Error('AgencyID was not found in API response.');
 
-            // Insert record
-            NormalSales.Insert(true);
+                NormalSales.Validate(
+                    "Agency ID",
+                    Format(Token.AsValue().AsInteger())
+                );
+
+                // Get AgencyName
+                if not RowObject.Get('AgencyName', Token) then
+                    Error('AgencyName was not found in API response.');
+
+                NormalSales.Validate(
+                    "Agency Name",
+                    Token.AsValue().AsText()
+                );
+
+                // Get Pax
+                if not RowObject.Get('Pax', Token) then
+                    Error('Pax was not found in API response.');
+
+                NormalSales.Validate(
+                    Pax,
+                    Token.AsValue().AsInteger()
+                );
+
+                // Get Sector
+                if not RowObject.Get('Sector', Token) then
+                    Error('Sector was not found in API response.');
+
+                NormalSales.Validate(
+                    Sector,
+                    Token.AsValue().AsText()
+                );
+
+                // Get TravelDate
+                if not RowObject.Get('TravelDate', Token) then
+                    Error('TravelDate was not found in API response.');
+
+                NormalSales.Validate(
+                    "Travel Date",
+                    Token.AsValue().AsDateTime()
+                );
+
+                // Get Type
+                if not RowObject.Get('Type', Token) then
+                    Error('Type was not found in API response.');
+
+                NormalSales.Validate(
+                    Type,
+                    Token.AsValue().AsText()
+                );
+
+                // Insert new record
+                NormalSales.Insert(true);
+                ImportedCount += 1;
+            end;
         end;
 
-        Message('Successfully imported %1 records.', DataArray.Count());
+        // Final summary
+        if SkippedCount > 0 then
+            Message(
+                'Import completed.\' +
+                'Imported: %1\' +
+                'Skipped: %2\' +
+                'Skipped Ref No./AQ Number: %3',
+                ImportedCount,
+                SkippedCount,
+                SkippedRefNos
+            )
+        else
+            Message(
+                'Import completed successfully.\' +
+                'Imported: %1\' +
+                'Skipped: 0',
+                ImportedCount
+            );
     end;
 }
