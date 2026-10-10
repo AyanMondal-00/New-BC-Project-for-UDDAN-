@@ -1,3 +1,4 @@
+
 page 50410 "Normal Sales List"
 {
     Caption = 'Normal Sales';
@@ -42,6 +43,7 @@ page 50410 "Normal Sales List"
                 {
                     ApplicationArea = All;
                 }
+
                 field("Select"; Rec."Select")
                 {
                     ApplicationArea = All;
@@ -69,7 +71,10 @@ page 50410 "Normal Sales List"
                     var
                         PassengerList: Page "Own Sales Passenger List Name";
                     begin
-                        PassengerList.SetRefNoAQNumber(Rec."Ref No./AQ Number", Rec.PNR);
+                        PassengerList.SetRefNoAQNumber(
+                            Rec."Ref No./AQ Number",
+                            Rec.PNR
+                        );
                         PassengerList.RunModal();
                     end;
                 }
@@ -141,32 +146,46 @@ page 50410 "Normal Sales List"
     {
         area(Processing)
         {
-            action("Import Own Sales Data from API")
+            action("Choose Date to Date")
             {
                 ApplicationArea = All;
-                Caption = 'Import Own Sales Data from API';
-                Image = Import;
+                Caption = 'Choose Date to Date';
+                ToolTip = 'Import Own Sales data from API for a selected date range.';
+                Image = DateRange;
 
                 trigger OnAction()
                 var
+                    DateFilterDialog: Page "Choose Date to Date";
                     OwnSalesAPIMgt: Codeunit "Own Sales API Mgt.";
+                    SelectedFromDate: Date;
+                    SelectedToDate: Date;
                 begin
-                    OwnSalesAPIMgt.ImportOneNormalSale();
-                    CurrPage.Update(false);
-                end;
-            }
-            action("Check BC Public IP")
-            {
-                ApplicationArea = All;
-                Caption = 'Check BC Public IP';
+                    DateFilterDialog.SetDates(Today, Today);
 
-                trigger OnAction()
-                var
-                    BCPublicIPTest: Codeunit "BC Public IP Test";
-                begin
-                    BCPublicIPTest.GetBCPublicIP();
+                    if DateFilterDialog.RunModal() = Action::OK then begin
+                        DateFilterDialog.GetDates(
+                            SelectedFromDate,
+                            SelectedToDate
+                        );
+
+                        if (SelectedFromDate = 0D) or
+                           (SelectedToDate = 0D)
+                        then
+                            Error('Please select both From Date and To Date.');
+
+                        if SelectedFromDate > SelectedToDate then
+                            Error('From Date cannot be later than To Date.');
+
+                        OwnSalesAPIMgt.ImportOwnSalesByDate(
+                            SelectedFromDate,
+                            SelectedToDate
+                        );
+
+                        CurrPage.Update(false);
+                    end;
                 end;
             }
+
             action("Create Own Sales Invoice")
             {
                 ApplicationArea = All;
@@ -180,52 +199,27 @@ page 50410 "Normal Sales List"
                 begin
                     CurrPage.SetSelectionFilter(SelectedNormalSales);
 
-                    SalesInvoiceMgt.CreateOwnSalesInvoices(SelectedNormalSales);
+                    SalesInvoiceMgt.CreateOwnSalesInvoices(
+                        SelectedNormalSales
+                    );
 
                     CurrPage.Update(false);
                 end;
             }
         }
-
     }
 
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';
+
         if Rec."Sales Invoice Created" then
             SalesInvoiceCreatedText := 'Yes'
         else
             SalesInvoiceCreatedText := 'No';
     end;
 
-    trigger OnNewRecord(BelowxRec: Boolean)
-    var
-        NormalSales: Record "Normal Sales";
-    begin
-        NormalSales.Reset();
-        if NormalSales.FindLast() then
-            if NormalSales."Serial No." >= 1 then
-                Rec."Serial No." := NormalSales."Serial No." + 1
-            else
-                Rec."Serial No." := 1
-        else
-            Rec."Serial No." := 1;
-    end;
-
     var
         ViewPassengerText: Text[30];
         SalesInvoiceCreatedText: Text[3];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

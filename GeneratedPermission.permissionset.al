@@ -53,6 +53,7 @@ permissionset 50300 GeneratedPermission
         page "Airline Inventory Payment Due" = X,
         page "API Sales Format List" = X,
         page "API Sales Passenger Name List" = X,
+        page "Choose Date to Date" = X,
         page "Dashboard of Sample Format" = X,
         page "Inventory Consumption List" = X,
         page "Inventory Consumption Pasenger" = X,

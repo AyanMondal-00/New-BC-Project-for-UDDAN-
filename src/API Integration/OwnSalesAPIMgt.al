@@ -1,7 +1,7 @@
 
 codeunit 50420 "Own Sales API Mgt."
 {
-    procedure ImportOneNormalSale()
+    procedure ImportOwnSalesByDate(FromDate: Date; ToDate: Date)
     var
         Client: HttpClient;
         Request: HttpRequestMessage;
@@ -25,13 +25,32 @@ codeunit 50420 "Own Sales API Mgt."
         Username: Text;
         Password: Text;
         AuthString: Text;
+        FromDateText: Text;
+        ToDateText: Text;
     begin
-        APIUrl := 'https://airiqvendorapi.azurewebsites.net/api/ms_business_central/SaleDetails/OwnSale?fromDate=2026-09-23&toDate=2026-09-24';
+        // Validate date range
+        if (FromDate = 0D) or (ToDate = 0D) then
+            Error('Please select both From Date and To Date.');
 
-        Username := 'om namah shivay';
-        Password := 'prince';
+        if FromDate > ToDate then
+            Error('From Date cannot be later than To Date.');
 
-        // Basic Authentication
+        // Format dates for API
+        FromDateText :=
+            Format(FromDate, 0, '<Year4>-<Month,2>-<Day,2>');
+        ToDateText :=
+            Format(ToDate, 0, '<Year4>-<Month,2>-<Day,2>');
+
+        // Build API URL
+        APIUrl := StrSubstNo(
+            'https://airiqvendorapi.azurewebsites.net/api/ms_business_central/SaleDetails/OwnSale?fromDate=%1&toDate=%2',
+            FromDateText,
+            ToDateText
+        );
+
+        // API credentials
+        Username := '<YOUR_API_USERNAME>';
+        Password := '<YOUR_API_PASSWORD>';
         AuthString := Username + ':' + Password;
 
         // Create GET request
@@ -61,7 +80,7 @@ codeunit 50420 "Own Sales API Mgt."
         // Read response
         Response.Content().ReadAs(ResponseText);
 
-        // Convert response to JSON
+        // Parse JSON response
         if not RootObject.ReadFrom(ResponseText) then
             Error('Invalid JSON response received from API.');
 
@@ -70,17 +89,18 @@ codeunit 50420 "Own Sales API Mgt."
             Error('The "data" field was not found in API response.');
 
         DataArray := Token.AsArray();
+        RecordCount := DataArray.Count();
 
-        if DataArray.Count() = 0 then begin
-            Message('No sales data was returned by the API.');
+        if RecordCount = 0 then begin
+            Message(
+                'No sales data was returned for %1 to %2.',
+                FromDateText,
+                ToDateText
+            );
             exit;
         end;
 
-        // Process maximum first 5 records
-        RecordCount := DataArray.Count();
-        if RecordCount > 6 then
-            RecordCount := 6;
-
+        // Process all API records
         for i := 0 to RecordCount - 1 do begin
             DataArray.Get(i, Token);
             RowObject := Token.AsObject();
@@ -91,7 +111,7 @@ codeunit 50420 "Own Sales API Mgt."
 
             RefNoValue := Token.AsValue().AsInteger();
 
-            // Check whether Ref No. already exists
+            // Check duplicate Ref No.
             ExistingNormalSales.Reset();
             ExistingNormalSales.SetRange(
                 "Ref No./AQ Number",
@@ -99,7 +119,7 @@ codeunit 50420 "Own Sales API Mgt."
             );
 
             if ExistingNormalSales.FindFirst() then begin
-                // Skip duplicate record
+                // Skip existing record
                 SkippedCount += 1;
 
                 if SkippedRefNos <> '' then
@@ -107,18 +127,18 @@ codeunit 50420 "Own Sales API Mgt."
 
                 SkippedRefNos += Format(RefNoValue);
             end else begin
-                // Clear previous record values and primary key
+                // Clear previous record state
                 Clear(NormalSales);
                 NormalSales.Reset();
                 NormalSales.Init();
 
-                // Set Ref No.
+                // Ref No.
                 NormalSales.Validate(
                     "Ref No./AQ Number",
                     RefNoValue
                 );
 
-                // Get EntryDateTime
+                // EntryDateTime
                 if not RowObject.Get('EntryDateTime', Token) then
                     Error('EntryDateTime was not found in API response.');
 
@@ -127,7 +147,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsDateTime()
                 );
 
-                // Get BillNo
+                // BillNo
                 if not RowObject.Get('BillNo', Token) then
                     Error('BillNo was not found in API response.');
 
@@ -136,7 +156,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsText()
                 );
 
-                // Get PNR
+                // PNR
                 if not RowObject.Get('PNR', Token) then
                     Error('PNR was not found in API response.');
 
@@ -145,7 +165,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsText()
                 );
 
-                // Get AgencyID
+                // AgencyID
                 if not RowObject.Get('AgencyID', Token) then
                     Error('AgencyID was not found in API response.');
 
@@ -154,7 +174,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Format(Token.AsValue().AsInteger())
                 );
 
-                // Get AgencyName
+                // AgencyName
                 if not RowObject.Get('AgencyName', Token) then
                     Error('AgencyName was not found in API response.');
 
@@ -163,7 +183,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsText()
                 );
 
-                // Get Pax
+                // Pax
                 if not RowObject.Get('Pax', Token) then
                     Error('Pax was not found in API response.');
 
@@ -172,7 +192,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsInteger()
                 );
 
-                // Get Sector
+                // Sector
                 if not RowObject.Get('Sector', Token) then
                     Error('Sector was not found in API response.');
 
@@ -181,7 +201,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsText()
                 );
 
-                // Get TravelDate
+                // TravelDate
                 if not RowObject.Get('TravelDate', Token) then
                     Error('TravelDate was not found in API response.');
 
@@ -190,7 +210,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsDateTime()
                 );
 
-                // Get Type
+                // Type - Text field
                 if not RowObject.Get('Type', Token) then
                     Error('Type was not found in API response.');
 
@@ -208,19 +228,23 @@ codeunit 50420 "Own Sales API Mgt."
         // Final summary
         if SkippedCount > 0 then
             Message(
-                'Import completed.\' +
-                'Imported: %1\' +
-                'Skipped: %2\' +
-                'Skipped Ref No./AQ Number: %3',
+                'Import completed for %1 to %2.\' +
+                'Imported: %3\' +
+                'Skipped: %4\' +
+                'Skipped Ref No./AQ Number: %5',
+                FromDateText,
+                ToDateText,
                 ImportedCount,
                 SkippedCount,
                 SkippedRefNos
             )
         else
             Message(
-                'Import completed successfully.\' +
-                'Imported: %1\' +
+                'Import completed successfully for %1 to %2.\' +
+                'Imported: %3\' +
                 'Skipped: 0',
+                FromDateText,
+                ToDateText,
                 ImportedCount
             );
     end;
