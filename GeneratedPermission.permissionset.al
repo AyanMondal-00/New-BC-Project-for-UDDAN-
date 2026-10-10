@@ -41,7 +41,7 @@ permissionset 50300 GeneratedPermission
         codeunit "AIRIQ Posted Sales Invoice Mgt" = X,
         codeunit "AIRIQ Purchase Line Mgt" = X,
         codeunit "AIRIQ Sales Invoice Mgt" = X,
-        codeunit "BC Public IP Test" = X,
+        
         codeunit "Own Sales API Mgt." = X,
         codeunit "Purchase Return Order Mgt." = X,
         codeunit "Sample Purchase API Management" = X,

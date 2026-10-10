@@ -65,7 +65,7 @@ table 50403 "Sales Return"
             DataClassification = CustomerContent;
         }
 
-        field(11; Sector; Text[100])
+        field(11; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

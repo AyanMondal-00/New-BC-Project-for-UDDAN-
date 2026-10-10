@@ -8,7 +8,7 @@ tableextension 50430 "AIRIQ Posted Sales Line Ext" extends "Sales Invoice Line"
             DataClassification = CustomerContent;
         }
 
-        field(50425; Sector; Text[20])
+        field(50425; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

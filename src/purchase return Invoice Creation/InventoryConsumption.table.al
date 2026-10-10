@@ -82,7 +82,7 @@ table 50420 "Inventory Consumption"
             DataClassification = CustomerContent;
         }
 
-        field(11; Sector; Code[20])
+        field(11; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

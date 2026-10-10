@@ -90,7 +90,7 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
         }
 
-        field(11; Sector; Code[20])
+        field(11; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

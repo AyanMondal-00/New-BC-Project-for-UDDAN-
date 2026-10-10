@@ -49,8 +49,8 @@ codeunit 50420 "Own Sales API Mgt."
         );
 
         // API credentials
-        Username := '<YOUR_API_USERNAME>';
-        Password := '<YOUR_API_PASSWORD>';
+        Username := 'om namah shivay';
+        Password := 'prince';
         AuthString := Username + ':' + Password;
 
         // Create GET request

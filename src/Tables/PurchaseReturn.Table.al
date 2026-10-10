@@ -59,7 +59,7 @@ table 50302 "Purchase Return"
             DataClassification = CustomerContent;
         }
 
-        field(10; Sector; Text[100])
+        field(10; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

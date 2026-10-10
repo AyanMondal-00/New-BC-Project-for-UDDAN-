@@ -108,7 +108,7 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
         }
 
-        field(9; Sector; Code[20])
+        field(9; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

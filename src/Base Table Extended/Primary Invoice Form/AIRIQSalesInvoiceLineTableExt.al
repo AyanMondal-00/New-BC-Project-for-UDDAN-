@@ -8,7 +8,7 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             DataClassification = CustomerContent;
         }
 
-        field(50425; Sector; Text[20])
+        field(50425; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

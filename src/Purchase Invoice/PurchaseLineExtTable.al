@@ -26,7 +26,7 @@ tableextension 50323 "Purchase Line Ext" extends "Purchase Line"
             DataClassification = CustomerContent;
         }
 
-        field(50329; "Sample Sector"; Code[20])
+        field(50329; "Sample Sector"; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;

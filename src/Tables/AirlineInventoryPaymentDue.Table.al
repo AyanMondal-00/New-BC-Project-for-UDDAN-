@@ -23,7 +23,7 @@ table 50303 "Airline Inventory Payment Due"
             DataClassification = CustomerContent;
         }
 
-        field(4; Sector; Code[20])
+        field(4; Sector; Text[200])
         {
             Caption = 'Sector';
             DataClassification = CustomerContent;
