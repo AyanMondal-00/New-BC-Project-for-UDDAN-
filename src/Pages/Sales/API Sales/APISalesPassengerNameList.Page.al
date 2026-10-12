@@ -39,6 +39,16 @@ page 50415 "API Sales Passenger Name List"
                 {
                     ApplicationArea = All;
                 }
+
+                field("ID"; Rec."ID")
+                {
+                    ApplicationArea = All;
+                }
+
+                field("Type"; Rec."Type")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
     }

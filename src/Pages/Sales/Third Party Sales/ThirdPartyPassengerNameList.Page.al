@@ -39,6 +39,16 @@ page 50416 "Third Party Name List"
                 {
                     ApplicationArea = All;
                 }
+
+                field("ID"; Rec."ID")
+                {
+                    ApplicationArea = All;
+                }
+
+                field("Type"; Rec."Type")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
     }

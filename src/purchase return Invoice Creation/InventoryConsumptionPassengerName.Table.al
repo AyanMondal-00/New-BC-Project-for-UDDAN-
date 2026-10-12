@@ -5,7 +5,7 @@ table 50422 "Inventory Consumption Pasenger"
 
     fields
     {
-        field(1; "Ref No./AQ Number"; Integer)
+        field(1; "Ref No./AQ Number"; BigInteger)
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;
@@ -26,6 +26,18 @@ table 50422 "Inventory Consumption Pasenger"
         field(4; "Passenger Name"; Text[100])
         {
             Caption = 'Passenger Name';
+            DataClassification = CustomerContent;
+        }
+
+        field(5; "ID"; BigInteger)
+        {
+            Caption = 'ID';
+            DataClassification = CustomerContent;
+        }
+
+        field(6; "Type"; Text[50])
+        {
+            Caption = 'Type';
             DataClassification = CustomerContent;
         }
     }

@@ -34,6 +34,16 @@ page 50423 "Inventory Consumption Pasenger"
                 {
                     ApplicationArea = All;
                 }
+
+                field("ID"; Rec."ID")
+                {
+                    ApplicationArea = All;
+                }
+
+                field("Type"; Rec."Type")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
     }

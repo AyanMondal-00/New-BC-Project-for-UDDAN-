@@ -43,6 +43,7 @@ permissionset 50300 GeneratedPermission
         codeunit "AIRIQ Sales Invoice Mgt" = X,
         
         codeunit "Own Sales API Mgt." = X,
+        codeunit "Passenger Name Import Mgt." = X,
         codeunit "Purchase Return Order Mgt." = X,
         codeunit "Sample Purchase API Management" = X,
         codeunit "Sample Purchase Inventory Sync" = X,

@@ -5,7 +5,7 @@ table 50406 "Third Party Passenger Name"
 
     fields
     {
-        field(1; "Ref No./AQ Number"; Integer)
+        field(1; "Ref No./AQ Number"; BigInteger)
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;
@@ -26,6 +26,18 @@ table 50406 "Third Party Passenger Name"
         field(4; "Passenger Name"; Text[100])
         {
             Caption = 'Passenger Name';
+            DataClassification = CustomerContent;
+        }
+
+        field(5; "ID"; BigInteger)
+        {
+            Caption = 'ID';
+            DataClassification = CustomerContent;
+        }
+
+        field(6; "Type"; Text[50])
+        {
+            Caption = 'Type';
             DataClassification = CustomerContent;
         }
     }

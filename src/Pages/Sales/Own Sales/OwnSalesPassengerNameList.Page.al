@@ -34,6 +34,16 @@ page 50412 "Own Sales Passenger List Name"
                 {
                     ApplicationArea = All;
                 }
+
+                field("ID"; Rec."ID")
+                {
+                    ApplicationArea = All;
+                }
+
+                field("Type"; Rec."Type")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
     }

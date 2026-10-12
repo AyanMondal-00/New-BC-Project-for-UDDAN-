@@ -27,6 +27,8 @@ codeunit 50420 "Own Sales API Mgt."
         AuthString: Text;
         FromDateText: Text;
         ToDateText: Text;
+        TempPassengerMgt: Codeunit "Passenger Name Import Mgt.";
+        PnrText: Text[10];
     begin
         // Validate date range
         if (FromDate = 0D) or (ToDate = 0D) then
@@ -100,7 +102,11 @@ codeunit 50420 "Own Sales API Mgt."
             exit;
         end;
 
-        // Process all API records
+        // Limit to first 5 records
+        if RecordCount > 5 then
+            RecordCount := 5;
+
+        // Process first 5 API records
         for i := 0 to RecordCount - 1 do begin
             DataArray.Get(i, Token);
             RowObject := Token.AsObject();
@@ -126,6 +132,14 @@ codeunit 50420 "Own Sales API Mgt."
                     SkippedRefNos += ', ';
 
                 SkippedRefNos += Format(RefNoValue);
+
+                // Ensure passengers are imported if missing for existing record
+                PnrText := ExistingNormalSales.PNR;
+                if PnrText = '' then
+                    if RowObject.Get('PNR', Token) then
+                        PnrText := CopyStr(Token.AsValue().AsText(), 1, MaxStrLen(PnrText));
+
+                TempPassengerMgt.ImportPassengersFromRow(RowObject, RefNoValue, PnrText);
             end else begin
                 // Clear previous record state
                 Clear(NormalSales);
@@ -222,6 +236,9 @@ codeunit 50420 "Own Sales API Mgt."
                 // Insert new record
                 NormalSales.Insert(true);
                 ImportedCount += 1;
+
+                // Import passengers from API response for newly inserted record
+                TempPassengerMgt.ImportPassengersFromRow(RowObject, RefNoValue, NormalSales.PNR);
             end;
         end;
 

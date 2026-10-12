@@ -43,7 +43,7 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
         }
 
-        field(6; "Ref No./AQ Number"; Integer)
+        field(6; "Ref No./AQ Number"; BigInteger)
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;

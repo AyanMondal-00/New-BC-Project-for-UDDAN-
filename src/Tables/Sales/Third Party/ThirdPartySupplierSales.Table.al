@@ -42,7 +42,7 @@ table 50402 "Third-Party Supplier Sales"
             DataClassification = CustomerContent;
         }
 
-        field(6; "Ref No./AQ Number"; Integer)
+        field(6; "Ref No./AQ Number"; BigInteger)
         {
             Caption = 'Ref No./AQ Number';
             DataClassification = CustomerContent;
