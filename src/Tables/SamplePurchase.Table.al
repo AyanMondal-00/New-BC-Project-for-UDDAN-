@@ -70,29 +70,9 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
 
             trigger OnValidate()
-            var
-                ContainsLetter: Boolean;
-                ContainsDigit: Boolean;
-                i: Integer;
             begin
-                if PNR <> '' then begin
-                    if StrLen(PNR) <> 6 then
-                        Error('The PNR length must be exactly 6 characters.');
-
-                    for i := 1 to StrLen(PNR) do begin
-                        if PNR[i] in ['A' .. 'Z'] then
-                            ContainsLetter := true
-                        else if PNR[i] in ['0' .. '9'] then
-                            ContainsDigit := true
-                        else
-                            Error('The PNR must only contain alphanumeric characters.');
-                    end;
-
-                    if not (ContainsLetter and ContainsDigit) then
-                        Error('The PNR must contain a mix of letters and numbers.');
-
-                    CheckDuplicatePNR();
-                end;
+                PNR := UpperCase(PNR);
+                CheckDuplicatePNR();
             end;
         }
 
@@ -154,22 +134,46 @@ table 50300 "Sample Purchase"
             Clustered = true;
         }
     }
+
     trigger OnInsert()
     begin
-        if "Serial No." <= 0 then
-            "Serial No." := GetNextSerialNo();
+        "Serial No." := GetNextSerialNo();
     end;
 
     local procedure GetNextSerialNo(): Integer
     var
+        SerialCounter: Record "Sample Purchase Serial Cnt.";
         SamplePurchase: Record "Sample Purchase";
+        HighestExistingNo: Integer;
     begin
-        SamplePurchase.Reset();
-        if SamplePurchase.FindLast() then
-            if SamplePurchase."Serial No." >= 1 then
-                exit(SamplePurchase."Serial No." + 1);
+        // Lock both tables while generating the number.
+        SamplePurchase.LockTable();
+        SerialCounter.LockTable();
 
-        exit(1);
+        // Find the highest serial currently in use.
+        SamplePurchase.Reset();
+        SamplePurchase.SetCurrentKey("Serial No.");
+
+        if SamplePurchase.FindLast() then
+            HighestExistingNo := SamplePurchase."Serial No.";
+
+        // Initialize the persistent counter on first use.
+        if not SerialCounter.Get('SAMPLEPUR') then begin
+            SerialCounter.Init();
+            SerialCounter."Counter Code" := 'SAMPLEPUR';
+            SerialCounter."Last Serial No." := HighestExistingNo;
+            SerialCounter.Insert(true);
+        end;
+
+        // Never allow the counter to go below an existing serial.
+        if SerialCounter."Last Serial No." < HighestExistingNo then
+            SerialCounter."Last Serial No." := HighestExistingNo;
+
+        // Allocate a new number and persist it.
+        SerialCounter."Last Serial No." += 1;
+        SerialCounter.Modify(true);
+
+        exit(SerialCounter."Last Serial No.");
     end;
 
     local procedure CheckDuplicatePNR()

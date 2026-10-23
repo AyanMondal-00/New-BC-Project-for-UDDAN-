@@ -42,19 +42,22 @@ codeunit 50322 "Sample Purchase Item Mngt"
                         Item.Init();
 
                         Item."No." :=
-                            NoSeries.GetNextNo('ITEM');
+                        ProcessRec.PNR;
 
                         Item.Description :=
                             ProcessRec.PNR;
 
                         Item.Validate(
                             Type,
-                            Item.Type::"Non-Inventory");
+                            Item.Type::"Inventory");
+
+                       Item.Validate(
+                            "Inventory Posting Group",
+                            'RESALE');
 
                         Item.Validate(
-                            "Gen. Prod. Posting Group",
-                            'RETAIL');
-
+                        "Gen. Prod. Posting Group",
+                        'RETAIL');
                         Item.Insert(true);
 
                         Item.Validate(

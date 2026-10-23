@@ -1,4 +1,4 @@
-﻿page 50312 "Purchase Return"
+page 50312 "Purchase Return"
 {
     PageType = List;
     ApplicationArea = All;
@@ -141,6 +141,27 @@
                 {
                     ApplicationArea = All;
                 }
+            }
+        }
+    }
+
+    actions
+    {
+        area(Processing)
+        {
+            action("Import from Excel")
+            {
+                Caption = 'Import from Excel';
+                ApplicationArea = All;
+                Image = ImportExcel;
+
+                trigger OnAction()
+                var
+                    PurchaseReturnExcelImport: Codeunit "Purchase Return Excel Import";
+                begin
+                    PurchaseReturnExcelImport.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
             }
         }
     }

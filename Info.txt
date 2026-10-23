@@ -1,41 +1,134 @@
-==================================================================================================================================================================================================
-                                                                            BUSINESS CENTRAL PROJECT OBJECT MAPPING
-==================================================================================================================================================================================================
+==================================================================================================================================================================
+                                                               BUSINESS CENTRAL PROJECT OBJECT MAPPING
+==================================================================================================================================================================
 
 Developer Notes:
 • Fastest for Dev/Testing: Business Central-er Extension Management page-e giye Uninstall & Delete Data kora.
 • Production / Client DB-er jonno: ObsoleteState = Removed; bebohar kora (jate client-er purano data nosto na hoy).
 
-==================================================================================================================================================================================================
-                                                                              CATEGORY / SECTION WISE OBJECT TABLE
-==================================================================================================================================================================================================
+==================================================================================================================================================================
+                                                                 CATEGORY / SECTION WISE OBJECT MAPPING
+==================================================================================================================================================================
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Category / Section          | Table Name                     | Table ID | Page Name                      | Page ID | Page Extension                 | Ext ID | Codeunit                         | Codeunit ID |
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Purchase & Inventory        | Sample Purchase                | 50300    | Sample Purchase List           | 50310   | Sample Purchase Navigation     | 50320  | Sample Purchase API Management   | 50320       |
-| Purchase & Inventory        | Sample Purchase Cue            | 50301    | -                              | -       | -                              | -      | -                                | -           |
-| Purchase & Inventory        | Purchase Return                | 50302    | Purchase Return                | 50312   | -                              | -      | -                                | -           |
-| Purchase & Inventory        | Airline Inventory Payment Due  | 50303    | Airline Inventory Payment Due  | 50313   | Airline Inventory Navigation   | 50321  | Sample Purchase Inventory Sync   | 50321       |
-| Purchase & Inventory        | Sample Purchase Dashboard      | 50330    | Dashboard of Sample Format     | 50340   | -                              | -      | -                                | -           |
-| Normal Sales (Own Sales)    | Normal Sales                   | 50400    | Normal Sales List              | 50410   | Sales Invoice Navigation       | 50420  | -                                | -           |
-| Normal Sales (Own Sales)    | Own Sales Passenger Name       | 50404    | Own Sales Passenger List Name  | 50412   | -                              | -      | -                                | -           |
-| API Sales                   | API Sales Format               | 50401    | API Sales Format List          | 50411   | -                              | -      | -                                | -           |
-| API Sales                   | API Sales Passenger Name       | 50405    | API Sales Passenger Name List  | 50415   | -                              | -      | -                                | -           |
-| Third Party Sales           | Third-Party Supplier Sales     | 50402    | 3rd Party Supplier Sales List  | 50414   | -                              | -      | -                                | -           |
-| Third Party Sales           | Third Party Passenger Name     | 50406    | Third Party Passenger Name List| 50416   | -                              | -      | -                                | -           |
-| Sales Return                | Sales Return                   | 50403    | Sales Return List              | 50413   | -                              | -      | -                                | -           |
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Category / Section           | Table Name                      | Table ID | Page Name                       | Page ID | Page / Table Extension         | Ext ID | Codeunit                          | Codeunit ID |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Purchase & Inventory         | Sample Purchase                 | 50300    | Sample Purchase List            | 50310   | Sample Purchase Navigation     | 50320  | Sample Purchase API Management    | 50320       |
+| Purchase & Inventory         | Sample Purchase Cue             | 50301    | -                               | -       | -                              | -      | Sample Purchase Inventory Sync    | 50321       |
+| Purchase & Inventory         | Purchase Return                 | 50302    | Purchase Return                 | 50312   | Airline Inventory Navigation   | 50321  | Sample Purchase Item Mngt         | 50322       |
+| Purchase & Inventory         | Airline Inventory Payment Due   | 50303    | Airline Inventory Payment Due   | 50313   | -                              | -      | -                                 | -           |
+| Purchase & Inventory         | Sample Purchase Dashboard       | 50330    | Dashboard of Sample Format      | 50340   | -                              | -      | -                                 | -           |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Purchase Invoice Creation    | AIRIQ Invoice Counter           | 50337    | -                               | -       | Purchase Line Ext (TableExt)   | 50323  | Sample Purchase Invoice Mngt      | 50336       |
+| Purchase Invoice Creation    | -                               | -        | -                               | -       | Purch Inv Subform Ext (PageExt)| 50335  | AIRIQ Invoice No. Mgt             | 50338       |
+| Purchase Invoice Creation    | -                               | -        | -                               | -       | -                              | -      | AIRIQ Purchase Line Mgt           | 50339       |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Purchase Return Invoice      | Inventory Consumption           | 50420    | Inventory Consumption List      | 50420   | Purchase Line Extension (TabExt)| 50421 | Purchase Return Order Mgt.        | 50422       |
+| Purchase Return Invoice      | Inventory Consumption Pasenger  | 50422    | Inventory Consumption Pasenger  | 50423   | Purch Order Subform Ext (PgExt)| 50422  | -                                 | -           |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Normal Sales (Own Sales)     | Normal Sales                    | 50400    | Normal Sales List               | 50410   | Sales Invoice Navigation       | 50420  | Own Sales API Mgt.                | 50420       |
+| Normal Sales (Own Sales)     | Own Sales Passenger Name        | 50404    | Own Sales Passenger List Name   | 50412   | -                              | -      | AIRIQ Create Sales Invoice        | 50426       |
+| Normal Sales (Own Sales)     | -                               | -        | Choose Date to Date (Dialog)    | 50417   | -                              | -      | AIRIQ Sales Invoice Mgt           | 50427       |
+| Normal Sales (Own Sales)     | -                               | -        | -                               | -       | -                              | -      | AIRIQ Posted Sales Invoice Mgt    | 50431       |
+| Normal Sales (Own Sales)     | -                               | -        | -                               | -       | -                              | -      | Passenger Name Import Mgt.        | 50440       |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| API Sales                    | API Sales Format                | 50401    | API Sales Format List           | 50411   | -                              | -      | AIRIQ Create API Sales Invoice    | 50435       |
+| API Sales                    | API Sales Passenger Name        | 50405    | API Sales Passenger Name List   | 50415   | -                              | -      | AIRIQ API Sales Invoice Mgt       | 50436       |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Third Party Sales            | Third-Party Supplier Sales      | 50402    | Third Party Sales List          | 50414   | -                              | -      | AIRIQ Create Third Party Sales Inv| 50437       |
+| Third Party Sales            | Third Party Passenger Name      | 50406    | Third Party Name List           | 50416   | -                              | -      | AIRIQ Third Party Sales Inv Mgt   | 50438       |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Sales Return                 | Sales Return                    | 50403    | Sales Return List               | 50413   | -                              | -      | -                                 | -           |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Sales Header Ext (TabExt)| 50424  | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Sales Line Ext (TabExt)  | 50425  | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | Sales Invoice Header PgExt     | 50427  | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Sales Inv Line PgExt     | 50428  | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Posted Sales Hdr Ext(Tab)| 50429  | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Posted Sales Line Ext(Tab)| 50430 | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Posted Sales Inv Hdr(Pg) | 50432  | -                                 | -           |
+| Sales Invoice Base Extension | -                               | -        | -                               | -       | AIRIQ Posted Sales Inv Line(Pg)| 50433  | -                                 | -           |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-==================================================================================================================================================================================================
-                                                                             SYSTEM & PERMISSION OBJECTS
-==================================================================================================================================================================================================
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Category / Section          | Object Type                    | Object Name                      | Object ID                                                                                    |
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Security & Permissions      | PermissionSet                  | GeneratedPermission              | 50300                                                                                        |
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+==================================================================================================================================================================
+                                                                MASTER OBJECT DIRECTORY (TYPE & ID WISE)
+==================================================================================================================================================================
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Type           | ID    | Object Name                         | Target / Source / Extends        | Source File Path                                             |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Table          | 50300 | Sample Purchase                     | -                                | src/Tables/SamplePurchase.Table.al                           |
+| Table          | 50301 | Sample Purchase Cue                 | -                                | src/Tables/SamplePurchaseCue.Table.al                        |
+| Table          | 50302 | Purchase Return                     | -                                | src/Tables/PurchaseReturn.Table.al                           |
+| Table          | 50303 | Airline Inventory Payment Due       | -                                | src/Tables/AirlineInventoryPaymentDue.Table.al               |
+| Table          | 50330 | Sample Purchase Dashboard           | -                                | src/Tables/SamplePurchaseDashboard.Table.al                  |
+| Table          | 50337 | AIRIQ Invoice Counter               | -                                | src/Purchase Invoice/AIRIQInvoiceCounterTable.al             |
+| Table          | 50400 | Normal Sales                        | -                                | src/Tables/Sales/Own Sales/OwnSales.Table.al                 |
+| Table          | 50401 | API Sales Format                    | -                                | src/Tables/Sales/API Sales/APISalesFormat.Table.al           |
+| Table          | 50402 | Third-Party Supplier Sales          | -                                | src/Tables/Sales/Third Party/ThirdPartySupplierSales.Table.al|
+| Table          | 50403 | Sales Return                        | -                                | src/Tables/SalesReturn.Table.al                              |
+| Table          | 50404 | Own Sales Passenger Name            | -                                | src/Tables/Sales/Own Sales/OwnSalesPassengerName.Table.al    |
+| Table          | 50405 | API Sales Passenger Name            | -                                | src/Tables/Sales/API Sales/APISalesPassengerName.Table.al    |
+| Table          | 50406 | Third Party Passenger Name          | -                                | src/Tables/Sales/Third Party/ThirdPartyPassengerName.Table.al|
+| Table          | 50420 | Inventory Consumption               | -                                | src/Purchase Return Invoice Creation/InventoryConsumption.table.al |
+| Table          | 50422 | Inventory Consumption Pasenger      | -                                | src/Purchase Return Invoice Creation/InventoryConsumptionPassengerName.Table.al |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| TableExtension | 50323 | Purchase Line Ext                   | Purchase Line                    | src/Purchase Invoice/PurchaseLineExtTable.al                 |
+| TableExtension | 50421 | Purchase Line Extension             | Purchase Line                    | src/Purchase Return Invoice Creation/PurchaseLineExtension.al|
+| TableExtension | 50424 | AIRIQ Sales Header Ext              | Sales Header                     | src/Base Table Extended/Primary Invoice Form/AIRIQSalesInvoiceHeaderTableExt.al |
+| TableExtension | 50425 | AIRIQ Sales Line Ext                | Sales Line                       | src/Base Table Extended/Primary Invoice Form/AIRIQSalesInvoiceLineTableExt.al |
+| TableExtension | 50429 | AIRIQ Posted Sales Header Ext       | Sales Invoice Header             | src/Base Table Extended/Posted Invoice Form/AIRIQPostedSalesInvoiceHeaderExt.al |
+| TableExtension | 50430 | AIRIQ Posted Sales Line Ext         | Sales Invoice Line               | src/Base Table Extended/Posted Invoice Form/AIRIQPostedSalesInvoiceLineExt.al |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Page           | 50310 | Sample Purchase List                | Sample Purchase (50300)          | src/Pages/SamplePurchaseList.Page.al                         |
+| Page           | 50312 | Purchase Return                     | Purchase Return (50302)          | src/Pages/PurchaseReturn.Page.al                             |
+| Page           | 50313 | Airline Inventory Payment Due       | Airline Inventory Payment Due (50303) | src/Pages/AirlineInventoryPaymentDue.Page.al            |
+| Page           | 50340 | Dashboard of Sample Format          | Sample Purchase Dashboard (50330)| src/Pages/DashboardOfSampleFormat.Page.al                    |
+| Page           | 50410 | Normal Sales List                   | Normal Sales (50400)             | src/Pages/Sales/Own Sales/NormalSalesList.Page.al            |
+| Page           | 50411 | API Sales Format List               | API Sales Format (50401)         | src/Pages/Sales/API Sales/APISalesFormatList.Page.al         |
+| Page           | 50412 | Own Sales Passenger List Name       | Own Sales Passenger Name (50404) | src/Pages/Sales/Own Sales/OwnSalesPassengerNameList.Page.al  |
+| Page           | 50413 | Sales Return List                   | Sales Return (50403)             | src/Pages/Sales/SalesReturnList.Page.al                      |
+| Page           | 50414 | Third Party Sales List              | Third-Party Supplier Sales (50402)| src/Pages/Sales/Third Party Sales/ThirdPartySupplierSalesList.Page.al |
+| Page           | 50415 | API Sales Passenger Name List       | API Sales Passenger Name (50405) | src/Pages/Sales/API Sales/APISalesPassengerNameList.Page.al  |
+| Page           | 50416 | Third Party Name List               | Third Party Passenger Name (50406)| src/Pages/Sales/Third Party Sales/ThirdPartyPassengerNameList.Page.al |
+| Page           | 50417 | Choose Date to Date                 | StandardDialog                   | src/Pages/Sales/Own Sales/ChooseDateToDateDialog.Page.al     |
+| Page           | 50420 | Inventory Consumption List          | Inventory Consumption (50420)    | src/Purchase Return Invoice Creation/InventoryConsumption.page.al |
+| Page           | 50423 | Inventory Consumption Pasenger       | Inventory Consumption Pasenger (50422) | src/Purchase Return Invoice Creation/InventoryConsumptionPassengerName.Page.al |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| PageExtension  | 50320 | Sample Purchase Navigation          | Business Manager Role Center     | src/Page Navigation/SamplePurchaseNavigation.PageExt.al      |
+| PageExtension  | 50321 | Airline Inventory Navigation        | Business Manager Role Center     | src/Page Navigation/AirlineInventoryPaymentDueNavigation.PageExt.al |
+| PageExtension  | 50335 | Purch Inv Subform Ext               | Purch. Invoice Subform           | src/Purchase Invoice/PurchInvSubformExtPage.al               |
+| PageExtension  | 50420 | Sales Invoice Navigation            | Business Manager Role Center     | src/Page Navigation/SalesInvoiceNavigation.PageExt.al         |
+| PageExtension  | 50422 | Purchase Order Subform Ext.         | Purchase Order Subform           | src/Purchase Return Invoice Creation/PurchaseOrderSubformExtension.al |
+| PageExtension  | 50427 | Sales Invoice Header PgExt          | Sales Invoice                    | src/Base Table Extended/Primary Invoice Form/AIRIQSalesInvoiceHeaderPageExt.al |
+| PageExtension  | 50428 | AIRIQ Sales Invoice Line PgExt      | Sales Invoice Subform            | src/Base Table Extended/Primary Invoice Form/AIRIQSalesInvoiceLinePageExt.al |
+| PageExtension  | 50432 | AIRIQ Posted Sales Inv Header       | Posted Sales Invoice             | src/Base Table Extended/Posted Invoice Form/AIRIQPostedSalesInvoiceHeaderPageExt.al |
+| PageExtension  | 50433 | AIRIQ Posted Sales Inv Line         | Posted Sales Invoice Subform     | src/Base Table Extended/Posted Invoice Form/AIRIQPostedSalesInvoiceLinePageExt.al |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Codeunit       | 50320 | Sample Purchase API Management      | API Integration                  | src/Codeunits/SamplePurchaseAPIManagement.Codeunit.al        |
+| Codeunit       | 50321 | Sample Purchase Inventory Sync      | Inventory Synchronization        | src/Codeunits/SamplePurchaseToAirlineInventory.Codeunit.al   |
+| Codeunit       | 50322 | Sample Purchase Item Mngt           | Item Series & Management         | src/Codeunits/SamplePurchaseItemManagement.Codeunit.al       |
+| Codeunit       | 50336 | Sample Purchase Invoice Mngt        | Purchase Invoice Automation      | src/Purchase Invoice/SamplePurchaseInvoiceMgtCodeUnit.al     |
+| Codeunit       | 50338 | AIRIQ Invoice No. Mgt               | Invoice Number Generator         | src/Purchase Invoice/AIRIQInvoiceNoMgtCodeunit.al            |
+| Codeunit       | 50339 | AIRIQ Purchase Line Mgt             | Purchase Line Handling           | src/Purchase Invoice/AIRIQPurchaseLineMgtCodeUnit.al         |
+| Codeunit       | 50420 | Own Sales API Mgt.                  | API Integration (Own Sales)      | src/API Integration/OwnSalesAPIMgt.al                        |
+| Codeunit       | 50422 | Purchase Return Order Mgt.          | Purchase Return Document Mgt     | src/Purchase Return Invoice Creation/PurchaseReturnOrderMgt.al|
+| Codeunit       | 50426 | AIRIQ Create Sales Invoice          | Own Sales Invoice Creation       | src/Sales Invoice Creation/Own Sales/CodeUnits/AIRIQCreateSalesInvoice.al |
+| Codeunit       | 50427 | AIRIQ Sales Invoice Mgt             | Own Sales Batch Invoice Mgt      | src/Sales Invoice Creation/Own Sales/CodeUnits/AIRIQSalesInvoiceMgt.al |
+| Codeunit       | 50431 | AIRIQ Posted Sales Invoice Mgt      | Posted Sales Invoice Helper      | src/Sales Invoice Creation/Own Sales/CodeUnits/AIRIQPostedSalesInvoiceMgt.al |
+| Codeunit       | 50435 | AIRIQ Create API Sales Invoice      | API Sales Invoice Creation       | src/Sales Invoice Creation/API Sales/Codeunits/AIRIQ Create API Sales Invoice.al |
+| Codeunit       | 50436 | AIRIQ API Sales Invoice Mgt         | API Sales Batch Invoice Mgt      | src/Sales Invoice Creation/API Sales/Codeunits/AIRIQ API Sales Invoice Mgt.al |
+| Codeunit       | 50437 | Third Party Sales Invoice           | 3rd Party Sales Invoice Creation | src/Sales Invoice Creation/Third Party Sales/AIRIQ Create Third Party Sales Invoice.al |
+| Codeunit       | 50438 | Third Party Sales Invoice Mgt       | 3rd Party Batch Invoice Mgt      | src/Sales Invoice Creation/Third Party Sales/AIRIQ Third Party Sales Invoice Mgt.al |
+| Codeunit       | 50440 | Passenger Name Import Mgt.          | Sales Passenger Name API Import  | src/Sales Passenger Name API Import Management/AllSalesPassengerNameMgtCodeunit.al |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| PermissionSet  | 50300 | GeneratedPermission                 | Application Permissions          | GeneratedPermission.permissionset.al                         |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+==================================================================================================================================================================
+                                                                      DEPLOYMENT & DEV RULES
+==================================================================================================================================================================
 
 ### 1. app.json File-e Version Increment Koro                                                                               
                                                                                                                               
@@ -43,12 +136,12 @@ Developer Notes:
                                                                                                                               
   • version: "1.0.0.0" theke change kore "1.0.0.1" ba "1.0.1.0" koro.                                                         
   ──────                                                                                                                      
-  ### 2. Notun .app Package Build Koro                                                                                        
+### 2. Notun .app Package Build Koro                                                                                        
                                                                                                                               
   • VS Code-e Ctrl + Shift + B press koro ba Command Palette (Ctrl + Shift + P) open kore AL: Package run koro.               
   • Tomar project root folder-e notun version-er .app file (e.g. ALProject2_1.0.0.1.app) toiri hobe.                          
   ──────                                                                                                                      
-  ### 3. Field Remove / Edit & Data Safety Rules                                                                              
+### 3. Field Remove / Edit & Data Safety Rules                                                                              
                                                                                                                               
   Business Central Production-e data protect korar jonno AL Language-er kisu strict rule ache:                                
                                                                                                                               
@@ -64,7 +157,7 @@ Developer Notes:
       Upgrade) toiri korte hoy. Etar fole existing data as-is notun schema-te transfer hoye jay.                              
                                                                                                                               
   ──────                                                                                                                      
-  ### 4. Production Environment-e Upload & Publish                                                                            
+### 4. Production Environment-e Upload & Publish                                                                            
                                                                                                                               
   VS Code theke direct F5 / Ctrl+F5 sudhu Sandbox environment-er jonno. Production-er jonno niche step follow koro:           
                                                                                                                               
@@ -78,9 +171,9 @@ Developer Notes:
                                                                                                                               
   6. Accept terms and conditions check box-e tick dao ebong Deploy button-e click koro.                                       
   ──────                                                                                                                      
-  ### Summary Checklist:                                                                                                      
+### Summary Checklist:                                                                                                      
                                                                                                                               
   [✓] app.json-e Version number update kora ache.                                                                             
   [✓] Breakable schema changes (field rename/delete) sorasori na kore Obsolete mark kora ache.                                
   [✓] VS Code-e .app package generate kora hoyeche.                                                                           
-  [✓] BC Production-er Extension Management page theke .app file upload kora hoyeche. 
+  [✓] BC Production-er Extension Management page theke .app file upload kora hoyeche.

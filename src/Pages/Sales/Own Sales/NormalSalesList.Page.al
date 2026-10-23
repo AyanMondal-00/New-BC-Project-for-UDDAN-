@@ -206,6 +206,22 @@ page 50410 "Normal Sales List"
                     CurrPage.Update(false);
                 end;
             }
+
+            action("Import from Excel")
+            {
+                ApplicationArea = All;
+                Caption = 'Import from Excel';
+                Image = ImportExcel;
+
+                trigger OnAction()
+                var
+                    OwnSalesExcelImportMgt: Codeunit "Own Sales Excel Import Mgt.";
+                begin
+                    OwnSalesExcelImportMgt.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
+            }
+
         }
     }
 

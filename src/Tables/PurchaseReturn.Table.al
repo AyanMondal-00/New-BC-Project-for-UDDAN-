@@ -171,6 +171,9 @@ table 50302 "Purchase Return"
         }
     }
 
+
+    
+
     trigger OnInsert()
     begin
         if "Serial No." <= 0 then

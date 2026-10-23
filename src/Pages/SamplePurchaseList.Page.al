@@ -199,6 +199,22 @@ page 50310 "Sample Purchase List"
                 end;
             }
 
+            action("Import from Excel")
+            {
+                ApplicationArea = All;
+                Caption = 'Import from Excel';
+                Image = ImportExcel;
+
+                trigger OnAction()
+                var
+                    SamplePurchaseExcelImport: Codeunit "Sample Purchase Excel Import";
+                begin
+                    SamplePurchaseExcelImport.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
+            }
+
+
         }
 
     }
