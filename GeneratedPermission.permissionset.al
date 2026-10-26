@@ -69,6 +69,7 @@ permissionset 50300 GeneratedPermission
         page "Own Sales Passenger List Name" = X,
         page "Purchase Return" = X,
         page "Sales Return List" = X,
+        page "Sample Purchase Date Dialog" = X,
         page "Sample Purchase List" = X,
         page "Third Party Name List" = X,
         page "Third Party Sales List" = X;

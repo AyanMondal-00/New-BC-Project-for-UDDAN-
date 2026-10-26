@@ -214,6 +214,63 @@ page 50310 "Sample Purchase List"
                 end;
             }
 
+            action("Select by Entry Date")
+            {
+                ApplicationArea = All;
+                Caption = 'Select by Entry Date';
+                ToolTip = 'Select Sample Purchase records within a specified Entry Date range.';
+                Image = SelectField;
+
+                trigger OnAction()
+                begin
+                    SetSelectionByEntryDate(true);
+                end;
+            }
+
+            // action("Unselect by Entry Date")
+            // {
+            //     ApplicationArea = All;
+            //     Caption = 'Unselect by Entry Date';
+            //     ToolTip = 'Unselect Sample Purchase records within a specified Entry Date range.';
+            //     Image = ClearFilter;
+
+            //     trigger OnAction()
+            //     begin
+            //         SetSelectionByEntryDate(false);
+            //     end;
+            // }
+
+            action("Deselect All")
+            {
+                ApplicationArea = All;
+                Caption = 'Deselect All';
+                ToolTip = 'Deselect all selected Sample Purchase records.';
+                Image = CancelAllLines;
+
+                trigger OnAction()
+                var
+                    SamplePurchaseRec: Record "Sample Purchase";
+                    UpdatedCount: Integer;
+                begin
+                    SamplePurchaseRec.Reset();
+                    SamplePurchaseRec.SetRange("Select", true);
+
+                    if SamplePurchaseRec.IsEmpty() then begin
+                        Message('No records are currently selected.');
+                        exit;
+                    end;
+
+                    if SamplePurchaseRec.FindSet(true) then
+                        repeat
+                            SamplePurchaseRec."Select" := false;
+                            SamplePurchaseRec.Modify();
+                            UpdatedCount += 1;
+                        until SamplePurchaseRec.Next() = 0;
+
+                    CurrPage.Update(false);
+                    Message('%1 record(s) were deselected.', UpdatedCount);
+                end;
+            }
 
         }
 
@@ -255,8 +312,52 @@ page 50310 "Sample Purchase List"
         else
             ItemCreatedText := 'No';
     end;
+
+    local procedure SetSelectionByEntryDate(NewSelect: Boolean)
+    var
+        DateDialog: Page "Sample Purchase Date Dialog";
+        SamplePurchaseRec: Record "Sample Purchase";
+        FromEntryDate: Date;
+        ToEntryDate: Date;
+        StartDateTime: DateTime;
+        EndDateTime: DateTime;
+        UpdatedCount: Integer;
+    begin
+        DateDialog.SetDates(Today, Today);
+
+        if DateDialog.RunModal() = Action::OK then begin
+            DateDialog.GetDates(FromEntryDate, ToEntryDate);
+
+            if (FromEntryDate = 0D) or (ToEntryDate = 0D) then
+                Error('Please select both From Entry Date and To Entry Date.');
+
+            if FromEntryDate > ToEntryDate then
+                Error('From Entry Date cannot be later than To Entry Date.');
+
+            StartDateTime := CreateDateTime(FromEntryDate, 0T);
+            EndDateTime := CreateDateTime(ToEntryDate, 235959.999T);
+
+            SamplePurchaseRec.Reset();
+            SamplePurchaseRec.SetRange("Entry Date", StartDateTime, EndDateTime);
+
+            if SamplePurchaseRec.IsEmpty() then begin
+                Message('No Sample Purchase records found for the specified Entry Date range.');
+                exit;
+            end;
+
+            if SamplePurchaseRec.FindSet(true) then
+                repeat
+                    SamplePurchaseRec."Select" := NewSelect;
+                    SamplePurchaseRec.Modify();
+                    UpdatedCount += 1;
+                until SamplePurchaseRec.Next() = 0;
+
+            CurrPage.Update(false);
+
+            if NewSelect then
+                Message('%1 record(s) were selected.', UpdatedCount)
+            else
+                Message('%1 record(s) were unselected.', UpdatedCount);
+        end;
+    end;
 }
-
-
-
-
