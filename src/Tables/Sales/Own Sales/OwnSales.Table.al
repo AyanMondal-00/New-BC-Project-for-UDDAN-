@@ -76,11 +76,15 @@ table 50400 "Normal Sales"
             Caption = 'Passenger';
             DataClassification = CustomerContent;
         }
-
         field(9; Pax; Integer)
         {
             Caption = 'Pax';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
         }
 
         field(10; "Travel Date"; DateTime)
@@ -192,20 +196,45 @@ table 50400 "Normal Sales"
     end;
 
     procedure CalculateGST()
+    var
+        TotalBaseFare: Decimal;
+        TotalOtherCharges: Decimal;
     begin
+        // Base Fare multiplied by Pax
+        TotalBaseFare := "Base Fare" * Pax;
+
+        // Other Charges multiplied by Pax
+        TotalOtherCharges := "Other Charges" * Pax;
+
         if UpperCase(Type) = 'DOMESTIC' then begin
-            "Taxable Basis" := "Base Fare" * 0.05;
+            // Domestic Taxable Basis: 5%
+            "Taxable Basis" := TotalBaseFare * 0.05;
+
+            // CGST: 9%
             CGST := "Taxable Basis" * 0.09;
+
+            // SGST: 9%
             SGST := "Taxable Basis" * 0.09;
+
             IGST := 0;
         end else begin
-            "Taxable Basis" := "Base Fare" * 0.10;
+            // International Taxable Basis: 10%
+            "Taxable Basis" := TotalBaseFare * 0.10;
+
             CGST := 0;
             SGST := 0;
+
+            // IGST: 18%
             IGST := "Taxable Basis" * 0.18;
         end;
 
-        "Total Amount" := "Base Fare" + "Other Charges" + CGST + SGST + IGST;
+        // Final Amount
+        "Total Amount" :=
+            TotalBaseFare +
+            TotalOtherCharges +
+            CGST +
+            SGST +
+            IGST;
     end;
 
     local procedure CheckDuplicatePNR()

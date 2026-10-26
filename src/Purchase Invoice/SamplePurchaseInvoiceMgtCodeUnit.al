@@ -205,10 +205,13 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
 
         PurchLine.Validate(
             "No.",
-            Item."No.");
+             ProcessRec.PNR);
 
         PurchLine.Description :=
             ProcessRec.PNR;
+
+        PurchLine.Validate
+        ("Location Code", 'SILIGURI');
 
         PurchLine.Validate(
             Quantity,
@@ -250,7 +253,7 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
 
         // =========================================================
         // Required formula:
-        // Line Amount = (Total Pax × Rate) + Other Charges
+        // Line Amount = (Total Pax × Rate) + (Total Pax x Other Charges)= Line Amount Excl. VAT
         // =========================================================
         if ProcessRec."Other Charges" <> 0 then begin
             PurchLine.Get(
@@ -258,14 +261,24 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
                 PurchLine."Document No.",
                 PurchLine."Line No.");
 
+            // Quantity = Total Pax
+            PurchLine.Validate(
+                Quantity,
+                ProcessRec."Total Pax");
+
+            // Direct Unit Cost Excl. VAT = Base Fare + Other Charges
+            PurchLine.Validate(
+                "Direct Unit Cost",
+                ProcessRec."Base Fare" + ProcessRec."Other Charges");
+
+            // Line Amount Excl. VAT = Direct Unit Cost * Total Pax
             PurchLine.Validate(
                 "Line Amount",
-                (ProcessRec."Total Pax" * ProcessRec.Rate) +
-                ProcessRec."Other Charges");
+                (ProcessRec."Base Fare" + ProcessRec."Other Charges") *
+                ProcessRec."Total Pax");
 
             PurchLine.Modify(true);
         end;
-
         // -------------------------
         // Source record update
         // -------------------------
