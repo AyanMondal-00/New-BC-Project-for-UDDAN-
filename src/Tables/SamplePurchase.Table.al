@@ -1,4 +1,4 @@
-table 50300 "Sample Purchase"
+﻿table 50300 "Sample Purchase"
 {
     Caption = 'Sample Purchase';
     DataClassification = CustomerContent;
@@ -59,6 +59,12 @@ table 50300 "Sample Purchase"
         field(19; "Item Created"; Boolean)
         {
             Caption = 'Item Created';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+        field(20; "Invoice Posted"; Boolean)
+        {
+            Caption = 'Invoice Posted';
             DataClassification = CustomerContent;
             Editable = false;
         }
@@ -144,6 +150,7 @@ table 50300 "Sample Purchase"
     var
         SerialCounter: Record "Sample Purchase Serial Cnt.";
         SamplePurchase: Record "Sample Purchase";
+        CommissionRec: Record "Commission Calculation";
         HighestExistingNo: Integer;
     begin
         // Lock both tables while generating the number.
@@ -182,7 +189,9 @@ table 50300 "Sample Purchase"
         NormalSales: Record "Normal Sales";
         APISalesFormat: Record "API Sales Format";
         ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        CommissionRec: Record "Commission Calculation";
     begin
+
         if PNR = '' then
             exit;
 
@@ -207,5 +216,15 @@ table 50300 "Sample Purchase"
         ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
         if not ThirdPartySupplierSales.IsEmpty() then
             Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+
+        if PNR <> xRec.PNR then begin
+            CommissionRec.Reset();
+            CommissionRec.SetRange(PNR, UpperCase(PNR));
+
+            if not CommissionRec.IsEmpty() then
+                Error(
+                    'The PNR %1 already exists in Commission Calculation.',
+                    PNR);
+        end;
     end;
 }

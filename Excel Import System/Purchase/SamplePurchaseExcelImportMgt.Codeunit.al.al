@@ -206,9 +206,9 @@ codeunit 50330 "Sample Purchase Excel Import"
     end;
 
     local procedure GetCellValue(
-        var TempExcelBuffer: Record "Excel Buffer" temporary;
-        RowNo: Integer;
-        ColumnNo: Integer): Text
+    var TempExcelBuffer: Record "Excel Buffer" temporary;
+    RowNo: Integer;
+    ColumnNo: Integer): Text
     begin
         TempExcelBuffer.Reset();
         TempExcelBuffer.SetRange("Row No.", RowNo);
@@ -261,29 +261,52 @@ codeunit 50330 "Sample Purchase Excel Import"
     end;
 
     local procedure GetDateTimeValue(
-        ValueText: Text;
-        RowNo: Integer;
-        FieldName: Text): DateTime
+    ValueText: Text;
+    RowNo: Integer;
+    FieldName: Text): DateTime
     var
         DateTimeValue: DateTime;
         DateValue: Date;
-        TimeValue: Time;
+        ExcelSerial: Decimal;
+        WholeDays: Integer;
+        Milliseconds: Duration;
+        BaseDate: Date;
     begin
+        ValueText := DelChr(ValueText, '<>', ' ');
+
         if ValueText = '' then
             exit(0DT);
 
+        // Standard DateTime text
         if Evaluate(DateTimeValue, ValueText) then
             exit(DateTimeValue);
 
-        if Evaluate(DateValue, ValueText) then begin
-            TimeValue := 0T;
-            exit(CreateDateTime(DateValue, TimeValue));
+        // Date-only text
+        if Evaluate(DateValue, ValueText) then
+            exit(CreateDateTime(DateValue, 0T));
+
+        // Excel serial DateTime, e.g. 46302.5
+        if Evaluate(ExcelSerial, ValueText) then begin
+            if ExcelSerial < 1 then
+                Error(
+                    'Invalid %1 at Excel row %2: %3. The full date and time are required.',
+                    FieldName, RowNo, ValueText);
+
+            WholeDays := Round(ExcelSerial, 1, '<');
+            BaseDate := DMY2Date(30, 12, 1899);
+            DateValue := BaseDate + WholeDays;
+
+            Milliseconds := Round(
+                (ExcelSerial - WholeDays) * 86400000,
+                1,
+                '=');
+
+            exit(
+                CreateDateTime(DateValue, 0T) + Milliseconds);
         end;
 
         Error(
-            'Invalid %1 at Excel row %2: %3',
-            FieldName,
-            RowNo,
-            ValueText);
+            'Invalid %1 at Excel row %2: %3. Use Excel DateTime format dd-mm-yyyy hh:mm.',
+            FieldName, RowNo, ValueText);
     end;
 }

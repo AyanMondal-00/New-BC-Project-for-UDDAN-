@@ -1,5 +1,12 @@
-codeunit 50336 "Sample Purchase Invoice Mngt"
+﻿codeunit 50336 "Sample Purchase Invoice Mngt"
 {
+    Permissions =
+        tabledata "Purchase Header" = rimd,
+        tabledata "Purchase Line" = rimd,
+        tabledata "Purch. Inv. Header" = r,
+        tabledata "Purch. Inv. Line" = r,
+        tabledata "Sample Purchase" = rimd;
+
     procedure CreatePurchaseInvoices()
     var
         SamplePurchase: Record "Sample Purchase";
@@ -10,6 +17,7 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
     procedure CreatePurchaseInvoices(var SelectedSamplePurchase: Record "Sample Purchase")
     var
         ProcessRec: Record "Sample Purchase";
+        FreshRec: Record "Sample Purchase";
         CreatedCount: Integer;
         DuplicateCount: Integer;
         ErrorCount: Integer;
@@ -28,26 +36,39 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
             repeat
                 ExistingInvoiceNo := '';
 
-                // Strong PNR duplicate protection
-                if PNRInvoiceExists(ProcessRec.PNR, ExistingInvoiceNo) then begin
-                    DuplicateCount += 1;
+                // Re-read latest state from database with record locking to prevent concurrent race conditions
+                if FreshRec.Get(ProcessRec."Serial No.") then begin
+                    FreshRec.LockTable();
+                    FreshRec.Get(ProcessRec."Serial No.");
 
-                    if ExistingInvoiceNo <> '' then begin
-                        ProcessRec."Purchase Invoice No." := ExistingInvoiceNo;
-                        ProcessRec."Select" := false;
-                        ProcessRec.Modify(true);
+                    // Verify record has not already been invoiced or posted concurrently
+                    if (FreshRec."Purchase Invoice No." <> '') or FreshRec."Invoice Posted" then begin
+                        DuplicateCount += 1;
+                        FreshRec."Select" := false;
+                        FreshRec.Modify(true);
+                        Commit();
+                    end else if PNRInvoiceExists(FreshRec.PNR, ExistingInvoiceNo) then begin
+                        DuplicateCount += 1;
+
+                        if ExistingInvoiceNo <> '' then begin
+                            FreshRec."Purchase Invoice No." := ExistingInvoiceNo;
+                            FreshRec."Select" := false;
+                            FreshRec.Modify(true);
+                            Commit();
+                        end;
+                    end else begin
+                        if CreateSinglePurchaseInvoice(
+                            FreshRec,
+                            ErrorDetails)
+                        then begin
+                            CreatedCount += 1;
+
+                            FreshRec."Select" := false;
+                            FreshRec.Modify(true);
+                            Commit();
+                        end else
+                            ErrorCount += 1;
                     end;
-                end else begin
-                    if CreateSinglePurchaseInvoice(
-                        ProcessRec,
-                        ErrorDetails)
-                    then begin
-                        CreatedCount += 1;
-
-                        ProcessRec."Select" := false;
-                        ProcessRec.Modify(true);
-                    end else
-                        ErrorCount += 1;
                 end;
 
             until ProcessRec.Next() = 0;
@@ -85,11 +106,178 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
         end;
     end;
 
+    procedure CreateAndPostPurchaseInvoices()
+    var
+        SamplePurchase: Record "Sample Purchase";
+    begin
+        CreateAndPostPurchaseInvoices(SamplePurchase);
+    end;
+
+    procedure CreateAndPostPurchaseInvoices(var SelectedSamplePurchase: Record "Sample Purchase")
+    var
+        ProcessRec: Record "Sample Purchase";
+        FreshRec: Record "Sample Purchase";
+        PurchHeader: Record "Purchase Header";
+        CreatedAndPostedCount: Integer;
+        DuplicateCount: Integer;
+        ErrorCount: Integer;
+        ErrorDetails: Text;
+        SummaryMsg: Text;
+        ExistingInvoiceNo: Code[20];
+        PostedInvoiceNo: Code[20];
+        PostingError: Text;
+    begin
+        ProcessRec.Copy(SelectedSamplePurchase);
+
+        if ProcessRec.IsEmpty() then begin
+            Message('No Sample Purchase records selected.');
+            exit;
+        end;
+
+        if ProcessRec.FindSet(true) then
+            repeat
+                ExistingInvoiceNo := '';
+
+                // Re-read latest state from database with record locking to prevent concurrent race conditions
+                if FreshRec.Get(ProcessRec."Serial No.") then begin
+                    FreshRec.LockTable();
+                    FreshRec.Get(ProcessRec."Serial No.");
+
+                    // Check if already posted or invoiced
+                    if FreshRec."Invoice Posted" then begin
+                        DuplicateCount += 1;
+                        FreshRec."Select" := false;
+                        FreshRec.Modify(true);
+                        Commit();
+                    end else if (FreshRec."Purchase Invoice No." <> '') and (not PurchHeaderExists(FreshRec."Purchase Invoice No.")) then begin
+                        // Existing invoice was posted or closed
+                        DuplicateCount += 1;
+                        FreshRec."Select" := false;
+                        FreshRec.Modify(true);
+                        Commit();
+                    end else if PNRInvoiceExists(FreshRec.PNR, ExistingInvoiceNo) then begin
+                        DuplicateCount += 1;
+
+                        if ExistingInvoiceNo <> '' then begin
+                            FreshRec."Purchase Invoice No." := ExistingInvoiceNo;
+                            FreshRec."Select" := false;
+                            FreshRec.Modify(true);
+                            Commit();
+                        end;
+                    end else begin
+                        Clear(PurchHeader);
+                        if CreateSinglePurchaseInvoiceInternal(
+                            FreshRec,
+                            ErrorDetails,
+                            PurchHeader,
+                            false)
+                        then begin
+                            // Prepare the Purchase Header for posting
+                            PurchHeader.Receive := true;
+                            PurchHeader.Invoice := true;
+                            PurchHeader.Modify(true);
+
+                            // Commit the created invoice before posting.
+                            // In Business Central AL, Codeunit.Run cannot be evaluated in a condition
+                            // (if Codeunit.Run(...) then) while an uncommitted write transaction is active.
+                            // Committing here closes the write transaction so Codeunit.Run can execute safely.
+                            Commit();
+
+                            ClearLastError();
+                            if Codeunit.Run(Codeunit::"Purch.-Post", PurchHeader) then begin
+                                PostedInvoiceNo := GetPostedInvoiceNo(PurchHeader);
+
+                                FreshRec."Purchase Invoice No." := PostedInvoiceNo;
+                                FreshRec."Invoice Posted" := true;
+                                FreshRec."Select" := false;
+                                FreshRec.Modify(true);
+
+                                Commit();
+                                CreatedAndPostedCount += 1;
+                            end else begin
+                                PostingError := GetLastErrorText();
+                                ClearLastError();
+
+                                // Safe cleanup:
+                                // Because Commit() was executed before posting, the draft PurchHeader exists in the database.
+                                // If posting failed, we must delete this draft invoice so that:
+                                // 1. No unmanaged draft invoice is left behind.
+                                // 2. Future duplicate checks (PNRInvoiceExists) will not block retry of this PNR.
+                                if PurchHeader.Get(PurchHeader."Document Type", PurchHeader."No.") then
+                                    PurchHeader.Delete(true);
+
+                                // Keep source record clean:
+                                FreshRec."Invoice Posted" := false;
+                                FreshRec."Purchase Invoice No." := '';
+                                FreshRec."Select" := true;
+                                FreshRec.Modify(true);
+
+                                // Finalize cleanup transaction before moving to next record
+                                Commit();
+
+                                ErrorCount += 1;
+                                ErrorDetails +=
+                                    StrSubstNo(
+                                        '\- Serial No. %1 (PNR %2): Posting failed: %3',
+                                        FreshRec."Serial No.",
+                                        FreshRec.PNR,
+                                        PostingError);
+                            end;
+                        end else
+                            ErrorCount += 1;
+                    end;
+                end;
+
+            until ProcessRec.Next() = 0;
+
+        // Result
+        if (CreatedAndPostedCount > 0) and
+           (DuplicateCount = 0) and
+           (ErrorCount = 0) then begin
+
+            Message(
+                'Success! %1 Purchase Invoice(s) created and posted successfully.',
+                CreatedAndPostedCount);
+
+        end else if (CreatedAndPostedCount = 0) and
+                   (DuplicateCount > 0) and
+                   (ErrorCount = 0) then begin
+
+            Message(
+                'Already Invoiced! All %1 selected record(s) have already been invoiced.',
+                DuplicateCount);
+
+        end else begin
+            SummaryMsg :=
+                StrSubstNo(
+                    'Create & Post Purchase Invoice Summary:\- Created & Posted: %1\- Already Invoiced: %2\- Errors: %3',
+                    CreatedAndPostedCount,
+                    DuplicateCount,
+                    ErrorCount);
+
+            if ErrorCount > 0 then
+                SummaryMsg +=
+                    StrSubstNo('\Details:%1', ErrorDetails);
+
+            Message(SummaryMsg);
+        end;
+    end;
+
     local procedure CreateSinglePurchaseInvoice(
         var ProcessRec: Record "Sample Purchase";
         var ErrorDetails: Text): Boolean
     var
         PurchHeader: Record "Purchase Header";
+    begin
+        exit(CreateSinglePurchaseInvoiceInternal(ProcessRec, ErrorDetails, PurchHeader, true));
+    end;
+
+    local procedure CreateSinglePurchaseInvoiceInternal(
+        var ProcessRec: Record "Sample Purchase";
+        var ErrorDetails: Text;
+        var PurchHeader: Record "Purchase Header";
+        UpdateSourceRec: Boolean): Boolean
+    var
         PurchLine: Record "Purchase Line";
         Vendor: Record Vendor;
         Item: Record Item;
@@ -279,17 +467,48 @@ codeunit 50336 "Sample Purchase Invoice Mngt"
 
             PurchLine.Modify(true);
         end;
-        // -------------------------
-        // Source record update
-        // -------------------------
-        ProcessRec."Purchase Invoice No." :=
-            PurchHeader."No.";
 
-        ProcessRec."Select" := false;
+        if UpdateSourceRec then begin
+            // -------------------------
+            // Source record update
+            // -------------------------
+            ProcessRec."Purchase Invoice No." :=
+                PurchHeader."No.";
 
-        ProcessRec.Modify(true);
+            ProcessRec."Select" := false;
+
+            ProcessRec.Modify(true);
+        end;
 
         exit(true);
+    end;
+
+    local procedure PurchHeaderExists(DocNo: Code[20]): Boolean
+    var
+        PurchHeader: Record "Purchase Header";
+    begin
+        if DocNo = '' then
+            exit(false);
+        exit(PurchHeader.Get(PurchHeader."Document Type"::Invoice, DocNo));
+    end;
+
+    local procedure GetPostedInvoiceNo(var PurchHeader: Record "Purchase Header"): Code[20]
+    var
+        PurchInvHeader: Record "Purch. Inv. Header";
+    begin
+        PurchInvHeader.Reset();
+        PurchInvHeader.SetCurrentKey("Pre-Assigned No.");
+        PurchInvHeader.SetRange("Pre-Assigned No.", PurchHeader."No.");
+        if PurchInvHeader.FindLast() then
+            exit(PurchInvHeader."No.");
+
+        if PurchHeader."Last Posting No." <> '' then
+            exit(PurchHeader."Last Posting No.");
+
+        if PurchHeader."Posting No." <> '' then
+            exit(PurchHeader."Posting No.");
+
+        exit(PurchHeader."No.");
     end;
 
     local procedure PNRInvoiceExists(

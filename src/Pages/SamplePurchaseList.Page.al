@@ -1,4 +1,4 @@
-page 50310 "Sample Purchase List"
+﻿page 50310 "Sample Purchase List"
 {
     Caption = 'Sample Purchase Format';
     PageType = List;
@@ -64,6 +64,12 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
                     Caption = 'Invoice Created';
+                    Editable = false;
+                }
+                field("Invoice Posted"; InvoicePostedText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Invoice Posted';
                     Editable = false;
                 }
                 field("Item Created"; ItemCreatedText)
@@ -198,6 +204,35 @@ page 50310 "Sample Purchase List"
                     CurrPage.Update(false);
                 end;
             }
+            action("Create & Post Purchase Invoices")
+            {
+                ApplicationArea = All;
+                Caption = 'Create & Post Purchase Invoices';
+                Image = Post;
+
+                trigger OnAction()
+                var
+                    SamplePurchaseInvoiceMgt: Codeunit "Sample Purchase Invoice Mngt";
+                    SelectedSamplePurchase: Record "Sample Purchase";
+                begin
+                    SelectedSamplePurchase.Reset();
+                    SelectedSamplePurchase.SetRange("Select", true);
+
+                    if SelectedSamplePurchase.IsEmpty() then begin
+                        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
+
+                        if SelectedSamplePurchase.IsEmpty() then begin
+                            Message('Please select at least one Sample Purchase record.');
+                            exit;
+                        end;
+                    end;
+
+                    SamplePurchaseInvoiceMgt.CreateAndPostPurchaseInvoices(
+                        SelectedSamplePurchase);
+
+                    CurrPage.Update(false);
+                end;
+            }
 
             action("Import from Excel")
             {
@@ -277,6 +312,7 @@ page 50310 "Sample Purchase List"
     }
     var
         InvoiceCreatedText: Text[3];
+        InvoicePostedText: Text[3];
         ItemCreatedText: Text[3];
 
     trigger OnAfterGetRecord()
@@ -285,18 +321,8 @@ page 50310 "Sample Purchase List"
     end;
 
     trigger OnNewRecord(BelowxRec: Boolean)
-    var
-        SamplePurchase: Record "Sample Purchase";
     begin
-        SamplePurchase.Reset();
-        if SamplePurchase.FindLast() then
-            if SamplePurchase."Serial No." >= 1 then
-                Rec."Serial No." := SamplePurchase."Serial No." + 1
-            else
-                Rec."Serial No." := 1
-        else
-            Rec."Serial No." := 1;
-
+        // Serial No. is assigned safely by Table 50300 OnInsert trigger using persistent counter with LockTable.
         SetCreatedStatusText();
     end;
 
@@ -306,6 +332,11 @@ page 50310 "Sample Purchase List"
             InvoiceCreatedText := 'Yes'
         else
             InvoiceCreatedText := 'No';
+
+        if Rec."Invoice Posted" then
+            InvoicePostedText := 'Yes'
+        else
+            InvoicePostedText := 'No';
 
         if Rec."Item Created" then
             ItemCreatedText := 'Yes'
