@@ -14,7 +14,7 @@ codeunit 50341 "Posted Purch Inv Line Mgt"
         var IsHandled: Boolean;
         var PurchInvLine: Record "Purch. Inv. Line")
     begin
-        // Copy AIRIQ custom fields before the posted invoice line is inserted.
+        // Copy source Purchase Line values to Posted Purchase Invoice Line.
         PurchInvLine."Sample Purchase Date" :=
             PurchaseLine."Sample Purchase Date";
 

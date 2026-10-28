@@ -1,5 +1,5 @@
 
-tableextension 50340 "Posted Purch Inv Line Ext" extends "Purch. Inv. Line"
+tableextension 50340 "Posted Purch Inv Subform Ext" extends "Purch. Inv. Line"
 {
     fields
     {
