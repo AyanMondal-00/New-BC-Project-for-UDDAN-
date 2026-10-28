@@ -111,7 +111,7 @@ table 50401 "API Sales Format"
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
-           
+
             trigger OnValidate()
             begin
                 CalculateGST();
@@ -184,9 +184,10 @@ table 50401 "API Sales Format"
         APISalesFormat: Record "API Sales Format";
     begin
         APISalesFormat.Reset();
+        APISalesFormat.SetCurrentKey("Serial No.");
+
         if APISalesFormat.FindLast() then
-            if APISalesFormat."Serial No." >= 1 then
-                exit(APISalesFormat."Serial No." + 1);
+            exit(APISalesFormat."Serial No." + 1);
 
         exit(1);
     end;

@@ -159,10 +159,25 @@ page 50411 "API Sales Format List"
                     CurrPage.Update(false);
                 end;
             }
+            action(ImportSalesExcel)
+            {
+                ApplicationArea = All;
+                Caption = 'Import from Excel';
+                Image = ImportExcel;
+                ToolTip = 'Import API Sales records from an Excel file.';
+
+                trigger OnAction()
+                var
+                    SalesExcelImportMgt: Codeunit "API Sales Excel Import Mgt.";
+                begin
+                    SalesExcelImportMgt.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
+            }
         }
-        
+
     }
-    
+
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';

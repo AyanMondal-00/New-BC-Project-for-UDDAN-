@@ -14,6 +14,7 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         SkippedCount: Integer;
         PNRValue: Text;
         RefNoValue: BigInteger;
+        PassengerNamesValue: Text;
     begin
         if not UploadIntoStream(
             'Select Own Sales Excel File',
@@ -72,7 +73,7 @@ codeunit 50430 "Own Sales Excel Import Mgt."
                 NormalSales.Validate("Sales Invoice Created",
                     GetBooleanValue(GetCellValue(TempExcelBuffer, RowNo, 8), RowNo, 'Sales Invoice Created'));
 
-                NormalSales.Validate(PNR, CopyStr(PNRValue, 1, 10));
+                NormalSales.Validate("PNR", CopyStr(PNRValue, 1, 10));
 
                 NormalSales.Validate(Pax,
                     GetIntegerValue(GetCellValue(TempExcelBuffer, RowNo, 11), RowNo, 'Pax'));
@@ -95,6 +96,10 @@ codeunit 50430 "Own Sales Excel Import Mgt."
                 NormalSales.CalculateGST();
 
                 NormalSales.Insert(true);
+
+                PassengerNamesValue := GetCellValue(TempExcelBuffer, RowNo, 10);
+                if PassengerNamesValue <> '' then
+                    ImportPassengerNames(RefNoValue, CopyStr(PNRValue, 1, 10), PassengerNamesValue);
                 ImportedCount += 1;
             end else
                 SkippedCount += 1;
@@ -189,5 +194,35 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         Error(
             'Invalid date/time "%1". Please use a valid Excel date/time value.',
             ValueText);
+    end;
+
+    local procedure ImportPassengerNames(RefNo: BigInteger; PNRCode: Text[10]; NamesText: Text)
+    var
+        OwnSalesPassengerName: Record "Own Sales Passenger Name";
+        NameList: List of [Text];
+        SingleName: Text;
+        SLNo: Integer;
+    begin
+        OwnSalesPassengerName.Reset();
+        OwnSalesPassengerName.SetRange("Ref No./AQ Number", RefNo);
+        OwnSalesPassengerName.SetRange("PNR", PNRCode);
+        if not OwnSalesPassengerName.IsEmpty() then
+            OwnSalesPassengerName.DeleteAll();
+
+        NameList := NamesText.Split(',');
+        SLNo := 1;
+        foreach SingleName in NameList do begin
+            SingleName := DelChr(SingleName, '<>', ' ');
+            if SingleName <> '' then begin
+                Clear(OwnSalesPassengerName);
+                OwnSalesPassengerName.Init();
+                OwnSalesPassengerName.Validate("Ref No./AQ Number", RefNo);
+                OwnSalesPassengerName.Validate("PNR", PNRCode);
+                OwnSalesPassengerName.Validate("SL No.", SLNo);
+                OwnSalesPassengerName.Validate("Passenger Name", CopyStr(SingleName, 1, 100));
+                OwnSalesPassengerName.Insert(true);
+                SLNo += 1;
+            end;
+        end;
     end;
 }

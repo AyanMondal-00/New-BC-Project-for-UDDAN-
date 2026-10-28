@@ -68,7 +68,7 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
-     
+
         }
 
         field(8; Passenger; Text[100])
@@ -183,9 +183,10 @@ table 50402 "Third-Party Supplier Sales"
         ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
     begin
         ThirdPartySupplierSales.Reset();
+        ThirdPartySupplierSales.SetCurrentKey("Serial No.");
+
         if ThirdPartySupplierSales.FindLast() then
-            if ThirdPartySupplierSales."Serial No." >= 1 then
-                exit(ThirdPartySupplierSales."Serial No." + 1);
+            exit(ThirdPartySupplierSales."Serial No." + 1);
 
         exit(1);
     end;

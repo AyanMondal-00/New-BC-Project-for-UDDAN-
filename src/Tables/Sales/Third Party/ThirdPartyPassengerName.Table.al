@@ -1,3 +1,4 @@
+
 table 50406 "Third Party Passenger Name"
 {
     Caption = 'Third Party Passenger Name';
@@ -41,7 +42,6 @@ table 50406 "Third Party Passenger Name"
             DataClassification = CustomerContent;
         }
     }
-    
 
     keys
     {

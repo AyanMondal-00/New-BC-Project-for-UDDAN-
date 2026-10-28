@@ -158,7 +158,25 @@ page 50414 "Third Party Sales List"
 
                     CurrPage.Update(false);
                 end;
+
             }
+            action(ImportThirdPartySalesExcel)
+            {
+                ApplicationArea = All;
+                Caption = 'Import from Excel';
+                Image = ImportExcel;
+                ToolTip = 'Import Third-Party Supplier Sales records from an Excel file.';
+
+                trigger OnAction()
+                var
+                    ThirdPartySalesImportMgt: Codeunit "Third Party Sales Excel Import";
+                begin
+                    ThirdPartySalesImportMgt.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
+            }
+
+
         }
     }
 
