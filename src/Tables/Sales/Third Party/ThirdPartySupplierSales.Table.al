@@ -15,6 +15,11 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                Rec."Date" := CurrentDateTime();
+            end;
         }
 
         field(3; "Invoice Number"; Code[50])

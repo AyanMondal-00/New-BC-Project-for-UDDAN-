@@ -149,11 +149,7 @@ table 50302 "Purchase Return"
             DataClassification = CustomerContent;
         }
 
-        field(25; "Name List"; Text[100])
-        {
-            Caption = 'Name List';
-            DataClassification = CustomerContent;
-        }
+ 
 
         field(26; "Cost Revision"; Option)
         {
@@ -172,24 +168,50 @@ table 50302 "Purchase Return"
     }
 
 
-    
+
+
 
     trigger OnInsert()
     begin
-        if "Serial No." <= 0 then
-            "Serial No." := GetNextSerialNo();
+        // Always generate Serial No. in Business Central.
+        "Serial No." := GetNextSerialNo();
     end;
 
     local procedure GetNextSerialNo(): Integer
     var
+        SerialCounter: Record "Purchase Return Serial Counter";
         PurchaseReturn: Record "Purchase Return";
+        LastUsedNo: Integer;
     begin
+        SerialCounter.LockTable();
+        PurchaseReturn.LockTable();
+
         PurchaseReturn.Reset();
+        PurchaseReturn.SetCurrentKey("Serial No.");
+
+        if not SerialCounter.Get('DEFAULT') then begin
+            SerialCounter.Init();
+            SerialCounter."Primary Key" := 'DEFAULT';
+            SerialCounter."Last Serial No." := 0;
+            SerialCounter.Insert();
+        end;
 
         if PurchaseReturn.FindLast() then
-            if PurchaseReturn."Serial No." >= 1 then
-                exit(PurchaseReturn."Serial No." + 1);
+            if PurchaseReturn."Serial No." >
+               SerialCounter."Last Serial No."
+            then
+                SerialCounter."Last Serial No." :=
+                    PurchaseReturn."Serial No.";
 
-        exit(1);
+        LastUsedNo := SerialCounter."Last Serial No.";
+
+        if LastUsedNo >= 2147483647 then
+            Error('Purchase Return Serial No. limit reached.');
+
+        SerialCounter."Last Serial No." := LastUsedNo + 1;
+        SerialCounter.Modify();
+
+        exit(LastUsedNo + 1);
     end;
+
 }

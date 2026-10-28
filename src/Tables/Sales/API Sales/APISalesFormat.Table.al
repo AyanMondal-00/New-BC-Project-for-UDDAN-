@@ -15,6 +15,10 @@ table 50401 "API Sales Format"
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                Rec."Date" := CurrentDateTime();
+            end;
         }
 
         field(3; "Invoice Number"; Code[50])
@@ -88,6 +92,10 @@ table 50401 "API Sales Format"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                Rec."Date" := CurrentDateTime();
+            end;
         }
 
         field(11; Sector; Text[200])

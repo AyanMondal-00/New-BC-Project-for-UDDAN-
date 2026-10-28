@@ -1,4 +1,4 @@
-﻿page 50413 "Sales Return List"
+page 50413 "Sales Return List"
 {
     Caption = 'Sales Return / Cancellation Charge Format';
     PageType = List;
@@ -163,6 +163,28 @@
                 }
 
 
+            }
+        }
+    }
+
+    actions
+    {
+        area(Processing)
+        {
+            action("Import from Excel")
+            {
+                ApplicationArea = All;
+                Caption = 'Import from Excel';
+                Image = ImportExcel;
+                ToolTip = 'Import Sales Return data from an Excel file.';
+
+                trigger OnAction()
+                var
+                    SalesReturnExcelImport: Codeunit "Sales Return Excel Import";
+                begin
+                    SalesReturnExcelImport.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
             }
         }
     }

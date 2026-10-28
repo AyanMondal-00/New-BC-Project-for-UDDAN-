@@ -132,10 +132,7 @@ page 50312 "Purchase Return"
                     ApplicationArea = All;
                 }
 
-                field("Name List"; Rec."Name List")
-                {
-                    ApplicationArea = All;
-                }
+   
 
                 field("Cost Revision"; Rec."Cost Revision")
                 {

@@ -15,6 +15,10 @@ table 50403 "Sales Return"
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                Rec."Entry Date" := CurrentDateTime();
+            end;
         }
 
         field(3; "Bill No."; Code[50])
@@ -81,6 +85,10 @@ table 50403 "Sales Return"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                Rec."Travel Date" := CurrentDateTime();
+            end;
         }
 
         field(14; Time; Time)
@@ -197,22 +205,55 @@ table 50403 "Sales Return"
         }
     }
 
+
+
     trigger OnInsert()
     begin
-        if "Serial No." <= 0 then
-            "Serial No." := GetNextSerialNo();
+        // Always generate Serial No. in Business Central.
+        // Ignore any Serial No. supplied by Excel or another caller.
+        "Serial No." := GetNextSerialNo();
     end;
 
     local procedure GetNextSerialNo(): Integer
     var
+        SerialCounter: Record "Sales Return Serial Counter";
         SalesReturn: Record "Sales Return";
+        LastUsedNo: Integer;
     begin
+        // Lock both tables to protect serial generation.
+        SerialCounter.LockTable();
+        SalesReturn.LockTable();
+
+        // Always find the actual highest existing Serial No.
         SalesReturn.Reset();
+        SalesReturn.SetCurrentKey("Serial No.");
 
+        if not SerialCounter.Get('DEFAULT') then begin
+            SerialCounter.Init();
+            SerialCounter."Primary Key" := 'DEFAULT';
+            SerialCounter."Last Serial No." := 0;
+            SerialCounter.Insert();
+        end;
+
+        // Synchronize counter with existing records.
         if SalesReturn.FindLast() then
-            if SalesReturn."Serial No." >= 1 then
-                exit(SalesReturn."Serial No." + 1);
+            if SalesReturn."Serial No." >
+               SerialCounter."Last Serial No."
+            then
+                SerialCounter."Last Serial No." :=
+                    SalesReturn."Serial No.";
 
-        exit(1);
+        LastUsedNo := SerialCounter."Last Serial No.";
+
+        if LastUsedNo >= 2147483647 then
+            Error('Sales Return Serial No. limit reached.');
+
+        // Save the next number permanently.
+        SerialCounter."Last Serial No." := LastUsedNo + 1;
+        SerialCounter.Modify();
+
+        exit(LastUsedNo + 1);
     end;
+
+
 }
