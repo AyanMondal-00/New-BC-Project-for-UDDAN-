@@ -82,15 +82,11 @@ codeunit 50437 "Third Party Sales Invoice"
         SalesLine.Validate("No.", Item."No.");
         SalesLine.Description := ThirdPartySales.PNR;
         SalesLine.Validate(Quantity, ThirdPartySales.Pax);
-        SalesLine.Validate("Unit Price", ThirdPartySales."Base Fare");
+        SalesLine.Validate("Unit Price", ThirdPartySales."Rate");
 
         SalesLine."Travel Date" := ThirdPartySales."Travel Date";
         SalesLine.Sector := ThirdPartySales.Sector;
         SalesLine.FlightType := ThirdPartySales.Type;
-        SalesLine."Other Charges" := ThirdPartySales."Other Charges";
-        SalesLine.CGST := ThirdPartySales.CGST;
-        SalesLine.SGST := ThirdPartySales.SGST;
-        SalesLine.IGST := ThirdPartySales.IGST;
         SalesLine."Passenger Name" := PassengerNames.ToText();
 
         SalesLine.Modify(true);

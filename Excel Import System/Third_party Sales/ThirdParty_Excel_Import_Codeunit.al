@@ -25,8 +25,7 @@ codeunit 50432 "Third Party Sales Excel Import"
         TravelDateColumn: Integer;
         SectorColumn: Integer;
         TypeColumn: Integer;
-        BaseFareColumn: Integer;
-        OtherChargesColumn: Integer;
+        RateColumn: Integer;
         PNRValue: Text;
         RefNoValue: BigInteger;
     begin
@@ -67,8 +66,7 @@ codeunit 50432 "Third Party Sales Excel Import"
         TravelDateColumn := GetHeaderColumn(TempExcelBuffer, 'Travel Date');
         SectorColumn := GetHeaderColumn(TempExcelBuffer, 'Sector');
         TypeColumn := GetHeaderColumn(TempExcelBuffer, 'Type');
-        BaseFareColumn := GetHeaderColumn(TempExcelBuffer, 'Base Fare');
-        OtherChargesColumn := GetHeaderColumn(TempExcelBuffer, 'Other Charges');
+        RateColumn := GetRateHeaderColumn(TempExcelBuffer);
 
         for RowNo := 2 to LastRowNo do begin
             PNRValue := DelChr(
@@ -158,20 +156,11 @@ codeunit 50432 "Third Party Sales Excel Import"
                         1, 50));
 
                 ThirdPartySales.Validate(
-                    "Base Fare",
+                    Rate,
                     GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, BaseFareColumn),
+                        GetCellValue(TempExcelBuffer, RowNo, RateColumn),
                         RowNo,
-                        'Base Fare'));
-
-                ThirdPartySales.Validate(
-                    "Other Charges",
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, OtherChargesColumn),
-                        RowNo,
-                        'Other Charges'));
-
-                ThirdPartySales.CalculateGST();
+                        'Rate'));
 
                 ThirdPartySales.Insert(true);
                 ImportedCount += 1;
@@ -185,7 +174,40 @@ codeunit 50432 "Third Party Sales Excel Import"
             SkippedCount);
     end;
 
-    local procedure GetHeaderColumn(
+        local procedure GetRateHeaderColumn(var TempExcelBuffer: Record "Excel Buffer" temporary): Integer
+    var
+        Col: Integer;
+    begin
+        Col := FindHeaderColumnOptional(TempExcelBuffer, 'Rate');
+        if Col = 0 then
+            Col := FindHeaderColumnOptional(TempExcelBuffer, 'Base Fare');
+        if Col = 0 then
+            Error('Excel header "Rate" or "Base Fare" was not found in row 1.');
+        exit(Col);
+    end;
+
+    local procedure FindHeaderColumnOptional(
+        var TempExcelBuffer: Record "Excel Buffer" temporary;
+        HeaderName: Text): Integer
+    var
+        HeaderValue: Text;
+    begin
+        TempExcelBuffer.Reset();
+        TempExcelBuffer.SetRange("Row No.", 1);
+
+        if TempExcelBuffer.FindSet() then
+            repeat
+                HeaderValue := UpperCase(
+                    DelChr(TempExcelBuffer."Cell Value as Text", '<>', ' '));
+
+                if HeaderValue = UpperCase(HeaderName) then
+                    exit(TempExcelBuffer."Column No.");
+            until TempExcelBuffer.Next() = 0;
+
+        exit(0);
+    end;
+
+local procedure GetHeaderColumn(
         var TempExcelBuffer: Record "Excel Buffer" temporary;
         HeaderName: Text): Integer
     var

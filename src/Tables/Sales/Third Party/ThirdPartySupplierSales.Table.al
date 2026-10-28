@@ -119,61 +119,12 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Type';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                CalculateGST();
-            end;
         }
 
-        field(13; "Base Fare"; Decimal)
+        field(13; "Rate"; Decimal)
         {
-            Caption = 'Base Fare';
+            Caption = 'Rate';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                CalculateGST();
-            end;
-        }
-
-        field(14; "Other Charges"; Decimal)
-        {
-            Caption = 'Other Charges';
-            DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                CalculateGST();
-            end;
-        }
-
-        field(15; "Taxable Basis"; Decimal)
-        {
-            Caption = 'Taxable Basis';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
-
-        field(16; CGST; Decimal)
-        {
-            Caption = 'CGST';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
-
-        field(17; SGST; Decimal)
-        {
-            Caption = 'SGST';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
-
-        field(18; IGST; Decimal)
-        {
-            Caption = 'IGST';
-            DataClassification = CustomerContent;
-            Editable = false;
         }
 
         field(19; "Total Amount"; Decimal)
@@ -211,23 +162,7 @@ table 50402 "Third-Party Supplier Sales"
         exit(1);
     end;
 
-    procedure CalculateGST()
-    begin
-        if UpperCase(Type) = 'DOMESTIC' then begin
-            "Taxable Basis" := "Base Fare" * 0.05;
-            CGST := "Taxable Basis" * 0.09;
-            SGST := "Taxable Basis" * 0.09;
-            IGST := 0;
-        end else begin
-            "Taxable Basis" := "Base Fare" * 0.10;
-            CGST := 0;
-            SGST := 0;
-            IGST := "Taxable Basis" * 0.18;
-        end;
-
-        "Total Amount" := "Base Fare" + "Other Charges" + CGST + SGST + IGST;
-    end;
-
+    
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";

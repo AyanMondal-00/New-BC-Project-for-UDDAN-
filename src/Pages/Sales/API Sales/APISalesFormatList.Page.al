@@ -94,38 +94,9 @@ page 50411 "API Sales Format List"
                     ApplicationArea = All;
                 }
 
-                field("Base Fare"; Rec."Base Fare")
+                field("Rate"; Rec."Rate")
                 {
                     ApplicationArea = All;
-                }
-
-                field("Other Charges"; Rec."Other Charges")
-                {
-                    ApplicationArea = All;
-                }
-
-                field("Taxable Basis"; Rec."Taxable Basis")
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-
-                field(CGST; Rec.CGST)
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-
-                field(SGST; Rec.SGST)
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-
-                field(IGST; Rec.IGST)
-                {
-                    ApplicationArea = All;
-                    Editable = false;
                 }
 
                 field("Total Amount"; Rec."Total Amount")

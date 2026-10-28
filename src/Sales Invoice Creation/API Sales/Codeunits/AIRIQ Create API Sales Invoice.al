@@ -80,15 +80,11 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         SalesLine.Validate("No.", Item."No.");
         SalesLine.Description := APISales.PNR;
         SalesLine.Validate(Quantity, APISales.Pax);
-        SalesLine.Validate("Unit Price", APISales."Base Fare");
+        SalesLine.Validate("Unit Price", APISales."Rate");
 
         SalesLine."Travel Date" := APISales."Travel Date";
         SalesLine.Sector := APISales.Sector;
         SalesLine.FlightType := APISales.Type;
-        SalesLine."Other Charges" := APISales."Other Charges";
-        SalesLine.CGST := APISales.CGST;
-        SalesLine.SGST := APISales.SGST;
-        SalesLine.IGST := APISales.IGST;
         SalesLine."Passenger Name" := PassengerNames.ToText();
 
         SalesLine.Modify(true);
