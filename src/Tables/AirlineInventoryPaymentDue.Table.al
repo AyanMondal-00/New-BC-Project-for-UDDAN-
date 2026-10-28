@@ -15,13 +15,33 @@ table 50303 "Airline Inventory Payment Due"
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Purchase Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Purchase Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(3; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(4; Sector; Text[200])
         {

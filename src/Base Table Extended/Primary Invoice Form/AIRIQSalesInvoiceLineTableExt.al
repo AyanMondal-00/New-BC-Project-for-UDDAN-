@@ -6,7 +6,17 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(50425; Sector; Text[200])
         {

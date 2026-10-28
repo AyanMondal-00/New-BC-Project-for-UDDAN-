@@ -218,7 +218,17 @@ table 50432 "CMF TFFE"
         {
             Caption = 'Received On';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Received On");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Received On" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(25; "Received In (Bank/ID)"; Text[100])
         {

@@ -16,10 +16,16 @@ table 50403 "Sales Return"
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
             trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
             begin
-                Rec."Entry Date" := CurrentDateTime();
+                SelectedDate := DT2Date(Rec."Entry Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Entry Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-        }
+    }
 
         field(3; "Bill No."; Code[50])
         {
@@ -86,10 +92,16 @@ table 50403 "Sales Return"
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
             trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
             begin
-                Rec."Travel Date" := CurrentDateTime();
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-        }
+    }
 
         field(14; Time; Time)
         {

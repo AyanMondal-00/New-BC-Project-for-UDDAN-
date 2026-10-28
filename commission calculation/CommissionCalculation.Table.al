@@ -73,7 +73,17 @@ table 50451 "Commission Calculation"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
     }
 
     keys

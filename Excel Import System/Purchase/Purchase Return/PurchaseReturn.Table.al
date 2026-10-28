@@ -15,13 +15,33 @@ table 50302 "Purchase Return"
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Entry Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Entry Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(3; "Purchase Date"; DateTime)
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Purchase Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Purchase Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(4; "Voucher Number"; Code[50])
         {
@@ -129,7 +149,17 @@ table 50302 "Purchase Return"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(22; "Departure Time"; Time)
         {
@@ -215,3 +245,4 @@ table 50302 "Purchase Return"
     end;
 
 }
+

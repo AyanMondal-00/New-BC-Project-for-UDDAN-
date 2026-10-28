@@ -15,12 +15,17 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
-
             trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
             begin
-                Rec."Date" := CurrentDateTime();
+                SelectedDate := DT2Date(Rec."Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-        }
+    }
 
         field(3; "Invoice Number"; Code[50])
         {
@@ -92,7 +97,17 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(11; Sector; Text[200])
         {

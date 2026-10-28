@@ -109,12 +109,32 @@ table 50428 "Target Incentive"
         {
             Caption = 'Rule Period Booking date From';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Rule Period Booking date From");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Rule Period Booking date From" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
            field(31; "Rule Period Booking date To"; DateTime)
         {
             Caption = 'Rule Period Booking date To';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Rule Period Booking date To");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Rule Period Booking date To" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(12; "Target Slabs at or Above (Cr)"; Decimal)
         {
@@ -274,7 +294,17 @@ table 50428 "Target Incentive"
         {
             Caption = 'Received On';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Received On");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Received On" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(30; "Received In (Bank/ID)"; Text[100])
         {

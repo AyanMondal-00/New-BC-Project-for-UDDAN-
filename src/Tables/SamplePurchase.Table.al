@@ -1,4 +1,4 @@
-﻿table 50300 "Sample Purchase"
+table 50300 "Sample Purchase"
 {
     Caption = 'Sample Purchase';
     DataClassification = CustomerContent;
@@ -15,13 +15,33 @@
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Purchase Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Purchase Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(3; "Entry Date"; DateTime)
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Entry Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Entry Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(4; Airline; Text[100])
         {
@@ -92,7 +112,17 @@
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
-        }
+            trigger OnValidate()
+            var
+                SelectedDate: Date;
+                CurrentTime: Time;
+            begin
+                SelectedDate := DT2Date(Rec."Travel Date");
+                CurrentTime := DT2Time(CurrentDateTime());
+            
+                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+            end;
+    }
 
         field(9; Sector; Text[200])
         {
@@ -228,3 +258,4 @@
         end;
     end;
 }
+
