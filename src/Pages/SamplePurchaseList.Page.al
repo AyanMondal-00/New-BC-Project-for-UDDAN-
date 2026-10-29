@@ -98,10 +98,7 @@
                     ApplicationArea = All;
                 }
 
-                field(Rate; Rec.Rate)
-                {
-                    ApplicationArea = All;
-                }
+
 
                 field("Base Fare"; Rec."Base Fare")
                 {
@@ -109,6 +106,10 @@
                 }
 
                 field("Other Charges"; Rec."Other Charges")
+                {
+                    ApplicationArea = All;
+                }
+                field(Rate; Rec.Rate)
                 {
                     ApplicationArea = All;
                 }
@@ -304,6 +305,21 @@
 
                     CurrPage.Update(false);
                     Message('%1 record(s) were deselected.', UpdatedCount);
+                end;
+            }
+            action("Import For Cost Reversion")
+            {
+                ApplicationArea = All;
+                Caption = 'Import For Cost Reversion';
+                Image = ImportExcel;
+                ToolTip = 'Import fare values from Excel and update existing Sample Purchase records by PNR.';
+
+                trigger OnAction()
+                var
+                    FareAlterationImport: Codeunit "Fare Alteration Import";
+                begin
+                    FareAlterationImport.ImportFareAlteration();
+                    CurrPage.Update(false);
                 end;
             }
 

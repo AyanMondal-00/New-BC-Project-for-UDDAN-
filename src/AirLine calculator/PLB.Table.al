@@ -1,4 +1,4 @@
-table 50460"PLB"
+table 50460 "PLB"
 {
     Caption = 'PLB';
     DataClassification = CustomerContent;
@@ -13,11 +13,9 @@ table 50460"PLB"
             Editable = false;
         }
 
-        field(2; "AirLine"; Option)
+        field(2; "AirLine"; Text[50])
         {
             Caption = 'AirLine';
-            OptionMembers = " ","IndiGo","SpiceJet","Air India";
-            OptionCaption = ' ,IndiGo,SpiceJet,Air India';
             DataClassification = CustomerContent;
         }
 
@@ -27,25 +25,16 @@ table 50460"PLB"
             DataClassification = CustomerContent;
         }
 
-        field(4; "Commission Basis"; Option)
+        field(4; "Commission Basis"; Text[50])
         {
             Caption = 'Commission Basis';
-            OptionMembers = "Booking Date","Travel Date";
-            OptionCaption = 'Booking Date,Travel Date';
             DataClassification = CustomerContent;
         }
 
-        field(5; "Calculation Base"; Option)
+        field(5; "Calculation Base"; Text[50])
         {
             Caption = 'Calculation Base';
-            OptionMembers = "Base Fare","Other Charges","Base Fare + Other Charges";
-            OptionCaption = 'Base Fare,Other Charges,Base Fare + Other Charges';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                RecalculateAmounts();
-            end;
         }
 
         field(6; "Commission %"; Decimal)
@@ -53,11 +42,6 @@ table 50460"PLB"
             Caption = 'Commission %';
             DecimalPlaces = 0 : 4;
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                RecalculateAmounts();
-            end;
         }
 
         field(7; "TDS % on Commission"; Decimal)
@@ -66,11 +50,6 @@ table 50460"PLB"
             DecimalPlaces = 0 : 4;
             InitValue = 2.0;
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                RecalculateAmounts();
-            end;
         }
 
         field(8; "GST %"; Decimal)
@@ -82,29 +61,24 @@ table 50460"PLB"
             DataClassification = CustomerContent;
         }
 
-        field(9; "Our State"; Option)
+        field(9; "Our State"; Text[50])
         {
             Caption = 'Our State';
-            OptionMembers = "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal";
-            OptionCaption = 'Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal';
             DataClassification = CustomerContent;
         }
 
-        field(10; "AirLine State"; Option)
+        field(10; "AirLine State"; Text[50])
         {
             Caption = 'AirLine State';
-            OptionMembers = "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal";
-            OptionCaption = 'Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal';
             DataClassification = CustomerContent;
         }
 
-        field(11; "GST Type"; Option)
+        field(11; "GST Type"; Text[50])
         {
             Caption = 'GST Type';
-            OptionMembers = "Auto by State","IGST","CGST+SGST";
-            OptionCaption = 'Auto by State,IGST,CGST+SGST';
             DataClassification = CustomerContent;
         }
+
         field(26; "Rule Period Booking date From"; DateTime)
         {
             Caption = 'Rule Period Booking date From';
@@ -116,11 +90,12 @@ table 50460"PLB"
             begin
                 SelectedDate := DT2Date(Rec."Rule Period Booking date From");
                 CurrentTime := DT2Time(CurrentDateTime());
-            
+
                 Rec."Rule Period Booking date From" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
-           field(27; "Rule Period Booking date To"; DateTime)
+        }
+
+        field(27; "Rule Period Booking date To"; DateTime)
         {
             Caption = 'Rule Period Booking date To';
             DataClassification = CustomerContent;
@@ -131,23 +106,20 @@ table 50460"PLB"
             begin
                 SelectedDate := DT2Date(Rec."Rule Period Booking date To");
                 CurrentTime := DT2Time(CurrentDateTime());
-            
+
                 Rec."Rule Period Booking date To" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
-        field(12; "Amount From"; Option)
+        }
+
+        field(12; "Amount From"; Text[50])
         {
             Caption = 'Amount From';
-            OptionMembers = "Manual Total","Ticket Data";
-            OptionCaption = 'Manual Total,Ticket Data';
             DataClassification = CustomerContent;
         }
 
-        field(13; "Transaction"; Option)
+        field(13; "Transaction"; Text[50])
         {
             Caption = 'Transaction';
-            OptionMembers = "Purchase","Purchase Return","Both";
-            OptionCaption = 'Purchase,Purchase Return,Both';
             DataClassification = CustomerContent;
         }
 
@@ -162,11 +134,6 @@ table 50460"PLB"
             Caption = 'Purchase Base Fare';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                RecalculateAmounts();
-            end;
         }
 
         field(16; "Purchase Other Charges"; Decimal)
@@ -174,11 +141,6 @@ table 50460"PLB"
             Caption = 'Purchase Other Charges';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                RecalculateAmounts();
-            end;
         }
 
         field(17; "Purchase Total"; Decimal)
@@ -193,12 +155,6 @@ table 50460"PLB"
             Caption = 'Purchase Commission';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                "Total Commission" := "Purchase Commission";
-                RecalculateTaxes();
-            end;
         }
 
         field(19; "Total Commission"; Decimal)
@@ -206,11 +162,6 @@ table 50460"PLB"
             Caption = 'Total Commission';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                RecalculateTaxes();
-            end;
         }
 
         field(20; "GST Percentage"; Decimal)
@@ -254,10 +205,10 @@ table 50460"PLB"
             begin
                 SelectedDate := DT2Date(Rec."Received On");
                 CurrentTime := DT2Time(CurrentDateTime());
-            
+
                 Rec."Received On" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(25; "Received In (Bank/ID)"; Text[100])
         {
@@ -273,67 +224,4 @@ table 50460"PLB"
             Clustered = true;
         }
     }
-
-    trigger OnInsert()
-    begin
-        if "GST %" = 0 then
-            "GST %" := 18;
-        if "GST Percentage" = 0 then
-            "GST Percentage" := 18;
-        if "TDS % on Commission" = 0 then
-            "TDS % on Commission" := 2;
-    end;
-
-    local procedure RecalculateAmounts()
-    var
-        CommissionableAmount: Decimal;
-    begin
-        "Purchase Total" := "Purchase Base Fare" + "Purchase Other Charges";
-
-        case "Calculation Base" of
-            "Calculation Base"::"Base Fare":
-                CommissionableAmount := "Purchase Base Fare";
-            "Calculation Base"::"Other Charges":
-                CommissionableAmount := "Purchase Other Charges";
-            "Calculation Base"::"Base Fare + Other Charges":
-                CommissionableAmount := "Purchase Total";
-        end;
-
-        if "Commission %" <> 0 then
-            "Purchase Commission" := Round((CommissionableAmount * "Commission %") / 100, 0.01)
-        else
-            "Purchase Commission" := 0;
-
-        "Total Commission" := "Purchase Commission";
-
-        RecalculateTaxes();
-    end;
-
-    local procedure RecalculateTaxes()
-    var
-        GSTVal: Decimal;
-        TDSVal: Decimal;
-        GSTPerc: Decimal;
-        TDSPerc: Decimal;
-    begin
-        if "GST %" <> 0 then
-            GSTPerc := "GST %"
-        else if "GST Percentage" <> 0 then
-            GSTPerc := "GST Percentage"
-        else
-            GSTPerc := 18;
-
-        if "TDS % on Commission" <> 0 then
-            TDSPerc := "TDS % on Commission"
-        else
-            TDSPerc := 2;
-
-        GSTVal := Round(("Total Commission" * GSTPerc) / 100, 0.01);
-        "Invoice Incl. GST" := "Total Commission" + GSTVal;
-
-        TDSVal := Round(("Total Commission" * TDSPerc) / 100, 0.01);
-        "TDS (2.00%) on Commission" := TDSVal;
-
-        "Net Receivable" := "Invoice Incl. GST" - TDSVal;
-    end;
 }

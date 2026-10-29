@@ -29,6 +29,11 @@ tableextension 50430 "AIRIQ Posted Sales Line Ext" extends "Sales Invoice Line"
             Caption = 'Flight Type';
             DataClassification = CustomerContent;
         }
+        field(50432; BaseFare; Text[50])
+        {
+            Caption = 'Base Fare';
+            DataClassification = CustomerContent;
+        }
 
         field(50427; "Other Charges"; Decimal)
         {

@@ -27,6 +27,11 @@ pageextension 50428 "AIRIQ Sales Invoice Line PgExt" extends "Sales Invoice Subf
                 ApplicationArea = All;
                 Editable = false;
             }
+            field(BaseFare; Rec.BaseFare)
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
 
             field("Other Charges"; Rec."Other Charges")
             {

@@ -23,7 +23,11 @@ pageextension 50433 "AIRIQ Posted Sales Inv Line" extends "Posted Sales Invoice 
             {
                 ApplicationArea = All;
             }
-
+            field(BaseFare; Rec.BaseFare)
+            {
+                ApplicationArea = All;
+            }
+      
             field("Other Charges"; Rec."Other Charges")
             {
                 ApplicationArea = All;

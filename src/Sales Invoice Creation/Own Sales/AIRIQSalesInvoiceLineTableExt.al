@@ -29,6 +29,11 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             Caption = 'Flight Type';
             DataClassification = CustomerContent;
         }
+        field(50432; BaseFare; Text[50])
+        {
+            Caption = 'Base Fare';
+            DataClassification = CustomerContent;
+        }
 
         field(50427; "Other Charges"; Decimal)
         {

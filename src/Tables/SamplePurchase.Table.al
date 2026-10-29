@@ -15,43 +15,52 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Purchase Date");
+
                 if DT2Time(Rec."Purchase Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Purchase Date");
-                Rec."Purchase Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Purchase Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(3; "Entry Date"; DateTime)
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Entry Date");
+
                 if DT2Time(Rec."Entry Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Entry Date");
-                Rec."Entry Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Entry Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(4; Airline; Text[100])
         {
             Caption = 'Airline';
             DataClassification = CustomerContent;
         }
+
         //////////////////////////////////////////////////////////////////////////////
         field(5; "Agency ID"; Code[20])
         {
@@ -59,13 +68,12 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
             ObsoleteState = Removed;
         }
-        ///////////////////////////////////////////////////////////////////////////////        
+        //////////////////////////////////////////////////////////////////////////////
+
         field(15; "Supplier ID"; Code[20])
         {
             Caption = 'Supplier ID';
             DataClassification = CustomerContent;
-
-
         }
 
         field(16; "Select"; Boolean)
@@ -80,19 +88,20 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
             Editable = false;
         }
+
         field(19; "Item Created"; Boolean)
         {
             Caption = 'Item Created';
             DataClassification = CustomerContent;
             Editable = false;
         }
+
         field(20; "Invoice Posted"; Boolean)
         {
             Caption = 'Invoice Posted';
             DataClassification = CustomerContent;
             Editable = false;
         }
-
 
         field(6; PNR; Text[10])
         {
@@ -110,25 +119,34 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Total Pax';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculatePurchaseAmount();
+            end;
         }
 
         field(8; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
+
                 if DT2Time(Rec."Travel Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Travel Date");
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Travel Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(9; Sector; Text[200])
         {
@@ -140,24 +158,36 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(11; "Base Fare"; Decimal)
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculatePurchaseAmount();
+            end;
         }
 
         field(12; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculatePurchaseAmount();
+            end;
         }
 
         field(13; "Total Amount"; Decimal)
         {
             Caption = 'Total Amount';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(14; Type; Text[50])
@@ -165,8 +195,6 @@ table 50300 "Sample Purchase"
             Caption = 'Type';
             DataClassification = CustomerContent;
         }
-
-
     }
 
     keys
@@ -180,13 +208,22 @@ table 50300 "Sample Purchase"
     trigger OnInsert()
     begin
         "Serial No." := GetNextSerialNo();
+        CalculatePurchaseAmount();
+    end;
+
+    local procedure CalculatePurchaseAmount()
+    begin
+        // Base Fare + Other Charges = Rate
+        Rec.Rate := Rec."Base Fare" + Rec."Other Charges";
+
+        // Rate * Total Pax = Total Amount
+        Rec."Total Amount" := Rec.Rate * Rec."Total Pax";
     end;
 
     local procedure GetNextSerialNo(): Integer
     var
         SerialCounter: Record "Sample Purchase Serial Cnt.";
         SamplePurchase: Record "Sample Purchase";
-        CommissionRec: Record "Commission Calculation";
         HighestExistingNo: Integer;
     begin
         // Lock both tables while generating the number.
@@ -227,31 +264,44 @@ table 50300 "Sample Purchase"
         ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
         CommissionRec: Record "Commission Calculation";
     begin
-
         if PNR = '' then
             exit;
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, Rec.PNR);
+
         if Rec."Serial No." <> 0 then
-            SamplePurchase.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            SamplePurchase.SetFilter(
+                "Serial No.", '<>%1', Rec."Serial No.");
+
         if not SamplePurchase.IsEmpty() then
-            Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Sample Purchase.',
+                Rec.PNR);
 
         NormalSales.Reset();
         NormalSales.SetRange(PNR, Rec.PNR);
+
         if not NormalSales.IsEmpty() then
-            Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Normal Sales.',
+                Rec.PNR);
 
         APISalesFormat.Reset();
         APISalesFormat.SetRange(PNR, Rec.PNR);
+
         if not APISalesFormat.IsEmpty() then
-            Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in API Sales Format.',
+                Rec.PNR);
 
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Third-Party Supplier Sales.',
+                Rec.PNR);
 
         if PNR <> xRec.PNR then begin
             CommissionRec.Reset();
@@ -264,4 +314,3 @@ table 50300 "Sample Purchase"
         end;
     end;
 }
-

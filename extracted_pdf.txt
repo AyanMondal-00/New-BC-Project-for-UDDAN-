@@ -1,0 +1,63 @@
+=== PAGE 1 ===
+AIRiQTRAVEL PLATFORM TAX INVOICEe-Invoice  ·  SAMPLE — NOT VALID FOR GST
+E-INVOICE DETAILS
+IRN 4a43161a3dbc2682656c1c9eb39f075414dbb65b77deec861125428762493db2
+Ack No. 112610000000001
+Ack Date 08 Sep 2026 11:42
+e-Invoice status Generated Signed QR Code
+e-Invoice  ·  SAMPLE — NOT VALID FOR GST
+INVOICE NO.
+103002
+REF NO.
+—
+INVOICE DATE
+08 Sep 2026
+PLACE OF SUPPLY
+West Bengal (19)
+SELLER / ISSUED BY
+AIRIQ 365 LIMITED
+Ground, 1st & 2nd Floor, Asmi Square
+Ward No. 43, 2nd Mile, Sevoke Road
+Siliguri – 734001, India
+GSTIN: 19XXXXXXXXXX1ZX
+BILL TO
+A. Agarwal Pvt Ltd
+Sevoke Road
+Siliguri, West Bengal
+India
+GSTIN: 19YYYYYYYYYY1ZY
+INVOICE DETAILS Rate & Amount are inclusive of GST
+SL NO. PASSENGER PNR TRAVEL DATE SAC QTY. RATE AMOUNT
+1 Ram Agarwal PNR5625X 08 Sep 2026 998555 1 ₹6,300.00 ₹6,300.00
+2 Shyam Agarwal PNR5625X 08 Sep 2026 998555 1 ₹6,300.00 ₹6,300.00
+3 Sita Agarwal PNR5625X 08 Sep 2026 998555 1 ₹6,300.00 ₹6,300.00
+4 Gita Agarwal PNR5625X 08 Sep 2026 998555 1 ₹6,300.00 ₹6,300.00
+5 Mohan Agarwal PNR5625X 08 Sep 2026 998555 1 ₹6,300.00 ₹6,300.00
+TAX BREAKDOWN
+TAX RATE TAX AMOUNT
+CGST 9% ₹101.25
+SGST 9% ₹101.25
+GST on Air Travel Agent's service under Rule 32(3), CGST Rules, 2017 (value deemed at 5% of basic fare for domestic / 10% for international). GST included in invoice value.
+AMOUNT IN WORDS
+Indian Rupees Thirty-One Thousand Five Hundred Only
+Value excl. GST ₹31,297.50
+CGST @ 9% ₹101.25
+SGST @ 9% ₹101.25
+INVOICE TOTAL ₹31,500.00
+NARRATION
+Being air tickets issued to A. Agarwal Pvt Ltd for 5 passengers (Ram Agarwal + 4) on PNR5625X, travel date 08 Sep 2026.
+BANK DETAILS
+Bank State Bank of India
+Account No. SBI 133667466
+IFSC —
+CONTACT DETAILS
+Website airiq.in
+Email accounts@airiq.in
+DECLARATION
+We declare that this invoice shows the actual price of the services
+described and that all particulars are true and correct.
+for AIRIQ 365 LIMITED
+Authorised SignatorySeal
+This is a computer-generated invoice.  Subject to Siliguri jurisdiction. airiq.in  |  Page 1 of 1
+SAMPLE
+
