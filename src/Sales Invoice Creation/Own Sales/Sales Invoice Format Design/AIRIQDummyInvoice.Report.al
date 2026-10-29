@@ -6,7 +6,7 @@ report 50390 "AIRIQ Dummy Invoice"
     UsageCategory = ReportsAndAnalysis;
 
     DefaultLayout = RDLC;
-    RDLCLayout = 'design.rdl';
+    RDLCLayout = 'AIRIQDummyInvoice.rdl';
 
     dataset
     {
