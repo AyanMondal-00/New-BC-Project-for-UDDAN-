@@ -97,6 +97,21 @@ page 50413 "Sales Return List"
                     ApplicationArea = All;
                 }
 
+                field("View Passenger"; ViewPassengerText)
+                {
+                    ApplicationArea = All;
+                    Caption = 'View Passenger';
+                    Editable = false;
+
+                    trigger OnDrillDown()
+                    var
+                        PassengerList: Page "Sales Return Passenger List";
+                    begin
+                        PassengerList.SetReturnNoAndPNR(Rec."Return No.", Rec.PNR);
+                        PassengerList.RunModal();
+                    end;
+                }
+
                 field(Reference; Rec.Reference)
                 {
                     ApplicationArea = All;
@@ -188,6 +203,14 @@ page 50413 "Sales Return List"
             }
         }
     }
+
+    trigger OnAfterGetRecord()
+    begin
+        ViewPassengerText := 'View Passenger';
+    end;
+
+    var
+        ViewPassengerText: Text[30];
 
     trigger OnNewRecord(BelowxRec: Boolean)
     var

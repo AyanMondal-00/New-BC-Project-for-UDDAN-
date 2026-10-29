@@ -21,8 +21,10 @@ table 50402 "Third-Party Supplier Sales"
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Date");
-                CurrentTime := DT2Time(CurrentDateTime());
-            
+                if DT2Time(Rec."Date") = 000000T then
+                    CurrentTime := DT2Time(CurrentDateTime())
+                else
+                    CurrentTime := DT2Time(Rec."Date");
                 Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
     }
@@ -103,8 +105,10 @@ table 50402 "Third-Party Supplier Sales"
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
-                CurrentTime := DT2Time(CurrentDateTime());
-            
+                if DT2Time(Rec."Travel Date") = 000000T then
+                    CurrentTime := DT2Time(CurrentDateTime())
+                else
+                    CurrentTime := DT2Time(Rec."Travel Date");
                 Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
     }

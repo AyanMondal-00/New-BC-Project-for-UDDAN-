@@ -21,8 +21,10 @@ table 50303 "Airline Inventory Payment Due"
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Purchase Date");
-                CurrentTime := DT2Time(CurrentDateTime());
-            
+                if DT2Time(Rec."Purchase Date") = 000000T then
+                    CurrentTime := DT2Time(CurrentDateTime())
+                else
+                    CurrentTime := DT2Time(Rec."Purchase Date");
                 Rec."Purchase Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
     }
@@ -37,8 +39,10 @@ table 50303 "Airline Inventory Payment Due"
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
-                CurrentTime := DT2Time(CurrentDateTime());
-            
+                if DT2Time(Rec."Travel Date") = 000000T then
+                    CurrentTime := DT2Time(CurrentDateTime())
+                else
+                    CurrentTime := DT2Time(Rec."Travel Date");
                 Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
     }

@@ -179,21 +179,138 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         DateTimeValue: DateTime;
         DateValue: Date;
         TimeValue: Time;
+        ExcelSerial: Decimal;
+        WholeDays: Integer;
+        Milliseconds: Duration;
+        BaseDate: Date;
+        CleanText: Text;
+        DatePart: Text;
+        TimePart: Text;
+        DateParts: List of [Text];
+        TimeParts: List of [Text];
+        SeparatorPosition: Integer;
+        DayNo: Integer;
+        MonthNo: Integer;
+        YearNo: Integer;
+        HourNo: Integer;
+        MinuteNo: Integer;
+        SecondNo: Integer;
+        ISODateText: Text;
     begin
-        if ValueText = '' then
+        CleanText := DelChr(ValueText, '<>', ' ');
+
+        if CleanText = '' then
             exit(0DT);
 
-        if Evaluate(DateTimeValue, ValueText) then
+        // Support text format: DD-MM-YYYY HH:MM
+        SeparatorPosition := StrPos(CleanText, ' ');
+
+        if SeparatorPosition > 0 then begin
+            DatePart := CopyStr(CleanText, 1, SeparatorPosition - 1);
+            TimePart := CopyStr(CleanText, SeparatorPosition + 1);
+
+            DatePart := DatePart.Replace('/', '-');
+            DateParts := DatePart.Split('-');
+
+            if DateParts.Count = 3 then begin
+                if StrLen(DateParts.Get(1)) = 4 then begin
+                    if not Evaluate(YearNo, DateParts.Get(1)) then
+                        Error('Invalid year in date "%1".', DatePart);
+
+                    if not Evaluate(MonthNo, DateParts.Get(2)) then
+                        Error('Invalid month in date "%1".', DatePart);
+
+                    if not Evaluate(DayNo, DateParts.Get(3)) then
+                        Error('Invalid day in date "%1".', DatePart);
+                end else begin
+                    if not Evaluate(DayNo, DateParts.Get(1)) then
+                        Error('Invalid day in date "%1".', DatePart);
+
+                    if not Evaluate(MonthNo, DateParts.Get(2)) then
+                        Error('Invalid month in date "%1".', DatePart);
+
+                    if not Evaluate(YearNo, DateParts.Get(3)) then
+                        Error('Invalid year in date "%1".', DatePart);
+                end;
+
+                // Validate the calendar date using ISO format.
+                ISODateText :=
+                    Format(YearNo) + '-' +
+                    PadNumber(MonthNo) + '-' +
+                    PadNumber(DayNo);
+
+                if not Evaluate(DateValue, ISODateText, 9) then
+                    Error('Invalid calendar date "%1".', DatePart);
+
+                TimeParts := TimePart.Split(':');
+
+                if (TimeParts.Count < 2) or (TimeParts.Count > 3) then
+                    Error('Invalid time "%1". Use HH:MM or HH:MM:SS.', TimePart);
+
+                if not Evaluate(HourNo, TimeParts.Get(1)) then
+                    Error('Invalid hour in time "%1".', TimePart);
+
+                if not Evaluate(MinuteNo, TimeParts.Get(2)) then
+                    Error('Invalid minute in time "%1".', TimePart);
+
+                Clear(SecondNo);
+                if TimeParts.Count = 3 then
+                    if not Evaluate(SecondNo, TimeParts.Get(3)) then
+                        Error('Invalid second in time "%1".', TimePart);
+
+                if (HourNo < 0) or (HourNo > 23) or
+                   (MinuteNo < 0) or (MinuteNo > 59) or
+                   (SecondNo < 0) or (SecondNo > 59)
+                then
+                    Error('Invalid time "%1". Use 24-hour time.', TimePart);
+
+                TimeValue :=
+                    000000T +
+                    (HourNo * 3600000) +
+                    (MinuteNo * 60000) +
+                    (SecondNo * 1000);
+
+                exit(CreateDateTime(DateValue, TimeValue));
+            end;
+        end;
+
+        // Support other valid DateTime formats.
+        if Evaluate(DateTimeValue, CleanText) then
             exit(DateTimeValue);
 
-        if Evaluate(DateValue, ValueText) then begin
-            TimeValue := 0T;
-            exit(CreateDateTime(DateValue, TimeValue));
+        if Evaluate(DateValue, CleanText) then
+            exit(CreateDateTime(DateValue, 0T));
+
+        // Support Excel serial DateTime values.
+        if Evaluate(ExcelSerial, CleanText) then begin
+            if ExcelSerial < 1 then
+                Error(
+                    'The Excel cell contains only a time or an invalid date: %1.',
+                    CleanText);
+
+            WholeDays := Round(ExcelSerial, 1, '<');
+            BaseDate := DMY2Date(30, 12, 1899);
+            DateValue := BaseDate + WholeDays;
+
+            Milliseconds := Round(
+                (ExcelSerial - WholeDays) * 86400000,
+                1,
+                '=');
+
+            exit(CreateDateTime(DateValue, 0T) + Milliseconds);
         end;
 
         Error(
-            'Invalid date/time "%1". Please use a valid Excel date/time value.',
+            'Cannot read date/time "%1". Use DD-MM-YYYY HH:MM, e.g. 28-09-2026 19:30.',
             ValueText);
+    end;
+
+    local procedure PadNumber(NumberValue: Integer): Text
+    begin
+        if NumberValue < 10 then
+            exit('0' + Format(NumberValue));
+
+        exit(Format(NumberValue));
     end;
 
     local procedure ImportPassengerNames(RefNo: BigInteger; PNRCode: Text[10]; NamesText: Text)

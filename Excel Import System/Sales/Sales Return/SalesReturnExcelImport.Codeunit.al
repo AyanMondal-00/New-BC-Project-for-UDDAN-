@@ -16,6 +16,8 @@ codeunit 50333 "Sales Return Excel Import"
         ImportedCount: Integer;
         DuplicateCount: Integer;
         BlankRowCount: Integer;
+        PassengerColumn: Integer;
+        PassengerNamesValue: Text;
     begin
         if not UploadIntoStream(
             'Select Excel File',
@@ -32,6 +34,14 @@ codeunit 50333 "Sales Return Excel Import"
 
         ExcelBuffer.OpenBookStream(InStream, SheetName);
         ExcelBuffer.ReadSheet();
+
+        PassengerColumn := FindHeaderColumnOptional(ExcelBuffer, 'Passenger Name');
+        if PassengerColumn = 0 then
+            PassengerColumn := FindHeaderColumnOptional(ExcelBuffer, 'Passenger');
+        if PassengerColumn = 0 then
+            PassengerColumn := FindHeaderColumnOptional(ExcelBuffer, 'Passenger Names');
+        if PassengerColumn = 0 then
+            PassengerColumn := FindHeaderColumnOptional(ExcelBuffer, 'View Passenger');
 
         ExcelBuffer.Reset();
         if ExcelBuffer.FindLast() then
@@ -232,8 +242,19 @@ codeunit 50333 "Sales Return Excel Import"
                         CopyStr(GetCellText(ExcelBuffer, RowNo, 30),
                             1, MaxStrLen(SalesReturn.Supplier));
 
+                    // Passenger Name
+                    if PassengerColumn <> 0 then begin
+                        PassengerNamesValue := GetCellText(ExcelBuffer, RowNo, PassengerColumn);
+                        SalesReturn."Passenger Name" := CopyStr(PassengerNamesValue, 1, MaxStrLen(SalesReturn."Passenger Name"));
+                    end else
+                        PassengerNamesValue := '';
+
                     // Generate Serial No. through the table trigger.
                     SalesReturn.Insert(true);
+
+                    if (PassengerNamesValue <> '') and (SalesReturn."Return No." <> '') then
+                        ImportPassengerNames(SalesReturn."Return No.", SalesReturn.PNR, PassengerNamesValue);
+
                     ImportedCount += 1;
                 end;
             end;
@@ -412,5 +433,56 @@ codeunit 50333 "Sales Return Excel Import"
             exit(ExcelBuffer."Cell Value as Text");
 
         exit('');
+    end;
+
+    local procedure FindHeaderColumnOptional(
+        var ExcelBuffer: Record "Excel Buffer" temporary;
+        ExpectedHeader: Text): Integer
+    var
+        NormalizedExpected: Text;
+        ActualHeader: Text;
+    begin
+        NormalizedExpected := DelChr(UpperCase(ExpectedHeader), '=', ' _-');
+
+        ExcelBuffer.Reset();
+        ExcelBuffer.SetRange("Row No.", 1);
+        if ExcelBuffer.FindSet() then
+            repeat
+                ActualHeader := DelChr(UpperCase(ExcelBuffer."Cell Value as Text"), '=', ' _-');
+                if ActualHeader = NormalizedExpected then
+                    exit(ExcelBuffer."Column No.");
+            until ExcelBuffer.Next() = 0;
+
+        exit(0);
+    end;
+
+    local procedure ImportPassengerNames(ReturnNo: Code[50]; PNRCode: Text[10]; NamesText: Text)
+    var
+        SalesReturnPassengerName: Record "Sales Return Passenger Name";
+        NameList: List of [Text];
+        SingleName: Text;
+        SLNo: Integer;
+    begin
+        SalesReturnPassengerName.Reset();
+        SalesReturnPassengerName.SetRange("Return No.", ReturnNo);
+        SalesReturnPassengerName.SetRange(PNR, PNRCode);
+        if not SalesReturnPassengerName.IsEmpty() then
+            SalesReturnPassengerName.DeleteAll();
+
+        NameList := NamesText.Split(',');
+        SLNo := 1;
+        foreach SingleName in NameList do begin
+            SingleName := DelChr(SingleName, '<>', ' ');
+            if SingleName <> '' then begin
+                Clear(SalesReturnPassengerName);
+                SalesReturnPassengerName.Init();
+                SalesReturnPassengerName.Validate("Return No.", ReturnNo);
+                SalesReturnPassengerName.Validate(PNR, PNRCode);
+                SalesReturnPassengerName.Validate("SL No.", SLNo);
+                SalesReturnPassengerName.Validate("Passenger Name", CopyStr(SingleName, 1, 100));
+                SalesReturnPassengerName.Insert(true);
+                SLNo += 1;
+            end;
+        end;
     end;
 }
