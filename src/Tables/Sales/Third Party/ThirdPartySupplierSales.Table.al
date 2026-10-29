@@ -151,15 +151,40 @@ table 50402 "Third-Party Supplier Sales"
 
     local procedure GetNextSerialNo(): Integer
     var
+        SerialCounter: Record "Third Party Sales Serial Cnt.";
         ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        LastUsedNo: Integer;
     begin
+        // Lock both tables to protect serial generation.
+        SerialCounter.LockTable();
+        ThirdPartySupplierSales.LockTable();
+
+        // Always find the actual highest existing Serial No.
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetCurrentKey("Serial No.");
 
-        if ThirdPartySupplierSales.FindLast() then
-            exit(ThirdPartySupplierSales."Serial No." + 1);
+        if not SerialCounter.Get('DEFAULT') then begin
+            SerialCounter.Init();
+            SerialCounter."Counter Code" := 'DEFAULT';
+            SerialCounter."Last Serial No." := 0;
+            SerialCounter.Insert();
+        end;
 
-        exit(1);
+        // Synchronize counter with existing records.
+        if ThirdPartySupplierSales.FindLast() then
+            if ThirdPartySupplierSales."Serial No." > SerialCounter."Last Serial No." then
+                SerialCounter."Last Serial No." := ThirdPartySupplierSales."Serial No.";
+
+        LastUsedNo := SerialCounter."Last Serial No.";
+
+        if LastUsedNo >= 2147483647 then
+            Error('Third-Party Sales Serial No. limit reached.');
+
+        // Save the next number permanently.
+        SerialCounter."Last Serial No." := LastUsedNo + 1;
+        SerialCounter.Modify();
+
+        exit(LastUsedNo + 1);
     end;
 
     

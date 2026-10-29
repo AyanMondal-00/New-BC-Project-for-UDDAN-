@@ -152,15 +152,40 @@ table 50401 "API Sales Format"
 
     local procedure GetNextSerialNo(): Integer
     var
+        SerialCounter: Record "API Sales Serial Cnt.";
         APISalesFormat: Record "API Sales Format";
+        LastUsedNo: Integer;
     begin
+        // Lock both tables to protect serial generation.
+        SerialCounter.LockTable();
+        APISalesFormat.LockTable();
+
+        // Always find the actual highest existing Serial No.
         APISalesFormat.Reset();
         APISalesFormat.SetCurrentKey("Serial No.");
 
-        if APISalesFormat.FindLast() then
-            exit(APISalesFormat."Serial No." + 1);
+        if not SerialCounter.Get('DEFAULT') then begin
+            SerialCounter.Init();
+            SerialCounter."Counter Code" := 'DEFAULT';
+            SerialCounter."Last Serial No." := 0;
+            SerialCounter.Insert();
+        end;
 
-        exit(1);
+        // Synchronize counter with existing records.
+        if APISalesFormat.FindLast() then
+            if APISalesFormat."Serial No." > SerialCounter."Last Serial No." then
+                SerialCounter."Last Serial No." := APISalesFormat."Serial No.";
+
+        LastUsedNo := SerialCounter."Last Serial No.";
+
+        if LastUsedNo >= 2147483647 then
+            Error('API Sales Serial No. limit reached.');
+
+        // Save the next number permanently.
+        SerialCounter."Last Serial No." := LastUsedNo + 1;
+        SerialCounter.Modify();
+
+        exit(LastUsedNo + 1);
     end;
 
     

@@ -28,6 +28,7 @@ codeunit 50432 "Third Party Sales Excel Import"
         RateColumn: Integer;
         PNRValue: Text;
         RefNoValue: BigInteger;
+        PassengerNamesValue: Text;
     begin
         if not UploadIntoStream(
             'Select Third-Party Sales Excel File',
@@ -74,6 +75,7 @@ codeunit 50432 "Third Party Sales Excel Import"
                 '<>', ' ');
 
             if PNRValue <> '' then begin
+                Clear(ThirdPartySales);
                 ThirdPartySales.Init();
 
                 ThirdPartySales.Validate(
@@ -163,6 +165,11 @@ codeunit 50432 "Third Party Sales Excel Import"
                         'Rate'));
 
                 ThirdPartySales.Insert(true);
+
+                PassengerNamesValue := GetCellValue(TempExcelBuffer, RowNo, PassengerColumn);
+                if PassengerNamesValue <> '' then
+                    ImportPassengerNames(RefNoValue, CopyStr(PNRValue, 1, 10), PassengerNamesValue);
+
                 ImportedCount += 1;
             end else
                 SkippedCount += 1;
@@ -434,5 +441,34 @@ local procedure GetHeaderColumn(
             exit('0' + Format(NumberValue));
 
         exit(Format(NumberValue));
+    end;
+    local procedure ImportPassengerNames(RefNo: BigInteger; PNRCode: Text[10]; NamesText: Text)
+    var
+        ThirdPartyPassengerName: Record "Third Party Passenger Name";
+        NameList: List of [Text];
+        SingleName: Text;
+        SLNo: Integer;
+    begin
+        ThirdPartyPassengerName.Reset();
+        ThirdPartyPassengerName.SetRange("Ref No./AQ Number", RefNo);
+        ThirdPartyPassengerName.SetRange("PNR", PNRCode);
+        if not ThirdPartyPassengerName.IsEmpty() then
+            ThirdPartyPassengerName.DeleteAll();
+
+        NameList := NamesText.Split(',');
+        SLNo := 1;
+        foreach SingleName in NameList do begin
+            SingleName := DelChr(SingleName, '<>', ' ');
+            if SingleName <> '' then begin
+                Clear(ThirdPartyPassengerName);
+                ThirdPartyPassengerName.Init();
+                ThirdPartyPassengerName.Validate("Ref No./AQ Number", RefNo);
+                ThirdPartyPassengerName.Validate("PNR", PNRCode);
+                ThirdPartyPassengerName.Validate("SL No.", SLNo);
+                ThirdPartyPassengerName.Validate("Passenger Name", CopyStr(SingleName, 1, 100));
+                ThirdPartyPassengerName.Insert(true);
+                SLNo += 1;
+            end;
+        end;
     end;
 }
