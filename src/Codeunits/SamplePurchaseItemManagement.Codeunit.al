@@ -1,10 +1,10 @@
+﻿
 codeunit 50322 "Sample Purchase Item Mngt"
 {
     procedure CreateItems(var SelectedSamplePurchase: Record "Sample Purchase")
     var
         ProcessRec: Record "Sample Purchase";
         Item: Record Item;
-        NoSeries: Codeunit "No. Series";
         CreatedCount: Integer;
         AlreadyExistCount: Integer;
         SkippedCount: Integer;
@@ -23,6 +23,7 @@ codeunit 50322 "Sample Purchase Item Mngt"
                     SkippedCount += 1;
                 end else begin
                     Clear(Item);
+
                     Item.SetRange(
                         Description,
                         ProcessRec.PNR);
@@ -41,31 +42,50 @@ codeunit 50322 "Sample Purchase Item Mngt"
                         Clear(Item);
                         Item.Init();
 
-                        Item."No." :=
-                        ProcessRec.PNR;
+                        // Item No. and Description = PNR
+                        Item."No." := ProcessRec.PNR;
+                        Item.Description := ProcessRec.PNR;
 
-                        Item.Description :=
-                            ProcessRec.PNR;
-
+                        // Item Type
                         Item.Validate(
                             Type,
-                            Item.Type::"Inventory");
+                            Item.Type::Inventory);
 
-                       Item.Validate(
+                        // Posting Groups
+                        Item.Validate(
                             "Inventory Posting Group",
                             'RESALE');
 
                         Item.Validate(
-                        "Gen. Prod. Posting Group",
-                        'RETAIL');
+                            "Gen. Prod. Posting Group",
+                            'RETAIL');
+
+                        // GST Details
+                        Item.Validate(
+                            "GST Group Code",
+                            'S1800');
+
+                        Item.Validate(
+                            "HSN/SAC Code",
+                            '998551');
+
+                        Item.Validate(
+                            "GST Credit",
+                            Item."GST Credit"::Availment);
+
+                        // VAT Prod. Posting Group remains blank
+
+                        // Insert Item
                         Item.Insert(true);
 
+                        // Base Unit of Measure
                         Item.Validate(
                             "Base Unit of Measure",
                             'PAX');
 
                         Item.Modify(true);
 
+                        // Update Sample Purchase
                         ProcessRec."Item Created" := true;
                         ProcessRec.Modify(true);
 
@@ -75,9 +95,7 @@ codeunit 50322 "Sample Purchase Item Mngt"
 
             until ProcessRec.Next() = 0;
 
-        // -------------------------
-        // Result
-        // -------------------------
+        // Result Summary
         if (CreatedCount > 0) and
            (AlreadyExistCount = 0) and
            (SkippedCount = 0) then begin
@@ -104,8 +122,7 @@ codeunit 50322 "Sample Purchase Item Mngt"
 
         end else begin
 
-            SummaryMsg :=
-                'Item Creation Summary:\';
+            SummaryMsg := 'Item Creation Summary:\';
 
             if CreatedCount > 0 then
                 SummaryMsg +=
