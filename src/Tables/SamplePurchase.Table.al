@@ -1,3 +1,4 @@
+
 table 50300 "Sample Purchase"
 {
     Caption = 'Sample Purchase';
@@ -61,14 +62,12 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
         }
 
-        //////////////////////////////////////////////////////////////////////////////
         field(5; "Agency ID"; Code[20])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
             ObsoleteState = Removed;
         }
-        //////////////////////////////////////////////////////////////////////////////
 
         field(15; "Supplier ID"; Code[20])
         {
@@ -110,7 +109,7 @@ table 50300 "Sample Purchase"
 
             trigger OnValidate()
             begin
-                PNR := UpperCase(PNR);
+                Rec.PNR := UpperCase(Rec.PNR);
                 CheckDuplicatePNR();
             end;
         }
@@ -203,12 +202,30 @@ table 50300 "Sample Purchase"
         {
             Clustered = true;
         }
+
+        key(PNRKey; PNR)
+        {
+        }
     }
 
     trigger OnInsert()
     begin
+        // Generate serial number
         "Serial No." := GetNextSerialNo();
+
+        // Normalize and check PNR
+        Rec.PNR := UpperCase(Rec.PNR);
+        CheckDuplicatePNR();
+
+        // Calculate purchase amounts
         CalculatePurchaseAmount();
+    end;
+
+    trigger OnModify()
+    begin
+        // Prevent duplicate PNR even when modified by code
+        Rec.PNR := UpperCase(Rec.PNR);
+        CheckDuplicatePNR();
     end;
 
     local procedure CalculatePurchaseAmount()
@@ -259,58 +276,25 @@ table 50300 "Sample Purchase"
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";
-        NormalSales: Record "Normal Sales";
-        APISalesFormat: Record "API Sales Format";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
-        CommissionRec: Record "Commission Calculation";
     begin
-        if PNR = '' then
+        // Empty PNR does not require duplicate checking
+        if Rec.PNR = '' then
             exit;
 
         SamplePurchase.Reset();
+
+        // Search only inside Sample Purchase
         SamplePurchase.SetRange(PNR, Rec.PNR);
 
+        // Exclude the current record
         if Rec."Serial No." <> 0 then
             SamplePurchase.SetFilter(
                 "Serial No.", '<>%1', Rec."Serial No.");
 
+        // Block duplicate PNR
         if not SamplePurchase.IsEmpty() then
             Error(
                 'The PNR %1 already exists in Sample Purchase.',
                 Rec.PNR);
-
-        NormalSales.Reset();
-        NormalSales.SetRange(PNR, Rec.PNR);
-
-        if not NormalSales.IsEmpty() then
-            Error(
-                'The PNR %1 already exists in Normal Sales.',
-                Rec.PNR);
-
-        APISalesFormat.Reset();
-        APISalesFormat.SetRange(PNR, Rec.PNR);
-
-        if not APISalesFormat.IsEmpty() then
-            Error(
-                'The PNR %1 already exists in API Sales Format.',
-                Rec.PNR);
-
-        ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
-
-        if not ThirdPartySupplierSales.IsEmpty() then
-            Error(
-                'The PNR %1 already exists in Third-Party Supplier Sales.',
-                Rec.PNR);
-
-        if PNR <> xRec.PNR then begin
-            CommissionRec.Reset();
-            CommissionRec.SetRange(PNR, UpperCase(PNR));
-
-            if not CommissionRec.IsEmpty() then
-                Error(
-                    'The PNR %1 already exists in Commission Calculation.',
-                    PNR);
-        end;
     end;
 }

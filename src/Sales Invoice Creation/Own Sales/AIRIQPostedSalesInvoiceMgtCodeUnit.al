@@ -1,4 +1,4 @@
-codeunit 50431 "AIRIQ Posted Sales Invoice Mgt"
+codeunit 50471 "AIRIQ Posted Sales Invoice Mgt"
 {
     Permissions =
         tabledata "Sales Invoice Header" = m,

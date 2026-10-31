@@ -12,12 +12,31 @@
   "logo": "",
   "dependencies": [
     {
-        "id": "db643212-b7fb-4dd4-b5a8-cb44ac714461",
-        "name": "India GST",
-        "publisher": "Microsoft",
-        "version": "28.5.54976.57206"
+      "id": "db643212-b7fb-4dd4-b5a8-cb44ac714461",
+      "name": "India GST",
+      "publisher": "Microsoft",
+      "version": "28.5.54976.57206"
+    },
+    {
+      "id": "f1d9b696-156b-4251-b542-34e549fa80e9",
+      "name": "India Voucher Interface",
+      "publisher": "Microsoft",
+      "version": "28.5.54976.56550"
+    },
+    {
+      "id": "d3c551dd-5903-4194-b153-04ced9d29a2c",
+      "name": "India Tax Base",
+      "publisher": "Microsoft",
+      "version": "28.5.54976.56550"
+    },
+
+    {
+      "id": "c1eafb3f-e397-468e-bdb4-ecc5c317ca00",
+      "name": "Tax Engine",
+      "publisher": "Microsoft",
+      "version": "28.5.54976.56550"
     }
-],
+  ],
   "screenshots": [],
   "platform": "1.0.0.0",
   "application": "28.0.0.0",
@@ -33,7 +52,5 @@
     "includeSourceInSymbolFile": true
   },
   "runtime": "17.0",
-  "features": [
-    "NoImplicitWith"
-  ]
+  "features": ["NoImplicitWith"]
 }
