@@ -1,3 +1,4 @@
+
 table 50401 "API Sales Format"
 {
     Caption = 'API Sales Format';
@@ -9,44 +10,50 @@ table 50401 "API Sales Format"
         {
             Caption = 'Serial No.';
             DataClassification = SystemMetadata;
+            Editable = false;
         }
 
         field(2; "Date"; DateTime)
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
-                CurrentTime: Time;
+                SelectedTime: Time;
             begin
+                if Rec."Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Date");
-                if DT2Time(Rec."Date") = 000000T then
-                    CurrentTime := DT2Time(CurrentDateTime())
-                else
-                    CurrentTime := DT2Time(Rec."Date");
-                Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
+                SelectedTime := DT2Time(Rec."Date");
+
+                if SelectedTime = 0T then
+                    SelectedTime := DT2Time(CurrentDateTime());
+
+                Rec."Date" :=
+                    CreateDateTime(SelectedDate, SelectedTime);
             end;
-    }
+        }
 
         field(3; "Invoice Number"; Code[50])
         {
             Caption = 'Invoice Number';
             DataClassification = CustomerContent;
         }
-        /////////////////////////////////////////////////////////////////////////
+
         field(4; "Supplier ID"; Code[30])
         {
             Caption = 'Supplier ID';
             DataClassification = CustomerContent;
             ObsoleteState = Removed;
         }
-        ////////////////////////////////////////////////////////////////////////////////////////
+
         field(22; "Agency ID"; Code[30])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
-
         }
 
         field(5; "Agency Name"; Text[100])
@@ -65,6 +72,7 @@ table 50401 "API Sales Format"
                 CheckDuplicateRefNoAQNumber();
             end;
         }
+
         field(23; "Select"; Boolean)
         {
             Caption = 'Select';
@@ -81,7 +89,6 @@ table 50401 "API Sales Format"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
-
         }
 
         field(8; Passenger; Text[100])
@@ -100,19 +107,25 @@ table 50401 "API Sales Format"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
-                CurrentTime: Time;
+                SelectedTime: Time;
             begin
+                if Rec."Travel Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Travel Date");
-                if DT2Time(Rec."Travel Date") = 000000T then
-                    CurrentTime := DT2Time(CurrentDateTime())
-                else
-                    CurrentTime := DT2Time(Rec."Travel Date");
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+                SelectedTime := DT2Time(Rec."Travel Date");
+
+                if SelectedTime = 0T then
+                    SelectedTime := DT2Time(CurrentDateTime());
+
+                Rec."Travel Date" :=
+                    CreateDateTime(SelectedDate, SelectedTime);
             end;
-    }
+        }
 
         field(11; Sector; Text[200])
         {
@@ -126,7 +139,7 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
         }
 
-        field(13; "Rate"; Decimal)
+        field(13; Rate; Decimal)
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
@@ -150,8 +163,8 @@ table 50401 "API Sales Format"
 
     trigger OnInsert()
     begin
-        if "Serial No." <= 0 then
-            "Serial No." := GetNextSerialNo();
+        // Generate a unique Serial No. for every new record.
+        "Serial No." := GetNextSerialNo();
     end;
 
     local procedure GetNextSerialNo(): Integer
@@ -160,11 +173,9 @@ table 50401 "API Sales Format"
         APISalesFormat: Record "API Sales Format";
         LastUsedNo: Integer;
     begin
-        // Lock both tables to protect serial generation.
         SerialCounter.LockTable();
         APISalesFormat.LockTable();
 
-        // Always find the actual highest existing Serial No.
         APISalesFormat.Reset();
         APISalesFormat.SetCurrentKey("Serial No.");
 
@@ -175,24 +186,24 @@ table 50401 "API Sales Format"
             SerialCounter.Insert();
         end;
 
-        // Synchronize counter with existing records.
         if APISalesFormat.FindLast() then
-            if APISalesFormat."Serial No." > SerialCounter."Last Serial No." then
-                SerialCounter."Last Serial No." := APISalesFormat."Serial No.";
+            if APISalesFormat."Serial No." >
+               SerialCounter."Last Serial No."
+            then
+                SerialCounter."Last Serial No." :=
+                    APISalesFormat."Serial No.";
 
         LastUsedNo := SerialCounter."Last Serial No.";
 
         if LastUsedNo >= 2147483647 then
             Error('API Sales Serial No. limit reached.');
 
-        // Save the next number permanently.
         SerialCounter."Last Serial No." := LastUsedNo + 1;
         SerialCounter.Modify();
 
         exit(LastUsedNo + 1);
     end;
 
-    
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";
@@ -205,25 +216,39 @@ table 50401 "API Sales Format"
 
         APISalesFormat.Reset();
         APISalesFormat.SetRange(PNR, Rec.PNR);
+
         if Rec."Serial No." <> 0 then
-            APISalesFormat.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            APISalesFormat.SetFilter(
+                "Serial No.", '<>%1', Rec."Serial No.");
+
         if not APISalesFormat.IsEmpty() then
-            Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in API Sales Format.',
+                Rec.PNR);
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, Rec.PNR);
+
         if not SamplePurchase.IsEmpty() then
-            Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Sample Purchase.',
+                Rec.PNR);
 
         NormalSales.Reset();
         NormalSales.SetRange(PNR, Rec.PNR);
+
         if not NormalSales.IsEmpty() then
-            Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Normal Sales.',
+                Rec.PNR);
 
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Third-Party Supplier Sales.',
+                Rec.PNR);
     end;
 
     local procedure CheckDuplicateRefNoAQNumber()
@@ -236,20 +261,34 @@ table 50401 "API Sales Format"
             exit;
 
         APISalesFormat.Reset();
-        APISalesFormat.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        APISalesFormat.SetRange(
+            "Ref No./AQ Number", Rec."Ref No./AQ Number");
+
         if Rec."Serial No." <> 0 then
-            APISalesFormat.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            APISalesFormat.SetFilter(
+                "Serial No.", '<>%1', Rec."Serial No.");
+
         if not APISalesFormat.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in API Sales Format.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in API Sales Format.',
+                Rec."Ref No./AQ Number");
 
         NormalSales.Reset();
-        NormalSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        NormalSales.SetRange(
+            "Ref No./AQ Number", Rec."Ref No./AQ Number");
+
         if not NormalSales.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in Normal Sales.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in Normal Sales.',
+                Rec."Ref No./AQ Number");
 
         ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        ThirdPartySupplierSales.SetRange(
+            "Ref No./AQ Number", Rec."Ref No./AQ Number");
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.',
+                Rec."Ref No./AQ Number");
     end;
 }

@@ -65,13 +65,23 @@ page 50414 "Third Party Sales List"
                     Caption = 'View Passenger';
                     Editable = false;
 
+
                     trigger OnDrillDown()
                     var
                         PassengerList: Page "Third Party Name List";
                     begin
-                        PassengerList.SetRefNoAQNumber(Rec."Ref No./AQ Number", Rec.PNR);
+                        if Rec."Ref No./AQ Number" = 0 then
+                            Error('Ref No./AQ Number is blank.');
+
+                        Clear(PassengerList);
+
+                        PassengerList.SetRefNoAQNumber(
+                            Rec."Ref No./AQ Number",
+                            Rec.PNR);
+
                         PassengerList.RunModal();
                     end;
+
                 }
 
                 field(Pax; Rec.Pax)

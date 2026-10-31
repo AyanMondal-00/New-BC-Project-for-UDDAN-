@@ -1,3 +1,4 @@
+
 page 50415 "API Sales Passenger Name List"
 {
     Caption = 'API Sales Passenger Name List';
@@ -10,7 +11,7 @@ page 50415 "API Sales Passenger Name List"
     {
         area(Content)
         {
-            group("Reference")
+            group(Reference)
             {
                 Caption = 'Reference';
 
@@ -40,12 +41,12 @@ page 50415 "API Sales Passenger Name List"
                     ApplicationArea = All;
                 }
 
-                field("ID"; Rec."ID")
+                field(ID; Rec.ID)
                 {
                     ApplicationArea = All;
                 }
 
-                field("Type"; Rec."Type")
+                field(Type; Rec.Type)
                 {
                     ApplicationArea = All;
                 }
@@ -61,7 +62,8 @@ page 50415 "API Sales Passenger Name List"
         Rec.PNR := CurrentPNR;
 
         Passenger.Reset();
-        Passenger.SetRange("Ref No./AQ Number", CurrentRefNo_AQNumber);
+        Passenger.SetRange(
+            "Ref No./AQ Number", CurrentRefNo_AQNumber);
         Passenger.SetRange(PNR, CurrentPNR);
 
         if Passenger.FindLast() then
@@ -70,16 +72,19 @@ page 50415 "API Sales Passenger Name List"
             Rec."SL No." := 1;
     end;
 
-    procedure SetRefNoAQNumber(AQNumber: Integer; PNRNo: Text[10])
+    procedure SetRefNoAQNumber(
+        AQNumber: BigInteger;
+        PNRNo: Text[10])
     begin
         CurrentRefNo_AQNumber := AQNumber;
         CurrentPNR := PNRNo;
 
-        Rec.SetRange("Ref No./AQ Number", CurrentRefNo_AQNumber);
+        Rec.SetRange(
+            "Ref No./AQ Number", CurrentRefNo_AQNumber);
         Rec.SetRange(PNR, CurrentPNR);
     end;
 
     var
-        CurrentRefNo_AQNumber: Integer;
+        CurrentRefNo_AQNumber: BigInteger;
         CurrentPNR: Text[10];
 }

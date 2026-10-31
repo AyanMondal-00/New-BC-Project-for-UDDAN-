@@ -1,3 +1,4 @@
+
 table 50405 "API Sales Passenger Name"
 {
     Caption = 'API Sales Passenger Name';
@@ -11,7 +12,7 @@ table 50405 "API Sales Passenger Name"
             DataClassification = CustomerContent;
         }
 
-        field(2; "PNR"; Text[10])
+        field(2; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = SystemMetadata;
@@ -29,13 +30,13 @@ table 50405 "API Sales Passenger Name"
             DataClassification = CustomerContent;
         }
 
-        field(5; "ID"; BigInteger)
+        field(5; ID; BigInteger)
         {
             Caption = 'ID';
             DataClassification = CustomerContent;
         }
 
-        field(6; "Type"; Text[50])
+        field(6; Type; Text[50])
         {
             Caption = 'Type';
             DataClassification = CustomerContent;
@@ -44,7 +45,7 @@ table 50405 "API Sales Passenger Name"
 
     keys
     {
-        key(PK; "Ref No./AQ Number", "PNR", "SL No.")
+        key(PK; "Ref No./AQ Number", PNR, "SL No.")
         {
             Clustered = true;
         }

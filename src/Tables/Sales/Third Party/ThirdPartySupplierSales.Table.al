@@ -1,3 +1,4 @@
+
 table 50402 "Third-Party Supplier Sales"
 {
     Caption = 'Third-Party Supplier Sales';
@@ -15,19 +16,22 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Date");
+
                 if DT2Time(Rec."Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Date");
+
                 Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(3; "Invoice Number"; Code[50])
         {
@@ -41,11 +45,11 @@ table 50402 "Third-Party Supplier Sales"
             DataClassification = CustomerContent;
             ObsoleteState = Removed;
         }
+
         field(22; "Agency ID"; Code[30])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
-
         }
 
         field(5; "Agency Name"; Text[100])
@@ -64,6 +68,7 @@ table 50402 "Third-Party Supplier Sales"
                 CheckDuplicateRefNoAQNumber();
             end;
         }
+
         field(23; "Select"; Boolean)
         {
             Caption = 'Select';
@@ -80,7 +85,6 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
-
         }
 
         field(8; Passenger; Text[100])
@@ -93,25 +97,33 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Pax';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateTotalAmount();
+            end;
         }
 
         field(10; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
+
                 if DT2Time(Rec."Travel Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Travel Date");
+
                 Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(11; Sector; Text[200])
         {
@@ -129,6 +141,11 @@ table 50402 "Third-Party Supplier Sales"
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateTotalAmount();
+            end;
         }
 
         field(19; "Total Amount"; Decimal)
@@ -149,8 +166,18 @@ table 50402 "Third-Party Supplier Sales"
 
     trigger OnInsert()
     begin
+        // Calculate total before inserting the record.
+        CalculateTotalAmount();
+
+        // Existing Serial No. generation.
         if "Serial No." <= 0 then
             "Serial No." := GetNextSerialNo();
+    end;
+
+    // New calculation procedure.
+    local procedure CalculateTotalAmount()
+    begin
+        Rec."Total Amount" := Rec.Rate * Rec.Pax;
     end;
 
     local procedure GetNextSerialNo(): Integer
@@ -176,8 +203,11 @@ table 50402 "Third-Party Supplier Sales"
 
         // Synchronize counter with existing records.
         if ThirdPartySupplierSales.FindLast() then
-            if ThirdPartySupplierSales."Serial No." > SerialCounter."Last Serial No." then
-                SerialCounter."Last Serial No." := ThirdPartySupplierSales."Serial No.";
+            if ThirdPartySupplierSales."Serial No." >
+               SerialCounter."Last Serial No."
+            then
+                SerialCounter."Last Serial No." :=
+                    ThirdPartySupplierSales."Serial No.";
 
         LastUsedNo := SerialCounter."Last Serial No.";
 
@@ -191,7 +221,6 @@ table 50402 "Third-Party Supplier Sales"
         exit(LastUsedNo + 1);
     end;
 
-    
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";
@@ -204,25 +233,41 @@ table 50402 "Third-Party Supplier Sales"
 
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
+
         if Rec."Serial No." <> 0 then
-            ThirdPartySupplierSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            ThirdPartySupplierSales.SetFilter(
+                "Serial No.",
+                '<>%1',
+                Rec."Serial No.");
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Third-Party Supplier Sales.',
+                Rec.PNR);
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, Rec.PNR);
+
         if not SamplePurchase.IsEmpty() then
-            Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Sample Purchase.',
+                Rec.PNR);
 
         NormalSales.Reset();
         NormalSales.SetRange(PNR, Rec.PNR);
+
         if not NormalSales.IsEmpty() then
-            Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Normal Sales.',
+                Rec.PNR);
 
         APISalesFormat.Reset();
         APISalesFormat.SetRange(PNR, Rec.PNR);
+
         if not APISalesFormat.IsEmpty() then
-            Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in API Sales Format.',
+                Rec.PNR);
     end;
 
     local procedure CheckDuplicateRefNoAQNumber()
@@ -235,20 +280,39 @@ table 50402 "Third-Party Supplier Sales"
             exit;
 
         ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        ThirdPartySupplierSales.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
         if Rec."Serial No." <> 0 then
-            ThirdPartySupplierSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            ThirdPartySupplierSales.SetFilter(
+                "Serial No.",
+                '<>%1',
+                Rec."Serial No.");
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.',
+                Rec."Ref No./AQ Number");
 
         NormalSales.Reset();
-        NormalSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        NormalSales.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
         if not NormalSales.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in Normal Sales.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in Normal Sales.',
+                Rec."Ref No./AQ Number");
 
         APISalesFormat.Reset();
-        APISalesFormat.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        APISalesFormat.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
         if not APISalesFormat.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in API Sales Format.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in API Sales Format.',
+                Rec."Ref No./AQ Number");
     end;
 }

@@ -12,7 +12,7 @@ table 50406 "Third Party Passenger Name"
             DataClassification = CustomerContent;
         }
 
-        field(2; "PNR"; Text[10])
+        field(2; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = SystemMetadata;
@@ -30,24 +30,28 @@ table 50406 "Third Party Passenger Name"
             DataClassification = CustomerContent;
         }
 
-        field(5; "ID"; BigInteger)
+        field(5; ID; BigInteger)
         {
-            Caption = 'ID';
+            Caption = 'Passenger ID';
             DataClassification = CustomerContent;
         }
 
-        field(6; "Type"; Text[50])
+        field(6; Type; Text[50])
         {
-            Caption = 'Type';
+            Caption = 'Passenger Type';
             DataClassification = CustomerContent;
         }
     }
 
     keys
     {
-        key(PK; "Ref No./AQ Number", "PNR", "SL No.")
+        key(PK; "Ref No./AQ Number", PNR, "SL No.")
         {
             Clustered = true;
+        }
+
+        key(SLNoLookup; "SL No.")
+        {
         }
     }
 }
