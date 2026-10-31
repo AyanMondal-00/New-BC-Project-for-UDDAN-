@@ -1,3 +1,4 @@
+
 table 50420 "Inventory Consumption"
 {
     Caption = 'Inventory Consumption';
@@ -9,11 +10,14 @@ table 50420 "Inventory Consumption"
         {
             Caption = 'Select';
             DataClassification = CustomerContent;
+            InitValue = false;
         }
+
         field(21; "Purchase Return Order Created"; Boolean)
         {
             Caption = 'Purchase Return Order Created';
             DataClassification = CustomerContent;
+            InitValue = false;
         }
 
         field(1; "Serial No."; Integer)
@@ -26,19 +30,22 @@ table 50420 "Inventory Consumption"
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Date");
+
                 if DT2Time(Rec."Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Date");
+
                 Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(3; "Invoice Number"; Code[50])
         {
@@ -57,7 +64,7 @@ table 50420 "Inventory Consumption"
             Caption = 'Agency Name';
             DataClassification = CustomerContent;
         }
-        
+
         field(22; "Supplier Name"; Text[100])
         {
             Caption = 'Supplier Name';
@@ -80,6 +87,8 @@ table 50420 "Inventory Consumption"
         {
             Caption = 'Passenger';
             DataClassification = CustomerContent;
+            ObsoleteState = Removed;
+            ObsoleteReason = 'Passenger name is no longer maintained in this table.';
         }
 
         field(9; Pax; Integer)
@@ -92,19 +101,22 @@ table 50420 "Inventory Consumption"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
+
                 if DT2Time(Rec."Travel Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Travel Date");
+
                 Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(11; Sector; Text[200])
         {
@@ -159,8 +171,6 @@ table 50420 "Inventory Consumption"
             Caption = 'Total Amount';
             DataClassification = CustomerContent;
         }
-
-
     }
 
     keys
@@ -179,14 +189,29 @@ table 50420 "Inventory Consumption"
 
     local procedure GetNextSerialNo(): Integer
     var
+        SerialCounter: Record "Inv. Cons. Serial Cnt.";
         InventoryConsumption: Record "Inventory Consumption";
     begin
-        InventoryConsumption.Reset();
+        SerialCounter.LockTable();
 
-        if InventoryConsumption.FindLast() then
-            if InventoryConsumption."Serial No." >= 1 then
-                exit(InventoryConsumption."Serial No." + 1);
+        if not SerialCounter.Get('INVCON') then begin
+            SerialCounter.Init();
+            SerialCounter."Counter Code" := 'INVCON';
 
-        exit(1);
+            InventoryConsumption.Reset();
+
+            if InventoryConsumption.FindLast() then
+                SerialCounter."Last Serial No." :=
+                    InventoryConsumption."Serial No."
+            else
+                SerialCounter."Last Serial No." := 0;
+
+            SerialCounter.Insert();
+        end;
+
+        SerialCounter."Last Serial No." += 1;
+        SerialCounter.Modify();
+
+        exit(SerialCounter."Last Serial No.");
     end;
 }

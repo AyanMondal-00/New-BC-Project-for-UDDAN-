@@ -94,10 +94,6 @@ codeunit 50332 "Purchase Return Excel Import"
                         CopyStr(GetCellText(ExcelBuffer, RowNo, 6),
                             1, MaxStrLen(PurchaseReturn."Airline ID"));
 
-                    // Column 7: Airline Code
-                    PurchaseReturn."Airline Code" :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 7),
-                            1, MaxStrLen(PurchaseReturn."Airline Code"));
 
                     // Column 8: Country
                     PurchaseReturn.Country :=

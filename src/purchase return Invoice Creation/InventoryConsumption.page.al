@@ -1,4 +1,5 @@
-page 50420 "Inventory Consumption List"
+
+page 50420 "Inv. Consumption List"
 {
     Caption = 'Inventory Consumption';
     PageType = List;
@@ -50,10 +51,12 @@ page 50420 "Inventory Consumption List"
                 {
                     ApplicationArea = All;
                 }
+
                 field("Supplier Name"; Rec."Supplier Name")
                 {
                     ApplicationArea = All;
                 }
+
                 field("Ref No./AQ Number"; Rec."Ref No./AQ Number")
                 {
                     ApplicationArea = All;
@@ -62,24 +65,6 @@ page 50420 "Inventory Consumption List"
                 field(PNR; Rec.PNR)
                 {
                     ApplicationArea = All;
-                }
-
-                field("View Passenger"; ViewPassengerText)
-                {
-                    ApplicationArea = All;
-                    Caption = 'View Passenger';
-                    Editable = false;
-
-                    trigger OnDrillDown()
-                    var
-                        PassengerList: Page "Inventory Consumption Pasenger";
-                    begin
-                        PassengerList.SetRefNoAQNumber(
-                            Rec."Ref No./AQ Number",
-                            Rec.PNR);
-
-                        PassengerList.RunModal();
-                    end;
                 }
 
                 field(Pax; Rec.Pax)
@@ -144,6 +129,21 @@ page 50420 "Inventory Consumption List"
     {
         area(Processing)
         {
+            action("Import from Excel")
+            {
+                ApplicationArea = All;
+                Caption = 'Import from Excel';
+                Image = ImportExcel;
+
+                trigger OnAction()
+                var
+                    ExcelImportMgt: Codeunit "Inv. Cons. Excel Import";
+                begin
+                    ExcelImportMgt.ImportFromExcel();
+                    CurrPage.Update(false);
+                end;
+            }
+
             action("Create Purchase Return Order")
             {
                 ApplicationArea = All;
@@ -174,30 +174,17 @@ page 50420 "Inventory Consumption List"
 
     var
         PurchaseReturnOrderCreatedText: Text[40];
-        ViewPassengerText: Text[40];
 
     trigger OnAfterGetRecord()
     begin
-        ViewPassengerText := 'View Passenger';
-
         if Rec."Purchase Return Order Created" then
-            PurchaseReturnOrderCreatedText := 'No'
+            PurchaseReturnOrderCreatedText := 'Yes'
         else
-            PurchaseReturnOrderCreatedText := 'Yes';
+            PurchaseReturnOrderCreatedText := 'No';
     end;
 
     trigger OnNewRecord(BelowxRec: Boolean)
-    var
-        InventoryConsumption: Record "Inventory Consumption";
     begin
-        InventoryConsumption.Reset();
-
-        if InventoryConsumption.FindLast() then
-            if InventoryConsumption."Serial No." >= 1 then
-                Rec."Serial No." := InventoryConsumption."Serial No." + 1
-            else
-                Rec."Serial No." := 1
-        else
-            Rec."Serial No." := 1;
+        PurchaseReturnOrderCreatedText := 'No';
     end;
 }

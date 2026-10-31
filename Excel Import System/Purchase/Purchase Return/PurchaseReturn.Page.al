@@ -42,10 +42,6 @@ page 50312 "Purchase Return"
                     ApplicationArea = All;
                 }
 
-                field("Airline Code"; Rec."Airline Code")
-                {
-                    ApplicationArea = All;
-                }
 
                 field(Country; Rec.Country)
                 {

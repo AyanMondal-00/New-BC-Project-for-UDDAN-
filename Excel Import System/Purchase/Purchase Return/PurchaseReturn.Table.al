@@ -69,6 +69,8 @@ table 50302 "Purchase Return"
         {
             Caption = 'Airline Code';
             DataClassification = CustomerContent;
+            ObsoleteState = Removed;
+            ObsoleteReason = 'Field is no longer used.';
         }
 
         field(8; Country; Text[50])
