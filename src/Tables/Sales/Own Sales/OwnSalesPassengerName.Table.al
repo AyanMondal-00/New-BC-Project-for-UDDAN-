@@ -1,3 +1,4 @@
+
 table 50404 "Own Sales Passenger Name"
 {
     Caption = 'Own Sales Passenger Name';
@@ -11,31 +12,33 @@ table 50404 "Own Sales Passenger Name"
             DataClassification = CustomerContent;
         }
 
-        field(2; "PNR"; Text[10])
+        field(2; PNR; Text[10])
         {
             Caption = 'PNR';
             DataClassification = SystemMetadata;
         }
+
         field(3; "SL No."; Integer)
         {
             Caption = 'SL No.';
             DataClassification = SystemMetadata;
         }
+
         field(4; "Passenger Name"; Text[100])
         {
             Caption = 'Passenger Name';
             DataClassification = CustomerContent;
         }
 
-        field(5; "ID"; BigInteger)
+        field(5; ID; BigInteger)
         {
-            Caption = 'ID';
+            Caption = 'Passenger ID';
             DataClassification = CustomerContent;
         }
 
-        field(6; "Type"; Text[50])
+        field(6; Type; Text[50])
         {
-            Caption = 'Type';
+            Caption = 'Passenger Type';
             DataClassification = CustomerContent;
         }
 
@@ -58,9 +61,13 @@ table 50404 "Own Sales Passenger Name"
 
     keys
     {
-        key(PK; "Ref No./AQ Number", "PNR", "SL No.")
+        key(PK; "Ref No./AQ Number", PNR, "SL No.")
         {
             Clustered = true;
+        }
+
+        key(SLNoLookup; "SL No.")
+        {
         }
     }
 }

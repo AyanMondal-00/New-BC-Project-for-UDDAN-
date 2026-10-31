@@ -10,26 +10,15 @@ page 50418 "Sales Return Passenger List"
     {
         area(Content)
         {
-            group("Reference")
-            {
-                Caption = 'Reference';
-
-                field("Return No."; Rec."Return No.")
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-
-                field(PNR; Rec.PNR)
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-            }
-
             repeater(General)
             {
                 field("SL No."; Rec."SL No.")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
+
+                field("Return No."; Rec."Return No.")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -40,29 +29,39 @@ page 50418 "Sales Return Passenger List"
                     ApplicationArea = All;
                 }
 
-                field("ID"; Rec."ID")
+                field("Passenger ID"; Rec.ID)
                 {
                     ApplicationArea = All;
+                    Caption = 'Passenger ID';
                 }
 
-                field("Type"; Rec."Type")
+                field("Passenger Type"; Rec.Type)
                 {
                     ApplicationArea = All;
+                    Caption = 'Passenger Type';
                 }
             }
         }
     }
 
+    trigger OnOpenPage()
+    begin
+        Rec.SetCurrentKey("SL No.");
+    end;
+
     trigger OnNewRecord(BelowxRec: Boolean)
     var
         Passenger: Record "Sales Return Passenger Name";
     begin
+        if CurrentReturnNo = '' then
+            Error('Return No. is required to add a passenger.');
+
         Rec."Return No." := CurrentReturnNo;
         Rec.PNR := CurrentPNR;
 
+        Passenger.LockTable();
         Passenger.Reset();
-        Passenger.SetRange("Return No.", CurrentReturnNo);
-        Passenger.SetRange(PNR, CurrentPNR);
+        Passenger.SetCurrentKey("SL No.");
 
         if Passenger.FindLast() then
             Rec."SL No." := Passenger."SL No." + 1
@@ -70,13 +69,16 @@ page 50418 "Sales Return Passenger List"
             Rec."SL No." := 1;
     end;
 
-    procedure SetReturnNoAndPNR(ReturnNo: Code[50]; PNRNo: Text[10])
+    procedure SetReturnNoAndPNR(
+        ReturnNo: Code[50];
+        PNRNo: Text[10])
     begin
         CurrentReturnNo := ReturnNo;
         CurrentPNR := PNRNo;
 
+        Rec.FilterGroup(2);
         Rec.SetRange("Return No.", CurrentReturnNo);
-        Rec.SetRange(PNR, CurrentPNR);
+        Rec.FilterGroup(0);
     end;
 
     var

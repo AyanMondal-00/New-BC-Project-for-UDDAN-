@@ -31,13 +31,13 @@ table 50407 "Sales Return Passenger Name"
 
         field(5; "ID"; BigInteger)
         {
-            Caption = 'ID';
+            Caption = 'Passenger ID';
             DataClassification = CustomerContent;
         }
 
         field(6; "Type"; Text[50])
         {
-            Caption = 'Type';
+            Caption = 'Passenger Type';
             DataClassification = CustomerContent;
         }
     }
@@ -47,6 +47,10 @@ table 50407 "Sales Return Passenger Name"
         key(PK; "Return No.", "PNR", "SL No.")
         {
             Clustered = true;
+        }
+
+        key(SLNoLookup; "SL No.")
+        {
         }
     }
 }

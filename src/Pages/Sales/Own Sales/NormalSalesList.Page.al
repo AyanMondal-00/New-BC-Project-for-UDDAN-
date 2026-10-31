@@ -66,15 +66,21 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                     Caption = 'View Passenger';
                     Editable = false;
+                    DrillDown = true;
 
                     trigger OnDrillDown()
                     var
                         PassengerList: Page "Own Sales Passenger List Name";
                     begin
+                        if Rec."Ref No./AQ Number" = 0 then
+                            Error('Ref No./AQ Number is blank.');
+
+                        Clear(PassengerList);
+
                         PassengerList.SetRefNoAQNumber(
                             Rec."Ref No./AQ Number",
-                            Rec.PNR
-                        );
+                            Rec.PNR);
+
                         PassengerList.RunModal();
                     end;
                 }
@@ -165,8 +171,7 @@ page 50410 "Normal Sales List"
                     if DateFilterDialog.RunModal() = Action::OK then begin
                         DateFilterDialog.GetDates(
                             SelectedFromDate,
-                            SelectedToDate
-                        );
+                            SelectedToDate);
 
                         if (SelectedFromDate = 0D) or
                            (SelectedToDate = 0D)
@@ -178,8 +183,7 @@ page 50410 "Normal Sales List"
 
                         OwnSalesAPIMgt.ImportOwnSalesByDate(
                             SelectedFromDate,
-                            SelectedToDate
-                        );
+                            SelectedToDate);
 
                         CurrPage.Update(false);
                     end;
@@ -200,8 +204,7 @@ page 50410 "Normal Sales List"
                     CurrPage.SetSelectionFilter(SelectedNormalSales);
 
                     SalesInvoiceMgt.CreateOwnSalesInvoices(
-                        SelectedNormalSales
-                    );
+                        SelectedNormalSales);
 
                     CurrPage.Update(false);
                 end;
@@ -221,7 +224,6 @@ page 50410 "Normal Sales List"
                     CurrPage.Update(false);
                 end;
             }
-
         }
     }
 

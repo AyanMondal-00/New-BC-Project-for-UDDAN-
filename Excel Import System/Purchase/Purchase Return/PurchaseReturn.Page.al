@@ -1,3 +1,4 @@
+
 page 50312 "Purchase Return"
 {
     PageType = List;
@@ -17,6 +18,7 @@ page 50312 "Purchase Return"
                     ApplicationArea = All;
                     Editable = false;
                 }
+
                 field("Entry Date"; Rec."Entry Date")
                 {
                     ApplicationArea = All;
@@ -41,7 +43,6 @@ page 50312 "Purchase Return"
                 {
                     ApplicationArea = All;
                 }
-
 
                 field(Country; Rec.Country)
                 {
@@ -127,8 +128,6 @@ page 50312 "Purchase Return"
                 {
                     ApplicationArea = All;
                 }
-
-   
 
                 field("Cost Revision"; Rec."Cost Revision")
                 {

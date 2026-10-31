@@ -1,3 +1,4 @@
+
 page 50412 "Own Sales Passenger List Name"
 {
     Caption = 'Own Sale Passenger Name List';
@@ -12,19 +13,13 @@ page 50412 "Own Sales Passenger List Name"
         {
             repeater(General)
             {
-                field("Ref No./AQ Number"; Rec."Ref No./AQ Number")
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-
-                field(PNR; Rec.PNR)
-                {
-                    ApplicationArea = All;
-                    Editable = false;
-                }
-
                 field("SL No."; Rec."SL No.")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
+
+                field("Ref No./AQ Number"; Rec."Ref No./AQ Number")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -35,29 +30,39 @@ page 50412 "Own Sales Passenger List Name"
                     ApplicationArea = All;
                 }
 
-                field("ID"; Rec."ID")
+                field("Passenger ID"; Rec.ID)
                 {
                     ApplicationArea = All;
+                    Caption = 'Passenger ID';
                 }
 
-                field("Type"; Rec."Type")
+                field("Passenger Type"; Rec.Type)
                 {
                     ApplicationArea = All;
+                    Caption = 'Passenger Type';
                 }
             }
         }
     }
 
+    trigger OnOpenPage()
+    begin
+        Rec.SetCurrentKey("SL No.");
+    end;
+
     trigger OnNewRecord(BelowxRec: Boolean)
     var
         Passenger: Record "Own Sales Passenger Name";
     begin
-        Rec."Ref No./AQ Number" := CurrentRefNo_AQNumber;
+        if CurrentRefNoAQNumber = 0 then
+            Error('Ref No./AQ Number is required.');
+
+        Rec."Ref No./AQ Number" := CurrentRefNoAQNumber;
         Rec.PNR := CurrentPNR;
 
+        Passenger.LockTable();
         Passenger.Reset();
-        Passenger.SetRange("Ref No./AQ Number", CurrentRefNo_AQNumber);
-        Passenger.SetRange(PNR, CurrentPNR);
+        Passenger.SetCurrentKey("SL No.");
 
         if Passenger.FindLast() then
             Rec."SL No." := Passenger."SL No." + 1
@@ -65,16 +70,19 @@ page 50412 "Own Sales Passenger List Name"
             Rec."SL No." := 1;
     end;
 
-    procedure SetRefNoAQNumber(AQNumber: Integer; PNRNo: Text[10])
+    procedure SetRefNoAQNumber(
+        AQNumber: BigInteger;
+        PNRNo: Text[10])
     begin
-        CurrentRefNo_AQNumber := AQNumber;
+        CurrentRefNoAQNumber := AQNumber;
         CurrentPNR := PNRNo;
 
-        Rec.SetRange("Ref No./AQ Number", CurrentRefNo_AQNumber);
-        Rec.SetRange(PNR, CurrentPNR);
+        Rec.FilterGroup(2);
+        Rec.SetRange("Ref No./AQ Number", CurrentRefNoAQNumber);
+        Rec.FilterGroup(0);
     end;
 
     var
-        CurrentRefNo_AQNumber: Integer;
+        CurrentRefNoAQNumber: BigInteger;
         CurrentPNR: Text[10];
 }

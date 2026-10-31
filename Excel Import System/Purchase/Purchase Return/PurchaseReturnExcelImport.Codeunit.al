@@ -1,321 +1,386 @@
 
 codeunit 50332 "Purchase Return Excel Import"
 {
+    trigger OnRun()
+    begin
+        ImportFromExcel();
+    end;
+
     procedure ImportFromExcel()
     var
-        ExcelBuffer: Record "Excel Buffer" temporary;
         PurchaseReturn: Record "Purchase Return";
-        ExistingPurchaseReturn: Record "Purchase Return";
-        InStream: InStream;
+        CheckPurchaseReturn: Record "Purchase Return";
+        TempExcelBuffer: Record "Excel Buffer" temporary;
+        UploadInStream: InStream;
         FileName: Text;
-        SheetName: Text;
-        LastRow: Integer;
         RowNo: Integer;
+        LastRowNo: Integer;
+        PNRValue: Text;
         CellValue: Text;
-        PNRValue: Text[10];
         ImportedCount: Integer;
-        DuplicateCount: Integer;
-        BlankRowCount: Integer;
+        SkippedCount: Integer;
     begin
         if not UploadIntoStream(
-            'Select Excel File',
+            'Select Purchase Return Excel File',
             '',
             'Excel Files (*.xlsx)|*.xlsx',
             FileName,
-            InStream)
+            UploadInStream)
         then
             exit;
 
-        SheetName := ExcelBuffer.SelectSheetsNameStream(InStream);
-        if SheetName = '' then
-            exit;
+        // Open Excel workbook
+        TempExcelBuffer.Reset();
+        TempExcelBuffer.DeleteAll();
 
-        ExcelBuffer.OpenBookStream(InStream, SheetName);
-        ExcelBuffer.ReadSheet();
+        TempExcelBuffer.OpenBookStream(
+            UploadInStream,
+            'Purchase Return');
 
-        ExcelBuffer.Reset();
-        if ExcelBuffer.FindLast() then
-            LastRow := ExcelBuffer."Row No.";
+        TempExcelBuffer.ReadSheet();
 
-        for RowNo := 2 to LastRow do begin
-            if (GetCellText(ExcelBuffer, RowNo, 4) = '') and
-               (GetCellText(ExcelBuffer, RowNo, 7) = '') and
-               (GetCellText(ExcelBuffer, RowNo, 11) = '')
-            then
-                BlankRowCount += 1
-            else begin
-                PNRValue := CopyStr(
-                    GetCellText(ExcelBuffer, RowNo, 11),
-                    1,
-                    MaxStrLen(PNRValue));
+        // Find last Excel row
+        TempExcelBuffer.Reset();
 
-                // Duplicate prevention by PNR.
-                Clear(ExistingPurchaseReturn);
+        if TempExcelBuffer.FindLast() then
+            LastRowNo := TempExcelBuffer."Row No."
+        else
+            LastRowNo := 0;
 
-                if PNRValue <> '' then begin
-                    ExistingPurchaseReturn.SetRange(
-                        PNR, PNRValue);
-                end;
+        // Start from Row 2 because Row 1 contains headers
+        for RowNo := 2 to LastRowNo do begin
 
-                if (PNRValue <> '') and
-                   ExistingPurchaseReturn.FindFirst()
-                then
-                    DuplicateCount += 1
-                else begin
-                    PurchaseReturn.Init();
+            // Column 10: PNR
+            PNRValue := UpperCase(
+                DelChr(
+                    GetCellValue(TempExcelBuffer, RowNo, 10),
+                    '=',
+                    ' '));
 
-                    // Column 1: Serial No. ignored.
-                    // Table OnInsert generates the Serial No.
-
-                    // Column 2: Entry Date
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 2);
-                    if CellValue <> '' then
-                        PurchaseReturn."Entry Date" :=
-                            ParseExcelDateTime(CellValue, RowNo, 2);
-
-                    // Column 3: Purchase Date
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 3);
-                    if CellValue <> '' then
-                        PurchaseReturn."Purchase Date" :=
-                            ParseExcelDateTime(CellValue, RowNo, 3);
-
-                    // Column 4: Voucher Number
-                    PurchaseReturn."Voucher Number" :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 4),
-                            1, MaxStrLen(PurchaseReturn."Voucher Number"));
-
-                    // Column 5: Airline
-                    PurchaseReturn.Airline :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 5),
-                            1, MaxStrLen(PurchaseReturn.Airline));
-
-                    // Column 6: Airline ID
-                    PurchaseReturn."Airline ID" :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 6),
-                            1, MaxStrLen(PurchaseReturn."Airline ID"));
-
-
-                    // Column 8: Country
-                    PurchaseReturn.Country :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 8),
-                            1, MaxStrLen(PurchaseReturn.Country));
-
-                    // Column 9: Type
-                    PurchaseReturn.Type :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 9),
-                            1, MaxStrLen(PurchaseReturn.Type));
-
-                    // Column 10: Sector
-                    PurchaseReturn.Sector :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 10),
-                            1, MaxStrLen(PurchaseReturn.Sector));
-
-                    // Column 11: PNR
-                    PurchaseReturn.PNR := PNRValue;
-
-                    // Column 12: Reference (optional)
-                    PurchaseReturn.Reference :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 12),
-                            1, MaxStrLen(PurchaseReturn.Reference));
-
-                    // Column 13: Narration (optional)
-                    PurchaseReturn.Narration :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 13),
-                            1, MaxStrLen(PurchaseReturn.Narration));
-
-                    // Column 14: Pax
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 14);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn.Pax, CellValue) then
-                            Error('Invalid Pax "%1" at row %2.',
-                                CellValue, RowNo);
-
-                    // Column 15: Base Fare
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 15);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn."Base Fare", CellValue) then
-                            Error('Invalid Base Fare at row %1.', RowNo);
-
-                    // Column 16: Others
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 16);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn.Others, CellValue) then
-                            Error('Invalid Others at row %1.', RowNo);
-
-                    // Column 17: Rate
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 17);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn.Rate, CellValue) then
-                            Error('Invalid Rate at row %1.', RowNo);
-
-                    // Column 18: Discount
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 18);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn.Discount, CellValue) then
-                            Error('Invalid Discount at row %1.', RowNo);
-
-                    // Column 19: XXLN Charges
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 19);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn."XXLN Charges", CellValue) then
-                            Error('Invalid XXLN Charges at row %1.', RowNo);
-
-                    // Column 20: Amount
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 20);
-                    if CellValue <> '' then
-                        if not Evaluate(PurchaseReturn.Amount, CellValue) then
-                            Error('Invalid Amount at row %1.', RowNo);
-
-                    // Column 21: Travel Date
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 21);
-                    if CellValue <> '' then
-                        PurchaseReturn."Travel Date" :=
-                            ParseExcelDateTime(CellValue, RowNo, 21);
-
-                    // Column 22: Departure Time
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 22);
-                    if CellValue <> '' then
-                        PurchaseReturn."Departure Time" :=
-                            ParseExcelTime(CellValue, RowNo, 22);
-
-                    // Column 23: Arrival Time
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 23);
-                    if CellValue <> '' then
-                        PurchaseReturn."Arrival Time" :=
-                            ParseExcelTime(CellValue, RowNo, 23);
-
-                    // Column 24: Flight No.
-                    PurchaseReturn."Flight No." :=
-                        CopyStr(GetCellText(ExcelBuffer, RowNo, 24),
-                            1, MaxStrLen(PurchaseReturn."Flight No."));
-
-      
-
-                    // Column 26: Cost Revision (Yes / No)
-                    CellValue := GetCellText(ExcelBuffer, RowNo, 26);
-                    if CellValue <> '' then begin
-                        CellValue := DelChr(CellValue, '<>', ' ');
-                        if not Evaluate(PurchaseReturn."Cost Revision", CellValue) then
-                            Error(
-                                'Invalid Cost Revision "%1" at row %2. Use Yes or No.',
-                                CellValue, RowNo);
-                    end;
-
-                    // Generate Serial No. through table OnInsert.
-                    PurchaseReturn.Insert(true);
-                    ImportedCount += 1;
-                end;
+            // Skip blank PNR
+            if PNRValue = '' then begin
+                SkippedCount += 1;
+                continue;
             end;
+
+            // Check PNR length
+            if StrLen(PNRValue) > MaxStrLen(PurchaseReturn.PNR) then
+                Error(
+                    'PNR %1 at Excel row %2 exceeds maximum length of %3 characters.',
+                    PNRValue,
+                    RowNo,
+                    MaxStrLen(PurchaseReturn.PNR));
+
+            // Check duplicate PNR
+            CheckPurchaseReturn.Reset();
+            CheckPurchaseReturn.SetRange(PNR, PNRValue);
+
+            if CheckPurchaseReturn.FindFirst() then begin
+                SkippedCount += 1;
+                continue;
+            end;
+
+            PurchaseReturn.Init();
+
+            // Column 1: Serial No.
+            // Not imported. Table OnInsert generates Serial No.
+
+            // Column 2: Entry Date (DateTime)
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 2);
+            if CellValue <> '' then
+                PurchaseReturn."Entry Date" :=
+                    ParseExcelDateTime(CellValue);
+
+            // Column 3: Purchase Date (DateTime)
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 3);
+            if CellValue <> '' then
+                PurchaseReturn."Purchase Date" :=
+                    ParseExcelDateTime(CellValue);
+
+            // Column 4: Voucher Number
+            PurchaseReturn."Voucher Number" := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 4),
+                1,
+                MaxStrLen(PurchaseReturn."Voucher Number"));
+
+            // Column 5: Airline
+            PurchaseReturn.Airline := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 5),
+                1,
+                MaxStrLen(PurchaseReturn.Airline));
+
+            // Column 6: Airline ID
+            PurchaseReturn."Airline ID" := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 6),
+                1,
+                MaxStrLen(PurchaseReturn."Airline ID"));
+
+            // Column 7: Country
+            PurchaseReturn.Country := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 7),
+                1,
+                MaxStrLen(PurchaseReturn.Country));
+
+            // Column 8: Type
+            PurchaseReturn.Type := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 8),
+                1,
+                MaxStrLen(PurchaseReturn.Type));
+
+            // Column 9: Sector
+            PurchaseReturn.Sector := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 9),
+                1,
+                MaxStrLen(PurchaseReturn.Sector));
+
+            // Column 10: PNR
+            PurchaseReturn.PNR := PNRValue;
+
+            // Column 11: Reference
+            PurchaseReturn.Reference := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 11),
+                1,
+                MaxStrLen(PurchaseReturn.Reference));
+
+            // Column 12: Narration
+            PurchaseReturn.Narration := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 12),
+                1,
+                MaxStrLen(PurchaseReturn.Narration));
+
+            // Column 13: Pax
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 13);
+            if CellValue <> '' then
+                EvaluateInteger(
+                    CellValue,
+                    RowNo,
+                    'Pax',
+                    PurchaseReturn.Pax);
+
+            // Column 14: Base Fare
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 14);
+            if CellValue <> '' then
+                EvaluateDecimal(
+                    CellValue,
+                    RowNo,
+                    'Base Fare',
+                    PurchaseReturn."Base Fare");
+
+            // Column 15: Others
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 15);
+            if CellValue <> '' then
+                EvaluateDecimal(
+                    CellValue,
+                    RowNo,
+                    'Others',
+                    PurchaseReturn.Others);
+
+            // Column 16: Rate
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 16);
+            if CellValue <> '' then
+                EvaluateDecimal(
+                    CellValue,
+                    RowNo,
+                    'Rate',
+                    PurchaseReturn.Rate);
+
+            // Column 17: Discount
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 17);
+            if CellValue <> '' then
+                EvaluateDecimal(
+                    CellValue,
+                    RowNo,
+                    'Discount',
+                    PurchaseReturn.Discount);
+
+            // Column 18: XXLN Charges
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 18);
+            if CellValue <> '' then
+                EvaluateDecimal(
+                    CellValue,
+                    RowNo,
+                    'XXLN Charges',
+                    PurchaseReturn."XXLN Charges");
+
+            // Column 19: Amount
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 19);
+            if CellValue <> '' then
+                EvaluateDecimal(
+                    CellValue,
+                    RowNo,
+                    'Amount',
+                    PurchaseReturn.Amount);
+
+            // Column 20: Travel Date (DateTime)
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 20);
+            if CellValue <> '' then
+                PurchaseReturn."Travel Date" :=
+                    ParseExcelDateTime(CellValue);
+
+            // Column 21: Departure Time (Time)
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 21);
+            if CellValue <> '' then
+                PurchaseReturn."Departure Time" :=
+                    ParseExcelTime(CellValue);
+
+            // Column 22: Arrival Time (Time)
+            CellValue := GetCellValue(TempExcelBuffer, RowNo, 22);
+            if CellValue <> '' then
+                PurchaseReturn."Arrival Time" :=
+                    ParseExcelTime(CellValue);
+
+            // Column 23: Flight No.
+            PurchaseReturn."Flight No." := CopyStr(
+                GetCellValue(TempExcelBuffer, RowNo, 23),
+                1,
+                MaxStrLen(PurchaseReturn."Flight No."));
+
+            // Column 24: Cost Revision (Option)
+            CellValue := UpperCase(
+                DelChr(
+                    GetCellValue(TempExcelBuffer, RowNo, 24),
+                    '<>',
+                    ' '));
+
+            case CellValue of
+                'YES':
+                    PurchaseReturn."Cost Revision" :=
+                        PurchaseReturn."Cost Revision"::Yes;
+
+                'NO':
+                    PurchaseReturn."Cost Revision" :=
+                        PurchaseReturn."Cost Revision"::No;
+
+                '':
+                    ;
+
+                else
+                    Error(
+                        'Invalid Cost Revision "%1" at Excel row %2. Only Yes or No is allowed.',
+                        CellValue,
+                        RowNo);
+            end;
+
+            // Insert record and generate Serial No. through Table OnInsert
+            PurchaseReturn.Insert(true);
+
+            ImportedCount += 1;
         end;
 
         Message(
-            'Purchase Return Excel Import Completed.\' +
-            'Imported: %1\' +
-            'Duplicate PNR: %2\' +
-            'Blank rows skipped: %3',
+            'Purchase Return Excel Import Completed.\Imported: %1\Skipped: %2',
             ImportedCount,
-            DuplicateCount,
-            BlankRowCount);
+            SkippedCount);
     end;
 
-    local procedure ParseExcelDateTime(
-        InputText: Text;
+
+    // ---------------------------------------------------------
+    // GET EXCEL CELL VALUE
+    // ---------------------------------------------------------
+
+    local procedure GetCellValue(
+        var TempExcelBuffer: Record "Excel Buffer" temporary;
         RowNo: Integer;
-        ColumnNo: Integer): DateTime
+        ColumnNo: Integer): Text
+    begin
+        TempExcelBuffer.Reset();
+        TempExcelBuffer.SetRange("Row No.", RowNo);
+        TempExcelBuffer.SetRange("Column No.", ColumnNo);
+
+        if TempExcelBuffer.FindFirst() then
+            exit(TempExcelBuffer."Cell Value as Text");
+
+        exit('');
+    end;
+
+
+    // ---------------------------------------------------------
+    // DATETIME PARSER
+    // Expected format: 20.10.2026 19:18
+    // ---------------------------------------------------------
+
+    local procedure ParseExcelDateTime(DateTimeText: Text): DateTime
     var
+        SeparatorPosition: Integer;
+        DatePart: Text;
+        TimePart: Text;
         ParsedDate: Date;
         ParsedTime: Time;
-        DateText: Text;
-        TimeText: Text;
-        SeparatorPosition: Integer;
     begin
-        InputText := DelChr(InputText, '<>', ' ');
+        DateTimeText := DelChr(DateTimeText, '<>', ' ');
 
-        SeparatorPosition := StrPos(InputText, ' ');
+        if DateTimeText = '' then
+            exit(0DT);
 
-        if SeparatorPosition > 0 then begin
-            DateText := CopyStr(InputText, 1, SeparatorPosition - 1);
-            TimeText := CopyStr(InputText, SeparatorPosition + 1);
+        SeparatorPosition := StrPos(DateTimeText, ' ');
+
+        if SeparatorPosition = 0 then begin
+            DatePart := DateTimeText;
+            TimePart := '00:00';
         end else begin
-            DateText := InputText;
-            TimeText := '';
+            DatePart := CopyStr(
+                DateTimeText,
+                1,
+                SeparatorPosition - 1);
+
+            TimePart := DelChr(
+                CopyStr(
+                    DateTimeText,
+                    SeparatorPosition + 1),
+                '<',
+                ' ');
         end;
 
-        if not ParseDateText(DateText, ParsedDate) then
-            Error(
-                'Invalid date "%1" at Excel row %2, column %3.',
-                DateText, RowNo, ColumnNo);
-
-        if TimeText = '' then
-            exit(CreateDateTime(ParsedDate, 0T));
-
-        if not Evaluate(ParsedTime, TimeText) then
-            Error(
-                'Invalid time "%1" at Excel row %2, column %3.',
-                TimeText, RowNo, ColumnNo);
+        ParsedDate := ParseExcelDate(DatePart);
+        ParsedTime := ParseExcelTime(TimePart);
 
         exit(CreateDateTime(ParsedDate, ParsedTime));
     end;
 
-    local procedure ParseDateText(
-        InputText: Text;
-        var ParsedDate: Date): Boolean
+
+    // ---------------------------------------------------------
+    // DATE PARSER
+    // Expected format: DD.MM.YYYY
+    // Also supports DD-MM-YYYY and DD/MM/YYYY
+    // ---------------------------------------------------------
+
+    local procedure ParseExcelDate(DateText: Text): Date
     var
-        Part1: Text;
-        Part2: Text;
-        Part3: Text;
-        Separator: Text[1];
-        SeparatorPosition: Integer;
-        SecondSeparatorPosition: Integer;
-        FirstNumber: Integer;
-        SecondNumber: Integer;
-        ThirdNumber: Integer;
+        DateParts: List of [Text];
+        DayNo: Integer;
+        MonthNo: Integer;
+        YearNo: Integer;
+        ParsedDate: Date;
     begin
-        // Try BC regional date parsing first.
-        if Evaluate(ParsedDate, InputText) then
-            exit(true);
+        DateText := ConvertStr(DateText, './', '--');
 
-        SeparatorPosition := StrPos(InputText, '-');
-        if SeparatorPosition = 0 then
-            SeparatorPosition := StrPos(InputText, '/');
+        DateParts := DateText.Split('-');
 
-        if SeparatorPosition = 0 then
-            exit(false);
+        if DateParts.Count() <> 3 then
+            Error(
+                'Invalid date format "%1". Expected DD.MM.YYYY.',
+                DateText);
 
-        Separator := CopyStr(InputText, SeparatorPosition, 1);
-        Part1 := CopyStr(InputText, 1, SeparatorPosition - 1);
+        if not Evaluate(DayNo, DateParts.Get(1)) then
+            Error('Invalid day in date: %1', DateText);
 
-        SecondSeparatorPosition :=
-            StrPos(
-                CopyStr(InputText, SeparatorPosition + 1),
-                Separator);
+        if not Evaluate(MonthNo, DateParts.Get(2)) then
+            Error('Invalid month in date: %1', DateText);
 
-        if SecondSeparatorPosition = 0 then
-            exit(false);
+        if not Evaluate(YearNo, DateParts.Get(3)) then
+            Error('Invalid year in date: %1', DateText);
 
-        SecondSeparatorPosition += SeparatorPosition;
+        if not TryCreateDate(
+            DayNo,
+            MonthNo,
+            YearNo,
+            ParsedDate)
+        then
+            Error('Invalid date value: %1', DateText);
 
-        Part2 := CopyStr(
-            InputText,
-            SeparatorPosition + 1,
-            SecondSeparatorPosition - SeparatorPosition - 1);
-
-        Part3 := CopyStr(InputText, SecondSeparatorPosition + 1);
-
-        if not Evaluate(FirstNumber, Part1) then
-            exit(false);
-        if not Evaluate(SecondNumber, Part2) then
-            exit(false);
-        if not Evaluate(ThirdNumber, Part3) then
-            exit(false);
-
-        if StrLen(Part1) = 4 then
-            exit(TryCreateDate(
-                ThirdNumber, SecondNumber, FirstNumber, ParsedDate));
-
-        exit(TryCreateDate(
-            FirstNumber, SecondNumber, ThirdNumber, ParsedDate));
+        exit(ParsedDate);
     end;
+
 
     [TryFunction]
     local procedure TryCreateDate(
@@ -324,38 +389,104 @@ codeunit 50332 "Purchase Return Excel Import"
         YearNo: Integer;
         var ParsedDate: Date)
     begin
-        ParsedDate := DMY2Date(DayNo, MonthNo, YearNo);
+        ParsedDate := DMY2Date(
+            DayNo,
+            MonthNo,
+            YearNo);
     end;
 
-    local procedure ParseExcelTime(
-        InputText: Text;
-        RowNo: Integer;
-        ColumnNo: Integer): Time
+
+    // ---------------------------------------------------------
+    // TIME PARSER
+    // Expected format: 19:48
+    // Also supports 19:48:00
+    // ---------------------------------------------------------
+
+    local procedure ParseExcelTime(TimeText: Text): Time
     var
+        TimeParts: List of [Text];
+        HourNo: Integer;
+        MinuteNo: Integer;
+        SecondNo: Integer;
         ParsedTime: Time;
     begin
-        InputText := DelChr(InputText, '<>', ' ');
+        TimeText := DelChr(TimeText, '<>', ' ');
 
-        if Evaluate(ParsedTime, InputText) then
-            exit(ParsedTime);
+        if TimeText = '' then
+            exit(0T);
 
-        Error(
-            'Invalid time "%1" at Excel row %2, column %3.',
-            InputText, RowNo, ColumnNo);
+        TimeParts := TimeText.Split(':');
+
+        if (TimeParts.Count() < 2) or
+           (TimeParts.Count() > 3)
+        then
+            Error(
+                'Invalid time format "%1". Expected HH:MM.',
+                TimeText);
+
+        if not Evaluate(HourNo, TimeParts.Get(1)) then
+            Error('Invalid hour in time: %1', TimeText);
+
+        if not Evaluate(MinuteNo, TimeParts.Get(2)) then
+            Error('Invalid minute in time: %1', TimeText);
+
+        if TimeParts.Count() = 3 then begin
+            if not Evaluate(SecondNo, TimeParts.Get(3)) then
+                Error('Invalid second in time: %1', TimeText);
+        end else
+            SecondNo := 0;
+
+        if (HourNo < 0) or (HourNo > 23) or
+           (MinuteNo < 0) or (MinuteNo > 59) or
+           (SecondNo < 0) or (SecondNo > 59)
+        then
+            Error('Invalid time value: %1', TimeText);
+
+        // Convert text into Business Central Time
+        if TimeParts.Count() = 2 then
+            TimeText := TimeText + ':00';
+
+        if not Evaluate(ParsedTime, TimeText) then
+            Error('Unable to convert time: %1', TimeText);
+
+        exit(ParsedTime);
     end;
 
-    local procedure GetCellText(
-        var ExcelBuffer: Record "Excel Buffer" temporary;
+
+    // ---------------------------------------------------------
+    // INTEGER PARSER
+    // ---------------------------------------------------------
+
+    local procedure EvaluateInteger(
+        CellValue: Text;
         RowNo: Integer;
-        ColumnNo: Integer): Text
+        FieldCaption: Text;
+        var IntegerValue: Integer)
     begin
-        ExcelBuffer.Reset();
-        ExcelBuffer.SetRange("Row No.", RowNo);
-        ExcelBuffer.SetRange("Column No.", ColumnNo);
+        if not Evaluate(IntegerValue, CellValue) then
+            Error(
+                'Invalid %1 value "%2" at Excel row %3.',
+                FieldCaption,
+                CellValue,
+                RowNo);
+    end;
 
-        if ExcelBuffer.FindFirst() then
-            exit(ExcelBuffer."Cell Value as Text");
 
-        exit('');
+    // ---------------------------------------------------------
+    // DECIMAL PARSER
+    // ---------------------------------------------------------
+
+    local procedure EvaluateDecimal(
+        CellValue: Text;
+        RowNo: Integer;
+        FieldCaption: Text;
+        var DecimalValue: Decimal)
+    begin
+        if not Evaluate(DecimalValue, CellValue) then
+            Error(
+                'Invalid %1 value "%2" at Excel row %3.',
+                FieldCaption,
+                CellValue,
+                RowNo);
     end;
 }

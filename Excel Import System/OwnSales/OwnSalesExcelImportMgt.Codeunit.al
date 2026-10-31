@@ -5,6 +5,7 @@ codeunit 50430 "Own Sales Excel Import Mgt."
     var
         TempExcelBuffer: Record "Excel Buffer" temporary;
         NormalSales: Record "Normal Sales";
+        ExistingNormalSales: Record "Normal Sales";
         UploadInStream: InStream;
         FileName: Text;
         SheetName: Text;
@@ -12,9 +13,12 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         LastRowNo: Integer;
         ImportedCount: Integer;
         SkippedCount: Integer;
+        DuplicateCount: Integer;
         PNRValue: Text;
         RefNoValue: BigInteger;
         PassengerNamesValue: Text;
+        PassengerIDsValue: Text;
+        PassengerTypesValue: Text;
     begin
         if not UploadIntoStream(
             'Select Own Sales Excel File',
@@ -25,124 +29,280 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         then
             exit;
 
-        SheetName := TempExcelBuffer.SelectSheetsNameStream(UploadInStream);
+        SheetName := TempExcelBuffer.SelectSheetsNameStream(
+            UploadInStream);
+
+        if SheetName = '' then
+            exit;
+
         UploadInStream.ResetPosition();
 
-        TempExcelBuffer.OpenBookStream(UploadInStream, SheetName);
+        TempExcelBuffer.OpenBookStream(
+            UploadInStream, SheetName);
+
         TempExcelBuffer.ReadSheet();
 
+        CheckHeaders(TempExcelBuffer);
+
         TempExcelBuffer.Reset();
+
         if not TempExcelBuffer.FindLast() then
             Error('The selected Excel file is empty.');
 
         LastRowNo := TempExcelBuffer."Row No.";
 
         if LastRowNo < 2 then
-            Error('No data rows found. Row 1 must contain the column headers.');
+            Error(
+                'No data rows found. Row 1 must contain the column headers.');
 
         for RowNo := 2 to LastRowNo do begin
-            PNRValue := GetCellValue(TempExcelBuffer, RowNo, 9);
+
+            PNRValue := GetCellValue(
+                TempExcelBuffer, RowNo, 9);
 
             if PNRValue <> '' then begin
-                Clear(NormalSales);
-                NormalSales.Init();
-
-                // Serial No. is generated automatically by table OnInsert.
-
-                NormalSales.Validate(
-                    "Date",
-                    GetDateTimeValue(TempExcelBuffer, RowNo, 2));
-
-                NormalSales.Validate(
-                    "Invoice Number",
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, 3), 1, 50));
-
-                NormalSales.Validate(
-                    "Agency ID",
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, 4), 1, 30));
-
-                NormalSales.Validate(
-                    "Agency Name",
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, 5), 1, 100));
 
                 if not Evaluate(
                     RefNoValue,
                     GetCellValue(TempExcelBuffer, RowNo, 6))
                 then
-                    Error('Invalid Ref No./AQ Number at Excel row %1.', RowNo);
+                    Error(
+                        'Invalid Ref No./AQ Number at Excel row %1.',
+                        RowNo);
 
-                NormalSales.Validate("Ref No./AQ Number", RefNoValue);
+                if RefNoValue = 0 then
+                    Error(
+                        'Ref No./AQ Number is blank or zero at Excel row %1.',
+                        RowNo);
 
-                NormalSales.Validate(
-                    "Select",
-                    GetBooleanValue(
-                        GetCellValue(TempExcelBuffer, RowNo, 7),
-                        RowNo,
-                        'Select'));
+                // Duplicate prevention by AQ Number.
+                ExistingNormalSales.Reset();
+                ExistingNormalSales.SetRange(
+                    "Ref No./AQ Number", RefNoValue);
 
-                NormalSales.Validate(
-                    "Sales Invoice Created",
-                    GetBooleanValue(
-                        GetCellValue(TempExcelBuffer, RowNo, 8),
-                        RowNo,
-                        'Sales Invoice Created'));
+                if not ExistingNormalSales.IsEmpty() then
+                    DuplicateCount += 1
+                else begin
 
-                NormalSales.Validate("PNR", CopyStr(PNRValue, 1, 10));
+                    // Passenger Name, ID and Type.
+                    PassengerNamesValue :=
+                        GetCellValue(
+                            TempExcelBuffer, RowNo, 10);
 
-                NormalSales.Validate(
-                    Pax,
-                    GetIntegerValue(
-                        GetCellValue(TempExcelBuffer, RowNo, 11),
-                        RowNo,
-                        'Pax'));
+                    PassengerIDsValue :=
+                        GetCellValue(
+                            TempExcelBuffer, RowNo, 11);
 
-                NormalSales.Validate(
-                    "Travel Date",
-                    GetDateTimeValue(TempExcelBuffer, RowNo, 12));
+                    PassengerTypesValue :=
+                        GetCellValue(
+                            TempExcelBuffer, RowNo, 12);
 
-                NormalSales.Validate(
-                    Sector,
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, 13), 1, 200));
+                    // Validate all passenger values first.
+                    CheckPassengers(
+                        PassengerNamesValue,
+                        PassengerIDsValue,
+                        PassengerTypesValue,
+                        RowNo);
 
-                NormalSales.Validate(
-                    Type,
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, 14), 1, 50));
+                    Clear(NormalSales);
+                    NormalSales.Init();
 
-                NormalSales.Validate(
-                    "Base Fare",
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, 15),
-                        RowNo,
-                        'Base Fare'));
+                    // Serial No. generated by table OnInsert.
 
-                NormalSales.Validate(
-                    "Other Charges",
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, 16),
-                        RowNo,
-                        'Other Charges'));
+                    // Column 2: Date
+                    NormalSales.Validate(
+                        "Date",
+                        GetDateTimeValue(
+                            TempExcelBuffer, RowNo, 2));
 
-                NormalSales.CalculateGST();
+                    // Column 3: Invoice Number
+                    NormalSales.Validate(
+                        "Invoice Number",
+                        CopyStr(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 3),
+                            1, 50));
 
-                NormalSales.Insert(true);
+                    // Column 4: Agency ID
+                    NormalSales.Validate(
+                        "Agency ID",
+                        CopyStr(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 4),
+                            1, 30));
 
-                PassengerNamesValue := GetCellValue(TempExcelBuffer, RowNo, 10);
+                    // Column 5: Agency Name
+                    NormalSales.Validate(
+                        "Agency Name",
+                        CopyStr(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 5),
+                            1, 100));
 
-                if PassengerNamesValue <> '' then
-                    ImportPassengerNames(
-                        RefNoValue,
-                        CopyStr(PNRValue, 1, 10),
-                        PassengerNamesValue);
+                    // Column 6: Ref No./AQ Number
+                    NormalSales.Validate(
+                        "Ref No./AQ Number",
+                        RefNoValue);
 
-                ImportedCount += 1;
+                    // Column 7: Select
+                    NormalSales.Validate(
+                        "Select",
+                        GetBooleanValue(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 7),
+                            RowNo,
+                            'Select'));
+
+                    // Column 8: Sales Invoice Created
+                    NormalSales.Validate(
+                        "Sales Invoice Created",
+                        GetBooleanValue(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 8),
+                            RowNo,
+                            'Sales Invoice Created'));
+
+                    // Column 9: PNR
+                    NormalSales.Validate(
+                        PNR,
+                        CopyStr(PNRValue, 1, 10));
+
+                    // Column 10: View Passenger
+                    // Stored in separate passenger table.
+
+                    // Column 11: Passenger ID
+                    // Stored in separate passenger table.
+
+                    // Column 12: Passenger Type
+                    // Stored in separate passenger table.
+
+                    // Column 13: Pax
+                    NormalSales.Validate(
+                        Pax,
+                        GetIntegerValue(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 13),
+                            RowNo,
+                            'Pax'));
+
+                    // Column 14: Travel Date
+                    NormalSales.Validate(
+                        "Travel Date",
+                        GetDateTimeValue(
+                            TempExcelBuffer, RowNo, 14));
+
+                    // Column 15: Sector
+                    NormalSales.Validate(
+                        Sector,
+                        CopyStr(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 15),
+                            1, 200));
+
+                    // Column 16: Type
+                    NormalSales.Validate(
+                        Type,
+                        CopyStr(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 16),
+                            1, 50));
+
+                    // Column 17: Base Fare
+                    NormalSales.Validate(
+                        "Base Fare",
+                        GetDecimalValue(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 17),
+                            RowNo,
+                            'Base Fare'));
+
+                    // Column 18: Other Charges
+                    NormalSales.Validate(
+                        "Other Charges",
+                        GetDecimalValue(
+                            GetCellValue(
+                                TempExcelBuffer, RowNo, 18),
+                            RowNo,
+                            'Other Charges'));
+
+                    // Preserve existing GST calculation.
+                    NormalSales.CalculateGST();
+
+                    // Insert main Normal Sales record.
+                    NormalSales.Insert(true);
+
+                    // Insert each passenger separately.
+                    if PassengerNamesValue <> '' then
+                        ImportPassengerNames(
+                            RefNoValue,
+                            CopyStr(PNRValue, 1, 10),
+                            PassengerNamesValue,
+                            PassengerIDsValue,
+                            PassengerTypesValue);
+
+                    ImportedCount += 1;
+                end;
             end else
                 SkippedCount += 1;
         end;
 
         Message(
-            'Own Sales Excel import completed.\Imported: %1\Skipped (blank PNR): %2',
+            'Own Sales Excel import completed.\' +
+            'Imported: %1\' +
+            'Duplicate AQ Number: %2\' +
+            'Skipped (blank PNR): %3',
             ImportedCount,
+            DuplicateCount,
             SkippedCount);
+    end;
+
+    local procedure CheckHeaders(
+        var TempExcelBuffer: Record "Excel Buffer" temporary)
+    var
+        Headers: List of [Text];
+        Expected: Text;
+        Actual: Text;
+        ColNo: Integer;
+    begin
+        Headers.Add('Serial No.');
+        Headers.Add('Date');
+        Headers.Add('Invoice Number');
+        Headers.Add('Agency ID');
+        Headers.Add('Agency Name');
+        Headers.Add('Ref No./AQ Number');
+        Headers.Add('Select');
+        Headers.Add('Sales Invoice Created');
+        Headers.Add('PNR');
+        Headers.Add('View Passenger');
+        Headers.Add('Passenger ID');
+        Headers.Add('Passenger Type');
+        Headers.Add('Pax');
+        Headers.Add('Travel Date');
+        Headers.Add('Sector');
+        Headers.Add('Type');
+        Headers.Add('Base Fare');
+        Headers.Add('Other Charges');
+        Headers.Add('Taxable Basis');
+        Headers.Add('CGST');
+        Headers.Add('SGST');
+        Headers.Add('IGST');
+        Headers.Add('Total Amount');
+
+        ColNo := 0;
+
+        foreach Expected in Headers do begin
+            ColNo += 1;
+
+            Actual := DelChr(
+                GetCellValue(
+                    TempExcelBuffer, 1, ColNo),
+                '<>', ' ');
+
+            if UpperCase(Actual) <> UpperCase(Expected) then
+                Error(
+                    'Excel header mismatch at column %1. Expected "%2", found "%3".',
+                    ColNo, Expected, Actual);
+        end;
     end;
 
     local procedure GetCellValue(
@@ -168,7 +328,8 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         NormalizedValue: Text;
         BooleanValue: Boolean;
     begin
-        NormalizedValue := UpperCase(DelChr(ValueText, '=', ' '));
+        NormalizedValue :=
+            UpperCase(DelChr(ValueText, '=', ' '));
 
         case NormalizedValue of
             'TRUE', 'YES', '1':
@@ -220,14 +381,17 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         if ValueText = '' then
             exit(0);
 
-        if not Evaluate(DecimalValue, ValueText, 9) then
-            Error(
-                'Invalid %1 at Excel row %2: %3',
-                FieldName,
-                RowNo,
-                ValueText);
+        if Evaluate(DecimalValue, ValueText, 9) then
+            exit(DecimalValue);
 
-        exit(DecimalValue);
+        if Evaluate(DecimalValue, ValueText) then
+            exit(DecimalValue);
+
+        Error(
+            'Invalid %1 at Excel row %2: %3',
+            FieldName,
+            RowNo,
+            ValueText);
     end;
 
     local procedure GetDateTimeValue(
@@ -241,26 +405,23 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         ParsedTime: Time;
     begin
         CellValue := DelChr(
-            GetCellValue(TempExcelBuffer, RowNo, ColumnNo),
-            '<>',
-            ' ');
+            GetCellValue(
+                TempExcelBuffer, RowNo, ColumnNo),
+            '<>', ' ');
 
         if CellValue = '' then
             exit(0DT);
 
-        // Try normal DateTime conversion.
+        // Preserve existing DateTime conversion.
         if Evaluate(ParsedDateTime, CellValue) then
             exit(ParsedDateTime);
 
-        // Try conversion using regional format.
         if Evaluate(ParsedDateTime, CellValue, 9) then
             exit(ParsedDateTime);
 
-        // Try date-only value.
         if Evaluate(ParsedDate, CellValue) then
             exit(CreateDateTime(ParsedDate, 000000T));
 
-        // Time-only values cannot provide a complete DateTime.
         if Evaluate(ParsedTime, CellValue) then
             Error(
                 'Excel row %1, column %2 contains only time: "%3". Please provide both date and time.',
@@ -275,46 +436,151 @@ codeunit 50430 "Own Sales Excel Import Mgt."
             CellValue);
     end;
 
+    local procedure SplitValues(
+        ValueText: Text): List of [Text]
+    var
+        Result: List of [Text];
+        Parts: List of [Text];
+        Part: Text;
+    begin
+        if DelChr(ValueText, '<>', ' ') = '' then
+            exit(Result);
+
+        Parts := ValueText.Split(',');
+
+        foreach Part in Parts do
+            Result.Add(
+                DelChr(Part, '<>', ' '));
+
+        exit(Result);
+    end;
+
+    local procedure CheckPassengers(
+        NamesText: Text;
+        IDsText: Text;
+        TypesText: Text;
+        RowNo: Integer)
+    var
+        Names: List of [Text];
+        IDs: List of [Text];
+        Types: List of [Text];
+        NameValue: Text;
+        IDValue: Text;
+        TypeValue: Text;
+        NumericID: BigInteger;
+        I: Integer;
+    begin
+        Names := SplitValues(NamesText);
+        IDs := SplitValues(IDsText);
+        Types := SplitValues(TypesText);
+
+        if (Names.Count() <> IDs.Count()) or
+           (Names.Count() <> Types.Count())
+        then
+            Error(
+                'Passenger count mismatch at Excel row %1: Names=%2, IDs=%3, Types=%4.',
+                RowNo,
+                Names.Count(),
+                IDs.Count(),
+                Types.Count());
+
+        for I := 1 to Names.Count() do begin
+            Names.Get(I, NameValue);
+            IDs.Get(I, IDValue);
+            Types.Get(I, TypeValue);
+
+            if (NameValue = '') or
+               (IDValue = '') or
+               (TypeValue = '')
+            then
+                Error(
+                    'Blank Passenger Name, ID or Type at Excel row %1, passenger %2.',
+                    RowNo, I);
+
+            if StrLen(NameValue) > 100 then
+                Error(
+                    'Passenger Name too long at Excel row %1, passenger %2.',
+                    RowNo, I);
+
+            if StrLen(TypeValue) > 50 then
+                Error(
+                    'Passenger Type too long at Excel row %1, passenger %2.',
+                    RowNo, I);
+
+            if not Evaluate(NumericID, IDValue) then
+                Error(
+                    'Invalid Passenger ID "%1" at Excel row %2, passenger %3.',
+                    IDValue, RowNo, I);
+        end;
+    end;
+
     local procedure ImportPassengerNames(
         RefNo: BigInteger;
         PNRCode: Text[10];
-        NamesText: Text)
+        NamesText: Text;
+        IDsText: Text;
+        TypesText: Text)
     var
-        OwnSalesPassengerName: Record "Own Sales Passenger Name";
-        NameList: List of [Text];
-        SingleName: Text;
+        Passenger: Record "Own Sales Passenger Name";
+        ExistingPassenger: Record "Own Sales Passenger Name";
+        Names: List of [Text];
+        IDs: List of [Text];
+        Types: List of [Text];
+        NameValue: Text;
+        IDValue: Text;
+        TypeValue: Text;
         SLNo: Integer;
+        I: Integer;
     begin
-        OwnSalesPassengerName.Reset();
-        OwnSalesPassengerName.SetRange("Ref No./AQ Number", RefNo);
-        OwnSalesPassengerName.SetRange("PNR", PNRCode);
+        Names := SplitValues(NamesText);
+        IDs := SplitValues(IDsText);
+        Types := SplitValues(TypesText);
 
-        if not OwnSalesPassengerName.IsEmpty() then
-            OwnSalesPassengerName.DeleteAll();
+        if Names.Count() = 0 then
+            exit;
 
-        NameList := NamesText.Split(',');
+        Passenger.LockTable();
 
-        SLNo := 1;
+        // Find maximum SL No. across all AQ Numbers.
+        ExistingPassenger.Reset();
+        ExistingPassenger.SetCurrentKey("SL No.");
 
-        foreach SingleName in NameList do begin
-            SingleName := DelChr(SingleName, '<>', ' ');
+        if ExistingPassenger.FindLast() then
+            SLNo := ExistingPassenger."SL No." + 1
+        else
+            SLNo := 1;
 
-            if SingleName <> '' then begin
-                Clear(OwnSalesPassengerName);
-                OwnSalesPassengerName.Init();
+        for I := 1 to Names.Count() do begin
+            Names.Get(I, NameValue);
+            IDs.Get(I, IDValue);
+            Types.Get(I, TypeValue);
 
-                OwnSalesPassengerName.Validate("Ref No./AQ Number", RefNo);
-                OwnSalesPassengerName.Validate("PNR", PNRCode);
-                OwnSalesPassengerName.Validate("SL No.", SLNo);
+            Passenger.Init();
 
-                OwnSalesPassengerName.Validate(
-                    "Passenger Name",
-                    CopyStr(SingleName, 1, 100));
+            Passenger."Ref No./AQ Number" := RefNo;
+            Passenger.PNR := PNRCode;
+            Passenger."SL No." := SLNo;
 
-                OwnSalesPassengerName.Insert(true);
+            Passenger."Passenger Name" :=
+                CopyStr(
+                    NameValue,
+                    1,
+                    MaxStrLen(Passenger."Passenger Name"));
 
-                SLNo += 1;
-            end;
+            if not Evaluate(Passenger.ID, IDValue) then
+                Error(
+                    'Invalid Passenger ID at AQ Number %1, passenger %2.',
+                    RefNo, I);
+
+            Passenger.Type :=
+                CopyStr(
+                    TypeValue,
+                    1,
+                    MaxStrLen(Passenger.Type));
+
+            Passenger.Insert(true);
+
+            SLNo += 1;
         end;
     end;
 }
