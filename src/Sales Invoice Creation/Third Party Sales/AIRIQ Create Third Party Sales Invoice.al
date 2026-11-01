@@ -1,3 +1,4 @@
+
 codeunit 50437 "Third Party Sales Invoice"
 {
     procedure CreateThirdPartySalesInvoice(
@@ -21,9 +22,11 @@ codeunit 50437 "Third Party Sales Invoice"
         if AQNumber = 0 then
             Error('AQ Number is required.');
 
-        // Customer matching by Agency Name
+        // STEP 1: CUSTOMER MATCHING
         Customer.Reset();
-        Customer.SetRange(Name, ThirdPartySales."Agency Name");
+        Customer.SetRange(
+            Name,
+            ThirdPartySales."Agency Name");
 
         if not Customer.FindFirst() then
             Error(
@@ -31,9 +34,11 @@ codeunit 50437 "Third Party Sales Invoice"
                 ThirdPartySales."Agency Name",
                 AQNumber);
 
-        // Item matching by Item Description = PNR
+        // STEP 2: ITEM MATCHING BY PNR
         Item.Reset();
-        Item.SetRange(Description, ThirdPartySales.PNR);
+        Item.SetRange(
+            Description,
+            ThirdPartySales.PNR);
 
         if not Item.FindFirst() then
             Error(
@@ -41,59 +46,110 @@ codeunit 50437 "Third Party Sales Invoice"
                 ThirdPartySales.PNR,
                 AQNumber);
 
-        // Get passenger names by AQ Number + PNR
+        // STEP 3: PASSENGER NAME COLLECTION
         Passenger.Reset();
-        Passenger.SetRange("Ref No./AQ Number", AQNumber);
-        Passenger.SetRange(PNR, ThirdPartySales.PNR);
+
+        Passenger.SetRange(
+            "Ref No./AQ Number",
+            AQNumber);
+
+        Passenger.SetRange(
+            PNR,
+            ThirdPartySales.PNR);
 
         if Passenger.FindSet() then begin
             repeat
                 if PassengerNames.Length() > 0 then
                     PassengerNames.Append(', ');
 
-                PassengerNames.Append(Passenger."Passenger Name");
+                PassengerNames.Append(
+                    Passenger."Passenger Name");
             until Passenger.Next() = 0;
         end;
 
-        // Create Sales Invoice Header
+        // STEP 4: CREATE SALES INVOICE HEADER
         SalesHeader.Init();
-        SalesHeader."Document Type" := SalesHeader."Document Type"::Invoice;
+
+        SalesHeader."Document Type" :=
+            SalesHeader."Document Type"::Invoice;
+
         SalesHeader.Insert(true);
 
-        SalesHeader.Validate("Sell-to Customer No.", Customer."No.");
-        SalesHeader.Validate("Document Date", Today());
+        SalesHeader.Validate(
+            "Sell-to Customer No.",
+            Customer."No.");
+
+        SalesHeader.Validate(
+            "Document Date",
+            Today());
 
         SalesHeader."AQ Number" := AQNumber;
-        SalesHeader."Agency ID" := ThirdPartySales."Agency ID";
+
+        SalesHeader."Agency ID" :=
+            ThirdPartySales."Agency ID";
+
         SalesHeader."Sales Type" :=
             SalesHeader."Sales Type"::"Third Party Sales";
 
         SalesHeader.Modify(true);
 
-        // Create Sales Invoice Line
+        // STEP 5: CREATE SALES INVOICE LINE
         SalesLine.Init();
-        SalesLine."Document Type" := SalesHeader."Document Type";
-        SalesLine."Document No." := SalesHeader."No.";
+
+        SalesLine."Document Type" :=
+            SalesHeader."Document Type";
+
+        SalesLine."Document No." :=
+            SalesHeader."No.";
+
         SalesLine."Line No." := 10000;
 
         SalesLine.Insert(true);
 
-        SalesLine.Validate(Type, SalesLine.Type::Item);
-        SalesLine.Validate("No.", Item."No.");
-        SalesLine.Description := ThirdPartySales.PNR;
-        SalesLine.Validate(Quantity, ThirdPartySales.Pax);
-        SalesLine.Validate("Unit Price", ThirdPartySales."Rate");
+        SalesLine.Validate(
+            Type,
+            SalesLine.Type::Item);
 
-        SalesLine."Travel Date" := ThirdPartySales."Travel Date";
-        SalesLine.Sector := ThirdPartySales.Sector;
-        SalesLine.FlightType := ThirdPartySales.Type;
-        SalesLine."Passenger Name" := PassengerNames.ToText();
+        SalesLine.Validate(
+            "No.",
+            Item."No.");
+
+        // PNR DESCRIPTION
+        SalesLine.Description :=
+            ThirdPartySales.PNR;
+
+        // FLIGHT TYPE BEFORE QUANTITY AND PRICE
+        SalesLine.Validate(
+            FlightType,
+            ThirdPartySales.Type);
+
+        // EXISTING QUANTITY
+        SalesLine.Validate(
+            Quantity,
+            ThirdPartySales.Pax);
+
+        // EXISTING UNIT PRICE
+        SalesLine.Validate(
+            "Unit Price",
+            ThirdPartySales."Rate");
+
+        // TRAVEL DETAILS
+        SalesLine."Travel Date" :=
+            ThirdPartySales."Travel Date";
+
+        SalesLine.Sector :=
+            ThirdPartySales.Sector;
+
+        // PASSENGER NAMES
+        SalesLine."Passenger Name" :=
+            PassengerNames.ToText();
 
         SalesLine.Modify(true);
 
-        // Update source Third Party Sales record
+        // STEP 6: UPDATE THIRD PARTY SALES
         ThirdPartySales."Select" := false;
         ThirdPartySales."Sales Invoice Created" := true;
+
         ThirdPartySales.Modify(true);
 
         Message(

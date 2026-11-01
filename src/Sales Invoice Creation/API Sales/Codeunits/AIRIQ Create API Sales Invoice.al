@@ -1,3 +1,4 @@
+
 codeunit 50435 "AIRIQ Create API Sales Invoice"
 {
     procedure CreateAPISalesInvoice(var APISales: Record "API Sales Format")
@@ -20,7 +21,7 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         if AQNumber = 0 then
             Error('AQ Number is required.');
 
-        // Customer matching by Agency Name
+        // STEP 1: CUSTOMER MATCHING
         Customer.Reset();
         Customer.SetRange(Name, APISales."Agency Name");
 
@@ -30,7 +31,7 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
                 APISales."Agency Name",
                 AQNumber);
 
-        // Item matching by Item Description = PNR
+        // STEP 2: ITEM MATCHING BY PNR
         Item.Reset();
         Item.SetRange(Description, APISales.PNR);
 
@@ -40,7 +41,7 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
                 APISales.PNR,
                 AQNumber);
 
-        // Get passenger names by AQ Number + PNR
+        // STEP 3: PASSENGER NAME COLLECTION
         Passenger.Reset();
         Passenger.SetRange("Ref No./AQ Number", AQNumber);
         Passenger.SetRange(PNR, APISales.PNR);
@@ -54,44 +55,83 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
             until Passenger.Next() = 0;
         end;
 
-        // Create Sales Invoice Header
+        // STEP 4: CREATE SALES INVOICE HEADER
         SalesHeader.Init();
-        SalesHeader."Document Type" := SalesHeader."Document Type"::Invoice;
+        SalesHeader."Document Type" :=
+            SalesHeader."Document Type"::Invoice;
+
         SalesHeader.Insert(true);
 
-        SalesHeader.Validate("Sell-to Customer No.", Customer."No.");
-        SalesHeader.Validate("Document Date", Today());
+        SalesHeader.Validate(
+            "Sell-to Customer No.",
+            Customer."No.");
+
+        SalesHeader.Validate(
+            "Document Date",
+            Today());
 
         SalesHeader."AQ Number" := AQNumber;
         SalesHeader."Agency ID" := APISales."Agency ID";
-        SalesHeader."Sales Type" := SalesHeader."Sales Type"::"API Sales";
+        SalesHeader."Sales Type" :=
+            SalesHeader."Sales Type"::"API Sales";
 
         SalesHeader.Modify(true);
 
-        // Create Sales Invoice Line
+        // STEP 5: CREATE SALES INVOICE LINE
         SalesLine.Init();
-        SalesLine."Document Type" := SalesHeader."Document Type";
-        SalesLine."Document No." := SalesHeader."No.";
+
+        SalesLine."Document Type" :=
+            SalesHeader."Document Type";
+
+        SalesLine."Document No." :=
+            SalesHeader."No.";
+
         SalesLine."Line No." := 10000;
 
         SalesLine.Insert(true);
 
-        SalesLine.Validate(Type, SalesLine.Type::Item);
-        SalesLine.Validate("No.", Item."No.");
-        SalesLine.Description := APISales.PNR;
-        SalesLine.Validate(Quantity, APISales.Pax);
-        SalesLine.Validate("Unit Price", APISales."Rate");
+        SalesLine.Validate(
+            Type,
+            SalesLine.Type::Item);
 
-        SalesLine."Travel Date" := APISales."Travel Date";
+        SalesLine.Validate(
+            "No.",
+            Item."No.");
+
+        // PNR DESCRIPTION
+        SalesLine.Description := APISales.PNR;
+
+        // FLIGHT TYPE BEFORE QUANTITY AND PRICE
+        SalesLine.Validate(
+            FlightType,
+            APISales.Type);
+
+        // EXISTING QUANTITY
+        SalesLine.Validate(
+            Quantity,
+            APISales.Pax);
+
+        // EXISTING UNIT PRICE
+        SalesLine.Validate(
+            "Unit Price",
+            APISales."Rate");
+
+        // TRAVEL DETAILS
+        SalesLine."Travel Date" :=
+            APISales."Travel Date";
+
         SalesLine.Sector := APISales.Sector;
-        SalesLine.FlightType := APISales.Type;
-        SalesLine."Passenger Name" := PassengerNames.ToText();
+
+        // PASSENGER NAMES
+        SalesLine."Passenger Name" :=
+            PassengerNames.ToText();
 
         SalesLine.Modify(true);
 
-        // Update source API Sales record
+        // STEP 6: UPDATE API SALES
         APISales."Select" := false;
         APISales."Sales Invoice Created" := true;
+
         APISales.Modify(true);
 
         Message(
