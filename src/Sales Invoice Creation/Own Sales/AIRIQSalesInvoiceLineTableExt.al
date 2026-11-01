@@ -1,3 +1,4 @@
+
 tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
 {
     fields
@@ -6,6 +7,7 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
@@ -13,10 +15,11 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
                 CurrentTime := DT2Time(CurrentDateTime());
-            
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Travel Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(50425; Sector; Text[200])
         {
@@ -29,6 +32,7 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             Caption = 'Flight Type';
             DataClassification = CustomerContent;
         }
+
         field(50432; BaseFare; Text[50])
         {
             Caption = 'Base Fare';
@@ -38,24 +42,6 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
         field(50427; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
-            DataClassification = CustomerContent;
-        }
-
-        field(50428; CGST; Decimal)
-        {
-            Caption = 'CGST';
-            DataClassification = CustomerContent;
-        }
-
-        field(50429; SGST; Decimal)
-        {
-            Caption = 'SGST';
-            DataClassification = CustomerContent;
-        }
-
-        field(50430; IGST; Decimal)
-        {
-            Caption = 'IGST';
             DataClassification = CustomerContent;
         }
 

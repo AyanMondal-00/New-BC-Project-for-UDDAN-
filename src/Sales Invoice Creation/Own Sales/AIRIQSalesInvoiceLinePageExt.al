@@ -1,4 +1,6 @@
-pageextension 50428 "AIRIQ Sales Invoice Line PgExt" extends "Sales Invoice Subform"
+
+pageextension 50428 "AIRIQ Sales Invoice Line PgExt"
+    extends "Sales Invoice Subform"
 {
     layout
     {
@@ -27,6 +29,7 @@ pageextension 50428 "AIRIQ Sales Invoice Line PgExt" extends "Sales Invoice Subf
                 ApplicationArea = All;
                 Editable = false;
             }
+
             field(BaseFare; Rec.BaseFare)
             {
                 ApplicationArea = All;
@@ -34,24 +37,6 @@ pageextension 50428 "AIRIQ Sales Invoice Line PgExt" extends "Sales Invoice Subf
             }
 
             field("Other Charges"; Rec."Other Charges")
-            {
-                ApplicationArea = All;
-                Editable = false;
-            }
-
-            field(CGST; Rec.CGST)
-            {
-                ApplicationArea = All;
-                Editable = false;
-            }
-
-            field(SGST; Rec.SGST)
-            {
-                ApplicationArea = All;
-                Editable = false;
-            }
-
-            field(IGST; Rec.IGST)
             {
                 ApplicationArea = All;
                 Editable = false;

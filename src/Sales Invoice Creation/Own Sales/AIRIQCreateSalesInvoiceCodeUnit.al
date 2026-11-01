@@ -15,11 +15,13 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
         Customer: Record Customer;
         Item: Record Item;
         Passenger: Record "Own Sales Passenger Name";
-        AQNumber: Integer;
+        AQNumber: BigInteger;
         LineNo: Integer;
+        UnitPriceValue: Decimal;
     begin
         AQNumber := NormalSales."Ref No./AQ Number";
 
+        // Prevent Duplicate Invoice Creation
         if NormalSales."Sales Invoice Created" then
             Error(
                 'Sales Invoice has already been created for AQ Number %1.',
@@ -28,7 +30,7 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
         if AQNumber = 0 then
             Error('AQ Number is required.');
 
-        // Customer Matching
+        // STEP 1: CUSTOMER MATCHING
         Customer.Reset();
         Customer.SetRange(Name, NormalSales."Agency Name");
 
@@ -38,7 +40,7 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
                 NormalSales."Agency Name",
                 AQNumber);
 
-        // Item Matching by PNR
+        // STEP 2: ITEM MATCHING BY PNR
         Item.Reset();
         Item.SetRange(Description, NormalSales.PNR);
 
@@ -48,117 +50,166 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
                 NormalSales.PNR,
                 AQNumber);
 
-        // Passenger Filtering
-        Passenger.Reset();
-        Passenger.SetRange("Ref No./AQ Number", AQNumber);
-        Passenger.SetRange(PNR, NormalSales.PNR);
+        // STEP 3: EXISTING UNIT PRICE CALCULATION
+        UnitPriceValue :=
+            NormalSales."Base Fare" +
+            NormalSales."Other Charges";
 
-        // Create Sales Invoice Header
+        // STEP 4: PASSENGER FILTERING
+        Passenger.Reset();
+
+        Passenger.SetCurrentKey(
+            "Ref No./AQ Number",
+            PNR,
+            "SL No.");
+
+        Passenger.SetRange(
+            "Ref No./AQ Number",
+            AQNumber);
+
+        Passenger.SetRange(
+            PNR,
+            NormalSales.PNR);
+
+        // STEP 5: CREATE SALES INVOICE HEADER
         SalesHeader.Init();
+
         SalesHeader."Document Type" :=
             SalesHeader."Document Type"::Invoice;
+
         SalesHeader.Insert(true);
 
-        SalesHeader.Validate("Sell-to Customer No.", Customer."No.");
-        SalesHeader.Validate("Document Date", Today());
+        SalesHeader.Validate(
+            "Sell-to Customer No.",
+            Customer."No.");
 
-        // Automatically Set Header Location Code
-        SalesHeader.Validate("Location Code", 'SILIGURI');
+        SalesHeader.Validate(
+            "Document Date",
+            Today());
+
+        SalesHeader.Validate(
+            "Location Code",
+            'SILIGURI');
 
         SalesHeader."AQ Number" := AQNumber;
-        SalesHeader."Agency ID" := NormalSales."Agency ID";
+
+        SalesHeader."Agency ID" :=
+            NormalSales."Agency ID";
+
         SalesHeader."Sales Type" :=
             SalesHeader."Sales Type"::"Own Sales";
 
         SalesHeader.Modify(true);
 
-        // Passenger Found
+        // STEP 6: CREATE PASSENGER-WISE LINES
+        LineNo := 10000;
+
         if Passenger.FindSet() then begin
-            LineNo := 10000;
-
             repeat
-                SalesLine.Init();
-                SalesLine."Document Type" := SalesHeader."Document Type";
-                SalesLine."Document No." := SalesHeader."No.";
-                SalesLine."Line No." := LineNo;
-                SalesLine.Insert(true);
-
-                SalesLine.Validate(Type, SalesLine.Type::Item);
-                SalesLine.Validate("No.", Item."No.");
-
-                SalesLine.Description := NormalSales.PNR;
-
-                SalesLine.Validate(Quantity, 1);
-
-                // Store Original Base Fare
-                SalesLine.BaseFare :=
-                    Format(NormalSales."Base Fare");
-
-                // Unit Price Excl. VAT = Base Fare * 5%
-                SalesLine.Validate(
-                    "Unit Price",
-                    NormalSales."Base Fare" * 0.05);
-
-                SalesLine."Travel Date" := NormalSales."Travel Date";
-                SalesLine.Sector := NormalSales.Sector;
-                SalesLine.FlightType := NormalSales.Type;
-
-                SalesLine."Other Charges" := NormalSales."Other Charges";
-                SalesLine.CGST := NormalSales.CGST;
-                SalesLine.SGST := NormalSales.SGST;
-                SalesLine.IGST := NormalSales.IGST;
-
-                SalesLine."Passenger Name" :=
-                    Passenger."Passenger Name";
-
-                SalesLine.Modify(true);
+                CreateSalesInvoiceLine(
+                    SalesHeader,
+                    NormalSales,
+                    Item,
+                    Passenger."Passenger Name",
+                    LineNo,
+                    1,
+                    UnitPriceValue);
 
                 LineNo += 10000;
 
             until Passenger.Next() = 0;
-
         end else begin
-
-            // No Passenger Found
-            SalesLine.Init();
-            SalesLine."Document Type" := SalesHeader."Document Type";
-            SalesLine."Document No." := SalesHeader."No.";
-            SalesLine."Line No." := 10000;
-            SalesLine.Insert(true);
-
-            SalesLine.Validate(Type, SalesLine.Type::Item);
-            SalesLine.Validate("No.", Item."No.");
-
-            SalesLine.Description := NormalSales.PNR;
-
-            SalesLine.Validate(Quantity, NormalSales.Pax);
-
-            // Store Original Base Fare
-            SalesLine.BaseFare :=
-                Format(NormalSales."Base Fare");
-
-            // Unit Price Excl. VAT = Base Fare * 5%
-            SalesLine.Validate(
-                "Unit Price",
-                NormalSales."Base Fare" * 0.05);
-
-            SalesLine."Travel Date" := NormalSales."Travel Date";
-            SalesLine.Sector := NormalSales.Sector;
-            SalesLine.FlightType := NormalSales.Type;
-
-            SalesLine."Other Charges" := NormalSales."Other Charges";
-            SalesLine.CGST := NormalSales.CGST;
-            SalesLine.SGST := NormalSales.SGST;
-            SalesLine.IGST := NormalSales.IGST;
-
-            SalesLine."Passenger Name" := NormalSales.Passenger;
-
-            SalesLine.Modify(true);
+            // Existing fallback behavior
+            CreateSalesInvoiceLine(
+                SalesHeader,
+                NormalSales,
+                Item,
+                NormalSales.Passenger,
+                LineNo,
+                NormalSales.Pax,
+                UnitPriceValue);
         end;
 
-        // Update Normal Sales Record
+        // STEP 7: UPDATE NORMAL SALES
         NormalSales."Select" := false;
         NormalSales."Sales Invoice Created" := true;
+
         NormalSales.Modify(true);
+    end;
+
+    local procedure CreateSalesInvoiceLine(
+        var SalesHeader: Record "Sales Header";
+        var NormalSales: Record "Normal Sales";
+        var Item: Record Item;
+        PassengerName: Text[100];
+        LineNo: Integer;
+        LineQuantity: Decimal;
+        UnitPriceValue: Decimal)
+    var
+        SalesLine: Record "Sales Line";
+    begin
+        SalesLine.Init();
+
+        SalesLine."Document Type" :=
+            SalesHeader."Document Type";
+
+        SalesLine."Document No." :=
+            SalesHeader."No.";
+
+        SalesLine."Line No." := LineNo;
+
+        SalesLine.Insert(true);
+
+        // Item Mapping
+        SalesLine.Validate(
+            Type,
+            SalesLine.Type::Item);
+
+        SalesLine.Validate(
+            "No.",
+            Item."No.");
+
+        // PNR as Description
+        SalesLine.Description :=
+            NormalSales.PNR;
+
+        // Flight Type before price validation
+        SalesLine.Validate(
+            FlightType,
+            NormalSales.Type);
+
+        // Passenger-wise Quantity
+        SalesLine.Validate(
+            Quantity,
+            LineQuantity);
+
+        // Original Base Fare
+        SalesLine.BaseFare :=
+            Format(NormalSales."Base Fare");
+
+        // EXISTING UNIT PRICE MAPPING
+        SalesLine.Validate(
+            "Unit Price",
+            UnitPriceValue);
+
+        // Travel Details
+        SalesLine."Travel Date" :=
+            NormalSales."Travel Date";
+
+        SalesLine.Sector :=
+            NormalSales.Sector;
+
+        // Other Charges
+        SalesLine."Other Charges" :=
+            NormalSales."Other Charges";
+
+        // Custom CGST, SGST, IGST mapping removed.
+        // Standard BC Tax Engine handles GST separately.
+
+        // Individual Passenger Name
+        SalesLine."Passenger Name" :=
+            PassengerName;
+
+        SalesLine.Modify(true);
     end;
 }
