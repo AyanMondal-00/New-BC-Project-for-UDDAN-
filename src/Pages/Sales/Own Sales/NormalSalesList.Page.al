@@ -24,7 +24,7 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                 }
 
-                field("Invoice Number"; Rec."Invoice Number")
+                field("Invoice Number"; Rec."Invoice Number")   
                 {
                     ApplicationArea = All;
                 }

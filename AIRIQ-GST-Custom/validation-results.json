@@ -1,0 +1,13 @@
+﻿{
+    "Result":  "PASS",
+    "Checks":  1300,
+    "Cases":  12,
+    "NumericScenarios":  720,
+    "IndiaGSTPackage":  "28.5.54976.57206",
+    "PackageSHA256":  "4017040BA30FDAD38EDE881072B9CE0FD4B51507A229D4C34873EDE547DE8E70",
+    "Scope":  "Item, Invoice, registered/unregistered, intra/inter, non-FOC, tax-exclusive; Kerala cess source guards preserved",
+    "TenantVersion71":  "VERIFIED: confirmed GST.json export for 6B464955-261F-4EAF-A749-7807444FC37C; other active tenant cases/parent not supplied",
+    "TreePriority":  "UNVERIFIED: no active tenant tree export supplied",
+    "RuntimeImportAndPosting":  "NOT RUN: offline validation only",
+    "ALCompile":  "Not run by this JSON validator. See compile-results.json for the separate complete-project build evidence."
+}

@@ -1,6 +1,9 @@
 
 codeunit 50333 "Sales Return Excel Import"
 {
+    var
+        ImportColumns: Dictionary of [Integer, Integer];
+
     procedure ImportFromExcel()
     var
         ExcelBuffer: Record "Excel Buffer" temporary;
@@ -243,50 +246,56 @@ codeunit 50333 "Sales Return Excel Import"
                             Cell(ExcelBuffer, RowNo, 24),
                             RowNo, 24);
 
-                    // Column 25: Taxable Value
-                    SalesReturn."Taxable Value" :=
+                    // Column 25: Other Charges
+                    SalesReturn."Other Charges" :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 25),
                             RowNo, 25);
 
-                    // Column 26: CGST
-                    SalesReturn.CGST :=
+                    // Column 26: Taxable Value
+                    SalesReturn."Taxable Value" :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 26),
                             RowNo, 26);
 
-                    // Column 27: SGST
-                    SalesReturn.SGST :=
+                    // Column 27: CGST
+                    SalesReturn.CGST :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 27),
                             RowNo, 27);
 
-                    // Column 28: IGST
-                    SalesReturn.IGST :=
+                    // Column 28: SGST
+                    SalesReturn.SGST :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 28),
                             RowNo, 28);
 
-                    // Column 29: Sold Value
-                    SalesReturn."Sold Value" :=
+                    // Column 29: IGST
+                    SalesReturn.IGST :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 29),
                             RowNo, 29);
 
-                    // Column 30: XXLN Charges
-                    SalesReturn."XXLN Charges" :=
+                    // Column 30: Sold Value
+                    SalesReturn."Sold Value" :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 30),
                             RowNo, 30);
 
-                    // Column 31: Refund Amount
-                    SalesReturn."Refund Amount" :=
+                    // Column 31: XXLN Charges
+                    SalesReturn."XXLN Charges" :=
                         ParseDecimal(
                             Cell(ExcelBuffer, RowNo, 31),
                             RowNo, 31);
 
-                    // Column 32: Sale Type
-                    CellText := Cell(ExcelBuffer, RowNo, 32);
+                    // Column 32: Refund Amount
+                    SalesReturn."Refund Amount" :=
+                        ParseDecimal(
+                            Cell(ExcelBuffer, RowNo, 32),
+                            RowNo, 32);
+
+                    // Column 33: Sale Type
+                    CellText := Cell(ExcelBuffer, RowNo, 33);
 
                     if CellText <> '' then
                         if not Evaluate(
@@ -297,10 +306,10 @@ codeunit 50333 "Sales Return Excel Import"
                                 'Invalid Sale Type "%1" at Excel row %2. Use Own or ThirdParty.',
                                 CellText, RowNo);
 
-                    // Column 33: Supplier
+                    // Column 34: Supplier
                     SalesReturn.Supplier :=
                         CopyStr(
-                            Cell(ExcelBuffer, RowNo, 33),
+                            Cell(ExcelBuffer, RowNo, 34),
                             1,
                             MaxStrLen(SalesReturn.Supplier));
 
@@ -339,6 +348,8 @@ codeunit 50333 "Sales Return Excel Import"
         Expected: Text;
         Actual: Text;
         ColNo: Integer;
+        HeaderColumns: Dictionary of [Text, Integer];
+        ActualColNo: Integer;
     begin
         Headers.Add('Serial No.');
         Headers.Add('Entry Date');
@@ -364,6 +375,7 @@ codeunit 50333 "Sales Return Excel Import"
         Headers.Add('Narration');
         Headers.Add('PAX');
         Headers.Add('Base Fare');
+        Headers.Add('Other Charges');
         Headers.Add('Taxable Value');
         Headers.Add('CGST');
         Headers.Add('SGST');
@@ -374,27 +386,40 @@ codeunit 50333 "Sales Return Excel Import"
         Headers.Add('Sale Type');
         Headers.Add('Supplier');
 
-        ColNo := 0;
+        Clear(ImportColumns);
+        ExcelBuffer.Reset();
+        ExcelBuffer.SetRange("Row No.", 1);
+        if ExcelBuffer.FindSet() then
+            repeat
+                Actual := UpperCase(DelChr(ExcelBuffer."Cell Value as Text", '<>', ' '));
+                if Actual = 'PASSENGER NAME' then
+                    Actual := 'VIEW PASSENGER';
+                if Actual <> '' then begin
+                    if HeaderColumns.ContainsKey(Actual) then
+                        Error('Duplicate Excel header "%1" at column %2.', Actual, ExcelBuffer."Column No.");
+                    HeaderColumns.Add(Actual, ExcelBuffer."Column No.");
+                end;
+            until ExcelBuffer.Next() = 0;
+        ExcelBuffer.Reset();
 
+        ColNo := 0;
         foreach Expected in Headers do begin
             ColNo += 1;
-
-            Actual := Cell(ExcelBuffer, 1, ColNo);
-
-            if UpperCase(Actual) <> UpperCase(Expected) then
-                Error(
-                    'Excel header mismatch at column %1. Expected "%2", found "%3".',
-                    ColNo, Expected, Actual);
+            if HeaderColumns.Get(UpperCase(Expected), ActualColNo) then
+                ImportColumns.Add(ColNo, ActualColNo)
+            else
+                // Serial No. is generated; older templates may omit Other Charges.
+                if not (ColNo in [1, 25]) then
+                    Error('Required Excel header "%1" is missing from row 1.', Expected);
         end;
     end;
-
     local procedure IsBlankRow(
         var ExcelBuffer: Record "Excel Buffer" temporary;
         RowNo: Integer): Boolean
     var
         ColNo: Integer;
     begin
-        for ColNo := 2 to 33 do
+        for ColNo := 2 to 34 do
             if Cell(ExcelBuffer, RowNo, ColNo) <> '' then
                 exit(false);
 
@@ -405,10 +430,15 @@ codeunit 50333 "Sales Return Excel Import"
         var ExcelBuffer: Record "Excel Buffer" temporary;
         RowNo: Integer;
         ColNo: Integer): Text
+    var
+        ActualColNo: Integer;
     begin
+        if not ImportColumns.Get(ColNo, ActualColNo) then
+            exit('');
+
         ExcelBuffer.Reset();
         ExcelBuffer.SetRange("Row No.", RowNo);
-        ExcelBuffer.SetRange("Column No.", ColNo);
+        ExcelBuffer.SetRange("Column No.", ActualColNo);
 
         if ExcelBuffer.FindFirst() then
             exit(

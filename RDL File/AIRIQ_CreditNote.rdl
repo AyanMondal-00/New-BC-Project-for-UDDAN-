@@ -1,0 +1,3840 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>26.0cm</Height>
+        <ReportItems>
+          <!-- Top Accent Bar: Blue 16.37cm + Coral 4.63cm = 21.0cm -->
+          <Textbox Name="TopAccentBlue">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>0cm</Top>
+            <Left>0cm</Left>
+            <Height>0.21cm</Height>
+            <Width>16.37cm</Width>
+            <Style>
+              <BackgroundColor>#1A74BA</BackgroundColor>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="TopAccentCoral">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>0cm</Top>
+            <Left>16.37cm</Left>
+            <Height>0.21cm</Height>
+            <Width>4.63cm</Width>
+            <Style>
+              <BackgroundColor>#F2666E</BackgroundColor>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <!-- Header Logo AIRiQ -->
+          <Textbox Name="LogoAIR">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>AIR</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>25pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>#1A74BA</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>iQ</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>25pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>#F2666E</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>0.95cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.05cm</Height>
+            <Width>5.5cm</Width>
+            <Style>
+              <PaddingLeft>0pt</PaddingLeft>
+              <PaddingTop>0pt</PaddingTop>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="LogoSubtitle">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>T R A V E L   P L A T F O R M</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>5.8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>#6B7A90</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>2.05cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.35cm</Height>
+            <Width>5.5cm</Width>
+            <Style>
+              <PaddingLeft>0pt</PaddingLeft>
+              <PaddingTop>0pt</PaddingTop>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <!-- Top Right CREDIT NOTE -->
+          <Textbox Name="TitleCreditNote">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>CREDIT NOTE</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>19pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>#14233C</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <Top>0.95cm</Top>
+            <Left>11.0cm</Left>
+            <Height>0.85cm</Height>
+            <Width>8.59cm</Width>
+            <Style>
+              <PaddingRight>0pt</PaddingRight>
+              <PaddingTop>0pt</PaddingTop>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="TitleCreditNoteSub">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Sales Return — Ticket Cancellation  ·  Original for Recipient</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>6.8pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Color>#6B7A90</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <Top>1.95cm</Top>
+            <Left>9.0cm</Left>
+            <Height>0.45cm</Height>
+            <Width>10.59cm</Width>
+            <Style>
+              <PaddingRight>0pt</PaddingRight>
+              <PaddingTop>0pt</PaddingTop>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <!-- Row 1: Left Box (Credit Note No. & Ref No.) -->
+          <Rectangle Name="BoxCreditNoteNo">
+            <Top>2.65cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.45cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#EAF3FB</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="LblCreditNoteNo">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>CREDIT NOTE NO.</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCreditNoteNo">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!CreditNoteNo.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>10.5pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.55cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.65cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="DivCreditNote">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.25cm</Top>
+                <Left>4.65cm</Left>
+                <Height>0.95cm</Height>
+                <Width>0.02cm</Width>
+                <Style>
+                  <BackgroundColor>#DCE6F0</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblRefNo">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>REF NO.</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>4.90cm</Left>
+                <Height>0.35cm</Height>
+                <Width>3.6cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValRefNo">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!RefNo.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>10.5pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.55cm</Top>
+                <Left>4.90cm</Left>
+                <Height>0.65cm</Height>
+                <Width>3.6cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Row 1: Right Box (Credit Note Date & Place of Supply) -->
+          <Rectangle Name="BoxCreditNoteDate">
+            <Top>2.65cm</Top>
+            <Left>10.66cm</Left>
+            <Height>1.45cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="LblCreditNoteDate">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>CREDIT NOTE DATE</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCreditNoteDate">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!CreditNoteDate.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>10.5pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.55cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.65cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblPlaceOfSupply">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>PLACE OF SUPPLY</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>4.65cm</Left>
+                <Height>0.35cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValPlaceOfSupply">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!PlaceOfSupply.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>9pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.55cm</Top>
+                <Left>4.65cm</Left>
+                <Height>0.65cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Row 2: Against Invoice Bar -->
+          <Rectangle Name="BoxAgainstInvoice">
+            <Top>4.25cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.15cm</Height>
+            <Width>18.18cm</Width>
+            <Style>
+              <BackgroundColor>#F6F9FC</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="TagAgainstInvoice">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.25cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.65cm</Height>
+                <Width>0.09cm</Width>
+                <Style>
+                  <BackgroundColor>#1A74BA</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Col 1: AGAINST INVOICE NO. -->
+              <Textbox Name="LblAgainstInvoiceNo">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>AGAINST INVOICE NO.</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>0.70cm</Left>
+                <Height>0.35cm</Height>
+                <Width>3.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValAgainstInvoiceNo">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!AgainstInvoiceNo.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>8.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.53cm</Top>
+                <Left>0.70cm</Left>
+                <Height>0.48cm</Height>
+                <Width>3.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Col 2: INVOICE DATE -->
+              <Textbox Name="LblInvoiceDate">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>INVOICE DATE</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>4.70cm</Left>
+                <Height>0.35cm</Height>
+                <Width>3.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValInvoiceDate">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!InvoiceDate.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>8.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.53cm</Top>
+                <Left>4.70cm</Left>
+                <Height>0.48cm</Height>
+                <Width>3.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Col 3: PNR -->
+              <Textbox Name="LblHeaderPNR">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>PNR</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>8.40cm</Left>
+                <Height>0.35cm</Height>
+                <Width>3.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValHeaderPNR">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!HeaderPNR.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>8.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.53cm</Top>
+                <Left>8.40cm</Left>
+                <Height>0.48cm</Height>
+                <Width>3.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Col 4: REASON -->
+              <Textbox Name="LblReason">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>REASON</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.18cm</Top>
+                <Left>11.60cm</Left>
+                <Height>0.35cm</Height>
+                <Width>6.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValReason">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!Reason.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>8.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.53cm</Top>
+                <Left>11.60cm</Left>
+                <Height>0.48cm</Height>
+                <Width>6.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Row 3: Left Box (SELLER / ISSUED BY) -->
+          <Rectangle Name="BoxSeller">
+            <Top>5.55cm</Top>
+            <Left>1.41cm</Left>
+            <Height>3.35cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="TagSeller">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.35cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>0.09cm</Width>
+                <Style>
+                  <BackgroundColor>#1A74BA</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblSeller">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>SELLER / ISSUED BY</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.32cm</Top>
+                <Left>0.65cm</Left>
+                <Height>0.35cm</Height>
+                <Width>7.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValSellerName">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!SellerName.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>10pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.75cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.50cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValSellerAddress1">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!SellerAddress1.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.25cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.36cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValSellerAddress2">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!SellerAddress2.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.58cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.36cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValSellerAddress3">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!SellerAddress3.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.91cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.36cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="SellerGSTIN">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>GSTIN: </Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                      <TextRun>
+                        <Value>=First(Fields!SellerGSTIN.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>2.60cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.45cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Row 3: Right Box (BILL TO) -->
+          <Rectangle Name="BoxCustomer">
+            <Top>5.55cm</Top>
+            <Left>10.66cm</Left>
+            <Height>3.35cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="TagCustomer">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.35cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>0.09cm</Width>
+                <Style>
+                  <BackgroundColor>#1A74BA</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblCustomer">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>BILL TO</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.32cm</Top>
+                <Left>0.65cm</Left>
+                <Height>0.35cm</Height>
+                <Width>7.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCustomerName">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!CustomerName.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>10pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.75cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.50cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCustomerAddress1">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!CustomerAddress1.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.25cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.36cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCustomerAddress2">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!CustomerAddress2.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.58cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.36cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCustomerAddress3">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!CustomerAddress3.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.91cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.36cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="CustomerGSTIN">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>GSTIN: </Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                      <TextRun>
+                        <Value>=First(Fields!CustomerGSTIN.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>2.60cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.45cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Section: CANCELLED PASSENGERS -->
+          <Textbox Name="LblCancelledPax">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>CANCELLED PASSENGERS</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>5.8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>#14233C</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>9.05cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.38cm</Height>
+            <Width>6.0cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="LblInclusiveNote">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Ticket value is inclusive of GST</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>6pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Color>#6B7A90</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <Top>9.05cm</Top>
+            <Left>11.0cm</Left>
+            <Height>0.38cm</Height>
+            <Width>8.59cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <!-- Table: TablixPassengers -->
+          <Tablix Name="TablixPassengers">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>1.18cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>3.10cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.80cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.00cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.40cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.10cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.80cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.90cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.80cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.10cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <!-- Header Row -->
+                <TablixRow>
+                  <Height>0.65cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_SL">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>SL NO.</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_Pax">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>PASSENGER</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_PNR">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>PNR</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_Date">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>TRAVEL DATE</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_SAC">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>SAC</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_Qty">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>QTY.</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_TktVal">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>TKT VALUE</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_CancelChg">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>CANCEL CHG.</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_GST18">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>GST 18%</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="H_Refund">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>REFUND</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.4pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#FFFFFF</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#1A74BA</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <!-- Detail Row -->
+                <TablixRow>
+                  <Height>0.68cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_Sl">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!SlNo.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_Pax">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!PassengerName.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_PNR">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!LinePNR.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>7.8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_Date">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!TravelDate.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>7.8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_SAC">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!SAC.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>7.8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_Qty">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Qty.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_TktVal">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="₹" &amp; Format(Fields!TktValue.Value, "#,##0.00")</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>7.8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_CancelChg">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="₹" &amp; Format(Fields!CancelCharge.Value, "#,##0.00")</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>7.8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_GST18">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="₹" &amp; Format(Fields!LineGST.Value, "#,##0.00")</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>7.8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="D_Refund">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="₹" &amp; Format(Fields!RefundAmount.Value, "#,##0.00")</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>=IIf(Fields!SlNo.Value Mod 2 = 0, "#F8FAFC", "#FFFFFF")</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>5pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <KeepWithGroup>After</KeepWithGroup>
+                </TablixMember>
+                <TablixMember>
+                  <Group Name="TablixPassengers_Details">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!SlNo.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>DataSet_Result</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=IsNothing(Fields!PassengerName.Value)</FilterExpression>
+                <Operator>Equal</Operator>
+                <FilterValues>
+                  <FilterValue>=False</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>9.48cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.33cm</Height>
+            <Width>18.18cm</Width>
+            <Style>
+              <Border>
+                <Color>#E2E8F0</Color>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <!-- Section: GST SUMMARY -->
+          <Textbox Name="LblGSTSummary">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>GST SUMMARY</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>5.8pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <Color>#14233C</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>11.00cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.35cm</Height>
+            <Width>6.0cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <!-- Table: TablixGST -->
+          <Tablix Name="TablixGST">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>4.80cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.20cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>3.80cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>3.80cm</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>3.58cm</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <!-- Header Row -->
+                <TablixRow>
+                  <Height>0.58cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GH_Tax">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>TAX</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.6pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#1A74BA</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#EAF3FB</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>3pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GH_Rate">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>RATE</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.6pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#1A74BA</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#EAF3FB</BackgroundColor>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>3pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GH_Rev">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>REVERSED ON TICKETS</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.6pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#1A74BA</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#EAF3FB</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>3pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GH_Cancel">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>ON CANCEL CHG.</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.6pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#1A74BA</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#EAF3FB</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>3pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GH_Net">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>NET GST</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>5.6pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#1A74BA</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <BackgroundColor>#EAF3FB</BackgroundColor>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>3pt</PaddingTop>
+                            <Border>
+                              <Style>None</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <!-- Detail Row -->
+                <TablixRow>
+                  <Height>0.60cm</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GD_Tax">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!TaxComponent.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GD_Rate">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!TaxRate.Value</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <PaddingLeft>4pt</PaddingLeft>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GD_Rev">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="(₹" &amp; Format(Fields!ReversedOnTickets.Value, "#,##0.00") &amp; ")"</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GD_Cancel">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="₹" &amp; Format(Fields!OnCancelChg.Value, "#,##0.00")</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GD_Net">
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>="₹" &amp; Format(Fields!NetGST.Value, "#,##0.00")</Value>
+                                  <Style>
+                                    <FontFamily>DejaVu Sans</FontFamily>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>#14233C</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <PaddingRight>4pt</PaddingRight>
+                            <PaddingTop>4pt</PaddingTop>
+                            <Border>
+                              <Color>#E2E8F0</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <KeepWithGroup>After</KeepWithGroup>
+                </TablixMember>
+                <TablixMember>
+                  <Group Name="TablixGST_Details">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!TaxComponent.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>DataSet_Result</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=IsNothing(Fields!TaxComponent.Value)</FilterExpression>
+                <Operator>Equal</Operator>
+                <FilterValues>
+                  <FilterValue>=False</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>11.38cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.18cm</Height>
+            <Width>18.18cm</Width>
+            <Style>
+              <Border>
+                <Color>#E2E8F0</Color>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <!-- Footnote below GST -->
+          <Textbox Name="TxtGSTFootnote">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>GST charged under Rule 32(3), CGST Rules, 2017 on the cancelled tickets is reversed (Sec. 34, CGST Act); GST @ 18% (SAC 998555) is charged on cancellation charges.</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>5.6pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Color>#6B7A90</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>12.62cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.42cm</Height>
+            <Width>18.18cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <!-- Section: NET REFUND IN WORDS (Left) & Refund Summary (Right) -->
+          <Rectangle Name="BoxNetRefundInWords">
+            <Top>13.15cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.55cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="LblNetRefundWords">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>NET REFUND IN WORDS</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.20cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValNetRefundWords">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!NetRefundInWords.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>8pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.58cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.85cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Right Calculation Card -->
+          <Rectangle Name="BoxRefundCalc">
+            <Top>13.15cm</Top>
+            <Left>10.66cm</Left>
+            <Height>4.35cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+            <ReportItems>
+              <!-- Row 1: Value excl. GST -->
+              <Textbox Name="LblValExcl">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Value excl. GST</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.05cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValValExcl">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="₹" &amp; Format(First(Fields!ValueExclGST.Value, "DataSet_Result"), "#,##0.00")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.05cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 2: CGST reversed @ 9% -->
+              <Textbox Name="LblCGSTRev">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>CGST reversed @ 9%</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.45cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCGSTRev">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="₹" &amp; Format(First(Fields!CGSTReversed.Value, "DataSet_Result"), "#,##0.00")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.45cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 3: SGST reversed @ 9% -->
+              <Textbox Name="LblSGSTRev">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>SGST reversed @ 9%</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.85cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValSGSTRev">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="₹" &amp; Format(First(Fields!SGSTReversed.Value, "DataSet_Result"), "#,##0.00")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.85cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Divider -->
+              <Textbox Name="DivCalc">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.25cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.02cm</Height>
+                <Width>8.73cm</Width>
+                <Style>
+                  <BackgroundColor>#E2E8F0</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 4: Credit Note Value -->
+              <Textbox Name="LblCNVal">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Credit Note Value</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.8pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.32cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValCNVal">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="₹" &amp; Format(First(Fields!CreditNoteValue.Value, "DataSet_Result"), "#,##0.00")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.8pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.32cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 5: Less: Cancellation Charges -->
+              <Textbox Name="LblLessCancel">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Less: Cancellation Charges</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#F2666E</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.72cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValLessCancel">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="(₹" &amp; Format(First(Fields!TotalCancelCharges.Value, "DataSet_Result"), "#,##0.00") &amp; ")"</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#F2666E</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.72cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 6: Less: CGST @ 9% on charges -->
+              <Textbox Name="LblLessCGST">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Less: CGST @ 9% on charges</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#F2666E</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>2.12cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValLessCGST">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="(₹" &amp; Format(First(Fields!CGSTOnCharges.Value, "DataSet_Result"), "#,##0.00") &amp; ")"</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#F2666E</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>2.12cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 7: Less: SGST @ 9% on charges -->
+              <Textbox Name="LblLessSGST">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Less: SGST @ 9% on charges</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#F2666E</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>2.52cm</Top>
+                <Left>0.10cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.5cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValLessSGST">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>="(₹" &amp; Format(First(Fields!SGSTOnCharges.Value, "DataSet_Result"), "#,##0.00") &amp; ")"</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#F2666E</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>2.52cm</Top>
+                <Left>4.6cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.23cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Total Banner Box: NET REFUND -->
+              <Rectangle Name="BoxNetRefundBanner">
+                <Top>3.02cm</Top>
+                <Left>0cm</Left>
+                <Height>0.95cm</Height>
+                <Width>8.93cm</Width>
+                <Style>
+                  <BackgroundColor>#1A74BA</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+                <ReportItems>
+                  <Textbox Name="LblNetRefund">
+                    <Paragraphs>
+                      <Paragraph>
+                        <TextRuns>
+                          <TextRun>
+                            <Value>NET REFUND</Value>
+                            <Style>
+                              <FontFamily>DejaVu Sans</FontFamily>
+                              <FontSize>6.8pt</FontSize>
+                              <FontWeight>Bold</FontWeight>
+                              <Color>#FFFFFF</Color>
+                            </Style>
+                          </TextRun>
+                        </TextRuns>
+                      </Paragraph>
+                    </Paragraphs>
+                    <Top>0.28cm</Top>
+                    <Left>0.42cm</Left>
+                    <Height>0.45cm</Height>
+                    <Width>3.0cm</Width>
+                    <Style>
+                      <Border>
+                        <Style>None</Style>
+                      </Border>
+                    </Style>
+                  </Textbox>
+                  <Textbox Name="ValNetRefund">
+                    <Paragraphs>
+                      <Paragraph>
+                        <TextRuns>
+                          <TextRun>
+                            <Value>="₹" &amp; Format(First(Fields!NetRefund.Value, "DataSet_Result"), "#,##0.00")</Value>
+                            <Style>
+                              <FontFamily>DejaVu Sans</FontFamily>
+                              <FontSize>12pt</FontSize>
+                              <FontWeight>Bold</FontWeight>
+                              <Color>#FFFFFF</Color>
+                            </Style>
+                          </TextRun>
+                        </TextRuns>
+                        <Style>
+                          <TextAlign>Right</TextAlign>
+                        </Style>
+                      </Paragraph>
+                    </Paragraphs>
+                    <Top>0.15cm</Top>
+                    <Left>3.50cm</Left>
+                    <Height>0.65cm</Height>
+                    <Width>5.01cm</Width>
+                    <Style>
+                      <PaddingRight>8pt</PaddingRight>
+                      <Border>
+                        <Style>None</Style>
+                      </Border>
+                    </Style>
+                  </Textbox>
+                </ReportItems>
+              </Rectangle>
+            </ReportItems>
+          </Rectangle>
+          <!-- Section: NARRATION -->
+          <Rectangle Name="BoxNarration">
+            <Top>17.65cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.35cm</Height>
+            <Width>18.18cm</Width>
+            <Style>
+              <BackgroundColor>#F6F9FC</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="TagNarration">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.25cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>0.09cm</Width>
+                <Style>
+                  <BackgroundColor>#1A74BA</BackgroundColor>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblNarration">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>NARRATION</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.22cm</Top>
+                <Left>0.65cm</Left>
+                <Height>0.35cm</Height>
+                <Width>4.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValNarration">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!Narration.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.4pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.58cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.70cm</Height>
+                <Width>17.34cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Section: BANK DETAILS (Left) -->
+          <Rectangle Name="BoxBankDetails">
+            <Top>19.20cm</Top>
+            <Left>1.41cm</Left>
+            <Height>1.70cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="LblBankDetails">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>BANK DETAILS</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.20cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 1: Bank -->
+              <Textbox Name="LblBank">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Bank</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.58cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.32cm</Height>
+                <Width>2.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValBank">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!BankName.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.58cm</Top>
+                <Left>2.70cm</Left>
+                <Height>0.32cm</Height>
+                <Width>5.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 2: Account No. -->
+              <Textbox Name="LblAcct">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Account No.</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.92cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.32cm</Height>
+                <Width>2.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValAcct">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!BankAccountNo.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.92cm</Top>
+                <Left>2.70cm</Left>
+                <Height>0.32cm</Height>
+                <Width>5.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 3: IFSC -->
+              <Textbox Name="LblIFSC">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>IFSC</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.26cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.32cm</Height>
+                <Width>2.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValIFSC">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!BankIFSC.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.26cm</Top>
+                <Left>2.70cm</Left>
+                <Height>0.32cm</Height>
+                <Width>5.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Section: CONTACT DETAILS (Right) -->
+          <Rectangle Name="BoxContactDetails">
+            <Top>19.20cm</Top>
+            <Left>10.66cm</Left>
+            <Height>1.70cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="LblContactDetails">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>CONTACT DETAILS</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.20cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 1: Website -->
+              <Textbox Name="LblWebsite">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Website</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.58cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.32cm</Height>
+                <Width>2.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValWebsite">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!Website.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.58cm</Top>
+                <Left>2.70cm</Left>
+                <Height>0.32cm</Height>
+                <Width>5.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Row 2: Email -->
+              <Textbox Name="LblEmail">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Email</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.92cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.32cm</Height>
+                <Width>2.2cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValEmail">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>=First(Fields!ContactEmail.Value, "DataSet_Result")</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7.2pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.92cm</Top>
+                <Left>2.70cm</Left>
+                <Height>0.32cm</Height>
+                <Width>5.8cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Section: DECLARATION (Left) -->
+          <Rectangle Name="BoxDeclaration">
+            <Top>21.10cm</Top>
+            <Left>1.41cm</Left>
+            <Height>2.60cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="LblDeclaration">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>DECLARATION</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>5.6pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#1A74BA</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.25cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.35cm</Height>
+                <Width>8.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="ValDeclaration">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>We declare that this credit note is issued against the original tax invoice cited above and that all particulars are true and correct.</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>6.6pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.65cm</Top>
+                <Left>0.42cm</Left>
+                <Height>1.50cm</Height>
+                <Width>8.09cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Section: SIGNATORY (Right) -->
+          <Rectangle Name="BoxSignatory">
+            <Top>21.10cm</Top>
+            <Left>10.66cm</Left>
+            <Height>2.60cm</Height>
+            <Width>8.93cm</Width>
+            <Style>
+              <BackgroundColor>#FFFFFF</BackgroundColor>
+              <Border>
+                <Color>#DCE6F0</Color>
+                <Style>Solid</Style>
+                <Width>0.8pt</Width>
+              </Border>
+            </Style>
+            <ReportItems>
+              <Textbox Name="ValSignatoryCompany">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>for AIRIQ 365 LIMITED</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>8pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>#14233C</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>0.25cm</Top>
+                <Left>1.50cm</Left>
+                <Height>0.45cm</Height>
+                <Width>7.01cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <!-- Dotted line -->
+              <Textbox Name="LineSignatory">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.80cm</Top>
+                <Left>2.20cm</Left>
+                <Height>0.02cm</Height>
+                <Width>6.31cm</Width>
+                <Style>
+                  <Border>
+                    <Color>#DCE6F0</Color>
+                    <Style>Dashed</Style>
+                    <Width>1pt</Width>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblSeal">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Seal</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.95cm</Top>
+                <Left>0.42cm</Left>
+                <Height>0.40cm</Height>
+                <Width>2.0cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+              <Textbox Name="LblAuthorisedSignatory">
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Authorised Signatory</Value>
+                        <Style>
+                          <FontFamily>DejaVu Sans</FontFamily>
+                          <FontSize>7pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <Color>#6B7A90</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Right</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <Top>1.95cm</Top>
+                <Left>4.50cm</Left>
+                <Height>0.40cm</Height>
+                <Width>4.01cm</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Textbox>
+            </ReportItems>
+          </Rectangle>
+          <!-- Footer Line -->
+          <Textbox Name="LineFooter">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>23.95cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.03cm</Height>
+            <Width>18.18cm</Width>
+            <Style>
+              <BackgroundColor>#DCE6F0</BackgroundColor>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="LineFooterAccent">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>23.95cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.06cm</Height>
+            <Width>1.80cm</Width>
+            <Style>
+              <BackgroundColor>#F2666E</BackgroundColor>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="ValFooterLeft">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>This is a computer-generated credit note.  Subject to Siliguri jurisdiction.</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>6.4pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Color>#6B7A90</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+              </Paragraph>
+            </Paragraphs>
+            <Top>24.10cm</Top>
+            <Left>1.41cm</Left>
+            <Height>0.40cm</Height>
+            <Width>12.0cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="ValFooterRight">
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>airiq.in  |  Page 1 of 1</Value>
+                    <Style>
+                      <FontFamily>DejaVu Sans</FontFamily>
+                      <FontSize>6.4pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Color>#6B7A90</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <Top>24.10cm</Top>
+            <Left>13.59cm</Left>
+            <Height>0.40cm</Height>
+            <Width>6.0cm</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+        </ReportItems>
+      </Body>
+      <Width>21.0cm</Width>
+      <Page>
+        <PageHeight>29.7cm</PageHeight>
+        <PageWidth>21.0cm</PageWidth>
+        <LeftMargin>0cm</LeftMargin>
+        <RightMargin>0cm</RightMargin>
+        <TopMargin>0cm</TopMargin>
+        <BottomMargin>0cm</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <Code>
+    Public Function BlankZero(ByVal Value As Decimal) As String
+        if Value = 0 then
+            Return ""
+        end if
+        Return Value.ToString()
+    End Function
+  </Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+  <rd:ReportID>8a451e73-0421-4f11-9a7c-bc78a05c743e</rd:ReportID>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Fields>
+        <Field Name="CreditNoteNo">
+          <DataField>CreditNoteNo</DataField>
+        </Field>
+        <Field Name="RefNo">
+          <DataField>RefNo</DataField>
+        </Field>
+        <Field Name="CreditNoteDate">
+          <DataField>CreditNoteDate</DataField>
+        </Field>
+        <Field Name="PlaceOfSupply">
+          <DataField>PlaceOfSupply</DataField>
+        </Field>
+        <Field Name="AgainstInvoiceNo">
+          <DataField>AgainstInvoiceNo</DataField>
+        </Field>
+        <Field Name="InvoiceDate">
+          <DataField>InvoiceDate</DataField>
+        </Field>
+        <Field Name="HeaderPNR">
+          <DataField>HeaderPNR</DataField>
+        </Field>
+        <Field Name="Reason">
+          <DataField>Reason</DataField>
+        </Field>
+        <Field Name="SellerName">
+          <DataField>SellerName</DataField>
+        </Field>
+        <Field Name="SellerAddress1">
+          <DataField>SellerAddress1</DataField>
+        </Field>
+        <Field Name="SellerAddress2">
+          <DataField>SellerAddress2</DataField>
+        </Field>
+        <Field Name="SellerAddress3">
+          <DataField>SellerAddress3</DataField>
+        </Field>
+        <Field Name="SellerGSTIN">
+          <DataField>SellerGSTIN</DataField>
+        </Field>
+        <Field Name="CustomerName">
+          <DataField>CustomerName</DataField>
+        </Field>
+        <Field Name="CustomerAddress1">
+          <DataField>CustomerAddress1</DataField>
+        </Field>
+        <Field Name="CustomerAddress2">
+          <DataField>CustomerAddress2</DataField>
+        </Field>
+        <Field Name="CustomerAddress3">
+          <DataField>CustomerAddress3</DataField>
+        </Field>
+        <Field Name="CustomerGSTIN">
+          <DataField>CustomerGSTIN</DataField>
+        </Field>
+        <Field Name="ValueExclGST">
+          <DataField>ValueExclGST</DataField>
+        </Field>
+        <Field Name="ValueExclGSTFormat">
+          <DataField>ValueExclGSTFormat</DataField>
+        </Field>
+        <Field Name="CGSTReversed">
+          <DataField>CGSTReversed</DataField>
+        </Field>
+        <Field Name="CGSTReversedFormat">
+          <DataField>CGSTReversedFormat</DataField>
+        </Field>
+        <Field Name="SGSTReversed">
+          <DataField>SGSTReversed</DataField>
+        </Field>
+        <Field Name="SGSTReversedFormat">
+          <DataField>SGSTReversedFormat</DataField>
+        </Field>
+        <Field Name="CreditNoteValue">
+          <DataField>CreditNoteValue</DataField>
+        </Field>
+        <Field Name="CreditNoteValueFormat">
+          <DataField>CreditNoteValueFormat</DataField>
+        </Field>
+        <Field Name="TotalCancelCharges">
+          <DataField>TotalCancelCharges</DataField>
+        </Field>
+        <Field Name="TotalCancelChargesFormat">
+          <DataField>TotalCancelChargesFormat</DataField>
+        </Field>
+        <Field Name="CGSTOnCharges">
+          <DataField>CGSTOnCharges</DataField>
+        </Field>
+        <Field Name="CGSTOnChargesFormat">
+          <DataField>CGSTOnChargesFormat</DataField>
+        </Field>
+        <Field Name="SGSTOnCharges">
+          <DataField>SGSTOnCharges</DataField>
+        </Field>
+        <Field Name="SGSTOnChargesFormat">
+          <DataField>SGSTOnChargesFormat</DataField>
+        </Field>
+        <Field Name="NetRefund">
+          <DataField>NetRefund</DataField>
+        </Field>
+        <Field Name="NetRefundFormat">
+          <DataField>NetRefundFormat</DataField>
+        </Field>
+        <Field Name="NetRefundInWords">
+          <DataField>NetRefundInWords</DataField>
+        </Field>
+        <Field Name="Narration">
+          <DataField>Narration</DataField>
+        </Field>
+        <Field Name="BankName">
+          <DataField>BankName</DataField>
+        </Field>
+        <Field Name="BankAccountNo">
+          <DataField>BankAccountNo</DataField>
+        </Field>
+        <Field Name="BankIFSC">
+          <DataField>BankIFSC</DataField>
+        </Field>
+        <Field Name="Website">
+          <DataField>Website</DataField>
+        </Field>
+        <Field Name="ContactEmail">
+          <DataField>ContactEmail</DataField>
+        </Field>
+        <Field Name="SlNo">
+          <DataField>SlNo</DataField>
+        </Field>
+        <Field Name="PassengerName">
+          <DataField>PassengerName</DataField>
+        </Field>
+        <Field Name="LinePNR">
+          <DataField>LinePNR</DataField>
+        </Field>
+        <Field Name="TravelDate">
+          <DataField>TravelDate</DataField>
+        </Field>
+        <Field Name="SAC">
+          <DataField>SAC</DataField>
+        </Field>
+        <Field Name="Qty">
+          <DataField>Qty</DataField>
+        </Field>
+        <Field Name="QtyFormat">
+          <DataField>QtyFormat</DataField>
+        </Field>
+        <Field Name="TktValue">
+          <DataField>TktValue</DataField>
+        </Field>
+        <Field Name="TktValueFormat">
+          <DataField>TktValueFormat</DataField>
+        </Field>
+        <Field Name="CancelCharge">
+          <DataField>CancelCharge</DataField>
+        </Field>
+        <Field Name="CancelChargeFormat">
+          <DataField>CancelChargeFormat</DataField>
+        </Field>
+        <Field Name="LineGST">
+          <DataField>LineGST</DataField>
+        </Field>
+        <Field Name="LineGSTFormat">
+          <DataField>LineGSTFormat</DataField>
+        </Field>
+        <Field Name="RefundAmount">
+          <DataField>RefundAmount</DataField>
+        </Field>
+        <Field Name="RefundAmountFormat">
+          <DataField>RefundAmountFormat</DataField>
+        </Field>
+        <Field Name="TaxComponent">
+          <DataField>TaxComponent</DataField>
+        </Field>
+        <Field Name="TaxRate">
+          <DataField>TaxRate</DataField>
+        </Field>
+        <Field Name="ReversedOnTickets">
+          <DataField>ReversedOnTickets</DataField>
+        </Field>
+        <Field Name="ReversedOnTicketsFormat">
+          <DataField>ReversedOnTicketsFormat</DataField>
+        </Field>
+        <Field Name="OnCancelChg">
+          <DataField>OnCancelChg</DataField>
+        </Field>
+        <Field Name="OnCancelChgFormat">
+          <DataField>OnCancelChgFormat</DataField>
+        </Field>
+        <Field Name="NetGST">
+          <DataField>NetGST</DataField>
+        </Field>
+        <Field Name="NetGSTFormat">
+          <DataField>NetGSTFormat</DataField>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+    </DataSet>
+  </DataSets>
+</Report>

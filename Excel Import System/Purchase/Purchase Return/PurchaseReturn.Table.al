@@ -1,3 +1,4 @@
+
 table 50302 "Purchase Return"
 {
     Caption = 'Purchase Return';
@@ -15,37 +16,45 @@ table 50302 "Purchase Return"
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Entry Date");
+
                 if DT2Time(Rec."Entry Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Entry Date");
-                Rec."Entry Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Entry Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(3; "Purchase Date"; DateTime)
         {
             Caption = 'Purchase Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Purchase Date");
+
                 if DT2Time(Rec."Purchase Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Purchase Date");
-                Rec."Purchase Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Purchase Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(4; "Voucher Number"; Code[50])
         {
@@ -109,28 +118,60 @@ table 50302 "Purchase Return"
             DataClassification = CustomerContent;
         }
 
+        // =========================================
+        // PAX - AUTOMATIC AMOUNT CALCULATION
+        // =========================================
+
         field(14; Pax; Integer)
         {
             Caption = 'Pax';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateReturnAmount();
+            end;
         }
+
+        // =========================================
+        // BASE FARE
+        // =========================================
 
         field(15; "Base Fare"; Decimal)
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateReturnAmount();
+            end;
         }
+
+        // =========================================
+        // OTHER CHARGES
+        // =========================================
 
         field(16; Others; Decimal)
         {
             Caption = 'Others';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateReturnAmount();
+            end;
         }
+
+        // =========================================
+        // RATE = BASE FARE + OTHERS
+        // =========================================
 
         field(17; Rate; Decimal)
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(18; Discount; Decimal)
@@ -145,29 +186,38 @@ table 50302 "Purchase Return"
             DataClassification = CustomerContent;
         }
 
+        // =========================================
+        // AMOUNT = RATE * PAX
+        // =========================================
+
         field(20; Amount; Decimal)
         {
             Caption = 'Amount';
             DataClassification = CustomerContent;
+            Editable = false;
         }
 
         field(21; "Travel Date"; DateTime)
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
+
                 if DT2Time(Rec."Travel Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Travel Date");
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Travel Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(22; "Departure Time"; Time)
         {
@@ -187,8 +237,6 @@ table 50302 "Purchase Return"
             DataClassification = CustomerContent;
         }
 
- 
-
         field(26; "Cost Revision"; Option)
         {
             Caption = 'Cost Revision';
@@ -205,15 +253,31 @@ table 50302 "Purchase Return"
         }
     }
 
-
-
-
+    // =========================================
+    // AUTOMATIC SERIAL NUMBER GENERATION
+    // =========================================
 
     trigger OnInsert()
     begin
-        // Always generate Serial No. in Business Central.
         "Serial No." := GetNextSerialNo();
+
+        CalculateReturnAmount();
     end;
+
+    // =========================================
+    // RATE AND AMOUNT CALCULATION
+    // =========================================
+
+    local procedure CalculateReturnAmount()
+    begin
+        Rec.Rate := Rec."Base Fare" + Rec.Others;
+
+        Rec.Amount := Rec.Rate * Rec.Pax;
+    end;
+
+    // =========================================
+    // EXISTING SERIAL NUMBER LOGIC
+    // =========================================
 
     local procedure GetNextSerialNo(): Integer
     var
@@ -251,6 +315,4 @@ table 50302 "Purchase Return"
 
         exit(LastUsedNo + 1);
     end;
-
 }
-

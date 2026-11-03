@@ -87,6 +87,11 @@ table 50403 "Sales Return"
         {
             Caption = 'Type';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
         }
 
         field(13; "Travel Date"; DateTime)
@@ -153,41 +158,65 @@ table 50403 "Sales Return"
         {
             Caption = 'PAX';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
         }
 
         field(21; "Base Fare"; Decimal)
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
-        }
 
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
+        }
+        field(33; "Other Charges"; Decimal)
+        {
+            Caption = 'Other Charges';
+            DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateGST();
+            end;
+        }
         field(22; "Taxable Value"; Decimal)
         {
             Caption = 'Taxable Value';
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(23; CGST; Decimal)
         {
             Caption = 'CGST';
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(24; SGST; Decimal)
         {
             Caption = 'SGST';
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(25; IGST; Decimal)
         {
             Caption = 'IGST';
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(26; "Sold Value"; Decimal)
         {
             Caption = 'Sold Value';
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
@@ -234,8 +263,36 @@ table 50403 "Sales Return"
         // Always generate Serial No. in Business Central.
         // Ignore any Serial No. supplied by Excel or another caller.
         "Serial No." := GetNextSerialNo();
+        CalculateGST();
     end;
 
+    trigger OnModify()
+    begin
+        CalculateGST();
+    end;
+
+    procedure CalculateGST()
+    var
+        TotalBaseFare: Decimal;
+        TotalOtherCharges: Decimal;
+    begin
+        TotalBaseFare := "Base Fare" * PAX;
+        TotalOtherCharges := "Other Charges" * PAX;
+
+        if UpperCase(DelChr(Type, '<>', ' ')) = 'DOMESTIC' then begin
+            "Taxable Value" := TotalBaseFare * 0.05;
+            CGST := "Taxable Value" * 0.09;
+            SGST := "Taxable Value" * 0.09;
+            IGST := 0;
+        end else begin
+            "Taxable Value" := TotalBaseFare * 0.10;
+            CGST := 0;
+            SGST := 0;
+            IGST := "Taxable Value" * 0.18;
+        end;
+
+        "Sold Value" := TotalBaseFare + TotalOtherCharges + CGST + SGST + IGST;
+    end;
     local procedure GetNextSerialNo(): Integer
     var
         SerialCounter: Record "Sales Return Serial Counter";

@@ -95,6 +95,11 @@ table 50420 "Inventory Consumption"
         {
             Caption = 'Pax';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateAmounts();
+            end;
         }
 
         field(10; "Travel Date"; DateTime)
@@ -128,47 +133,76 @@ table 50420 "Inventory Consumption"
         {
             Caption = 'Type';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateAmounts();
+            end;
         }
 
         field(13; "Base Fare"; Decimal)
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateAmounts();
+            end;
         }
 
         field(14; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateAmounts();
+            end;
+        }
+        field(23; "Rate"; Decimal)
+        {
+            Caption = 'Rate';
+            Editable = false;
+            DataClassification = CustomerContent;
         }
 
         field(15; "Taxable Basis"; Decimal)
         {
             Caption = 'Taxable Basis';
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(16; CGST; Decimal)
         {
             Caption = 'CGST';
+            BlankZero = true;
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(17; SGST; Decimal)
         {
             Caption = 'SGST';
+            BlankZero = true;
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(18; IGST; Decimal)
         {
             Caption = 'IGST';
+            BlankZero = true;
+            Editable = false;
             DataClassification = CustomerContent;
         }
 
         field(19; "Total Amount"; Decimal)
         {
             Caption = 'Total Amount';
+            Editable = false;
             DataClassification = CustomerContent;
         }
     }
@@ -185,8 +219,41 @@ table 50420 "Inventory Consumption"
     begin
         if "Serial No." <= 0 then
             "Serial No." := GetNextSerialNo();
+
+        CalculateAmounts();
     end;
 
+    trigger OnModify()
+    begin
+        CalculateAmounts();
+    end;
+
+    procedure CalculateAmounts()
+    var
+        TotalBaseFare: Decimal;
+    begin
+        TotalBaseFare := "Base Fare" * Pax;
+        Rate := ("Base Fare" + "Other Charges") * Pax;
+        "Total Amount" := Rate;
+        "Taxable Basis" := 0;
+        CGST := 0;
+        SGST := 0;
+        IGST := 0;
+
+        case UpperCase(DelChr(Type, '<>', ' ')) of
+            'DOMESTIC':
+                begin
+                    "Taxable Basis" := TotalBaseFare * 5 / 100;
+                    CGST := "Taxable Basis" * 9 / 100;
+                    SGST := "Taxable Basis" * 9 / 100;
+                end;
+            'INTERNATIONAL':
+                begin
+                    "Taxable Basis" := TotalBaseFare * 10 / 100;
+                    IGST := "Taxable Basis" * 18 / 100;
+                end;
+        end;
+    end;
     local procedure GetNextSerialNo(): Integer
     var
         SerialCounter: Record "Inv. Cons. Serial Cnt.";

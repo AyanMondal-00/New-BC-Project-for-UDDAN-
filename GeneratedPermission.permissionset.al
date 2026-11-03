@@ -4,6 +4,8 @@ permissionset 50300 GeneratedPermission
 {
     Assignable = true;
     Permissions =
+        tabledata "AIRIQ AQPR Reservation" = RIMD,
+        tabledata "AIRIQ SR Return Registry" = RIMD,
         tabledata "AIRIQ Invoice Counter" = RIMD,
         tabledata "Airline Inventory Payment Due" = RIMD,
         tabledata "API Sales Format" = RIMD,
@@ -35,6 +37,8 @@ permissionset 50300 GeneratedPermission
         tabledata "Third Party Passenger Name" = RIMD,
         tabledata "Third Party Sales Serial Cnt." = RIMD,
         tabledata "Third-Party Supplier Sales" = RIMD,
+        table "AIRIQ AQPR Reservation" = X,
+        table "AIRIQ SR Return Registry" = X,
         table "AIRIQ Invoice Counter" = X,
         table "Airline Inventory Payment Due" = X,
         table "API Sales Format" = X,
@@ -66,6 +70,18 @@ permissionset 50300 GeneratedPermission
         table "Third Party Passenger Name" = X,
         table "Third Party Sales Serial Cnt." = X,
         table "Third-Party Supplier Sales" = X,
+        codeunit "AIRIQ AQPR No. Mgt" = X,
+        codeunit "AIRIQ Bank Payment Import" = X,
+        codeunit AIRIQ.BankReceipt."AIRIQ Bank Receipt Import" = X,
+        codeunit AIRIQ.ContraVoucher."AIRIQ Contra Voucher Import" = X,
+        codeunit AIRIQ.JournalVoucher."AIRIQ Journal Voucher Import" = X,
+        codeunit "AIRIQ Return Credit Memo" = X,
+        codeunit "AIRIQ Return Posting" = X,
+        codeunit "AIRIQ SR Create Memo" = X,
+        codeunit "AIRIQ SR Integrity" = X,
+        codeunit "AIRIQ SR Install" = X,
+        codeunit "AIRIQ SR Upgrade" = X,
+        codeunit "AIRIQ SR Posting" = X,
         codeunit "AIRIQ API Sales Invoice Mgt" = X,
         codeunit "AIRIQ Create API Sales Invoice" = X,
         codeunit "AIRIQ Create Sales Invoice" = X,
@@ -93,6 +109,13 @@ permissionset 50300 GeneratedPermission
         codeunit "Third Party Sales Invoice" = X,
         codeunit "Third Party Sales Invoice Mgt" = X,
         codeunit "Third Party Sales Excel Import" = X,
+        page "AIRIQ GST Config Diagnostic" = X,
+        page "AIRIQ GST Diagnostic" = X,
+        page "AIRIQ GST Field Diagnostic" = X,
+        page "AIRIQ GST Formula Check" = X,
+        page "AIRIQ GST Tree Check" = X,
+        page "AIRIQ GST Tree Diagnostic" = X,
+        page "AIRIQ GST Use Case Check" = X,
         page "Airline Inventory Payment Due" = X,
         page "API Sales Format List" = X,
         page "API Sales Passenger Name List" = X,
@@ -118,5 +141,6 @@ permissionset 50300 GeneratedPermission
         page "Target Incentive" = X,
         page "Third Party Name List" = X,
         page "Third Party Sales List" = X,
-        report "AIRIQ Dummy Invoice" = X;
+        report "AIRIQ Sales Invoice" = X,
+        report "AIRIQ Credit Note Invoice" = X;
 }

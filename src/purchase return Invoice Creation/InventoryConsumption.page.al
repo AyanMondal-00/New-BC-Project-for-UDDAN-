@@ -96,6 +96,10 @@ page 50420 "Inv. Consumption List"
                 {
                     ApplicationArea = All;
                 }
+                field(Rate; Rec.Rate)
+                {
+                    ApplicationArea = All;
+                }
 
                 field("Taxable Basis"; Rec."Taxable Basis")
                 {
@@ -104,16 +108,19 @@ page 50420 "Inv. Consumption List"
 
                 field(CGST; Rec.CGST)
                 {
+                    BlankZero = true;
                     ApplicationArea = All;
                 }
 
                 field(SGST; Rec.SGST)
                 {
+                    BlankZero = true;
                     ApplicationArea = All;
                 }
 
                 field(IGST; Rec.IGST)
                 {
+                    BlankZero = true;
                     ApplicationArea = All;
                 }
 

@@ -1,0 +1,9 @@
+﻿{
+    "Result":  "PASS",
+    "Source":  "Confirmed GST.json Sandbox 7.1 export",
+    "DeterministicRebuild":  "All three generated files matched SHA256 on an independent rebuild.",
+    "DoubleScalingNegativeControl":  "Extra /20 in an isolated Domestic component was rejected for numeric base/rate inconsistency.",
+    "OriginalImportFiles":  "Unchanged by the negative-control experiment.",
+    "ALCompilerAttempt":  "Not rerun: JSON/scripts/documentation only; prior AL evidence remains in compile-results.json.",
+    "TenantActions":  "NONE"
+}

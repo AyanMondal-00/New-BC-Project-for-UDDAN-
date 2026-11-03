@@ -31,6 +31,23 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
         {
             Caption = 'Flight Type';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            var
+                CalculateTax: Codeunit "Calculate Tax";
+            begin
+                if Rec.IsTemporary() then
+                    exit;
+                if (Rec."Document Type" <> Rec."Document Type"::Invoice) or
+                   (Rec.Type <> Rec.Type::Item) or (Rec."No." = '') then
+                    exit;
+                if Rec.FlightType = xRec.FlightType then
+                    exit;
+
+                // Re-run standard tax selection when FlightType changes or is cleared.
+                // The custom formulas read Amount; never reduce the commercial fields.
+                CalculateTax.CallTaxEngineOnSalesLine(Rec, xRec);
+            end;
         }
 
         field(50432; BaseFare; Text[50])

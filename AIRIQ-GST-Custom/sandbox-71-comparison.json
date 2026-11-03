@@ -1,0 +1,55 @@
+{
+  "CaseID": "{6B464955-261F-4EAF-A749-7807444FC37C}",
+  "LocalSource": "AIRIQ-GST-Source/6b464955-261f-4eaf-a749-7807444fc37c.json",
+  "LocalSHA256": "47E1D1885FB3301150D7D6C7314E81CEEBF5745E6C3AAAC2090F03F2E17A5D08",
+  "SandboxExport": "GST.json",
+  "SandboxSHA256": "8831A78065B7A267530692802F07F63491B7A0D994191E722B54D44BD9F09129",
+  "FromVersion": "7.0",
+  "ToVersion": "7.1",
+  "RawChangedProperties": [
+    "MinorVersion",
+    "PresentationOrder",
+    "TaxPostingSetup"
+  ],
+  "SemanticDifferences": [
+    {
+      "Path": "$.MinorVersion",
+      "Before": 0,
+      "After": 1
+    },
+    {
+      "Path": "$.PresentationOrder",
+      "Before": 253,
+      "After": 257
+    }
+  ],
+  "PostingMappingsSemanticallyEqual": true,
+  "UnchangedProperties": [
+    "CaseID",
+    "Description",
+    "Version",
+    "TaxType",
+    "ChangedBy",
+    "Code",
+    "TaxEntity",
+    "ParentUseCase",
+    "ParentCaseId",
+    "Indent",
+    "PostingTableName",
+    "PostingTableFilters",
+    "Attributes",
+    "RateColumns",
+    "ComputationVariables",
+    "ComputationScript",
+    "PostingVariables",
+    "PostingScript",
+    "Components",
+    "Condition"
+  ],
+  "NormalizedPostingCollections": [
+    "TaxPostingSetup by ComponentName",
+    "When by Sequence",
+    "InsertRecordFields by Sequence"
+  ],
+  "TenantActions": "NONE"
+}

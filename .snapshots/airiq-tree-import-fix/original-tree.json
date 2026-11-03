@@ -1,0 +1,122 @@
+﻿[
+    {
+        "Code":  "TE-112400A01",
+        "Name":  "AIRIQ Domestic - Inter State Sales of Goods from Unregistered Customer through Sales Order/Invoice.",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000103}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112400A02",
+        "Name":  "AIRIQ International - Inter State Sales of Goods from Unregistered Customer through Sales Order/Invoice.",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000103}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112401A01",
+        "Name":  "AIRIQ Domestic - Intra State Sales of Goods from UnRegistered Customer through Sales Order/Invoice - Kerala Food Cess",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000105}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112401A02",
+        "Name":  "AIRIQ International - Intra State Sales of Goods from UnRegistered Customer through Sales Order/Invoice - Kerala Food Cess",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000105}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112402A01",
+        "Name":  "AIRIQ Domestic - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice - Kerala Food Cess",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000104}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112402A02",
+        "Name":  "AIRIQ International - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice - Kerala Food Cess",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000104}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112403A01",
+        "Name":  "AIRIQ Domestic - Intra State Sales of Goods from Unregistered Customer through Sales Order/Invoice",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000102}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112403A02",
+        "Name":  "AIRIQ International - Intra State Sales of Goods from Unregistered Customer through Sales Order/Invoice",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000102}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112404A01",
+        "Name":  "AIRIQ Domestic - Inter State Sales of Goods from Registered Customer through Sales Order/Invoice.",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000101}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112404A02",
+        "Name":  "AIRIQ International - Inter State Sales of Goods from Registered Customer through Sales Order/Invoice.",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000101}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112405A01",
+        "Name":  "AIRIQ Domestic - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000001}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    },
+    {
+        "Code":  "TE-112405A02",
+        "Name":  "AIRIQ International - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice",
+        "NodeType":  "Use Case",
+        "TableID":  37,
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000002}",
+        "TaxType":  "",
+        "IsTaxTypeRoot":  false,
+        "Condition":  null
+    }
+]

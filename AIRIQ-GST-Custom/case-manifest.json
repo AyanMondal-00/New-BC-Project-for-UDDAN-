@@ -1,0 +1,110 @@
+﻿[
+    {
+        "FlightType":  "Domestic",
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000001}",
+        "SourceCaseID":  "{6B464955-261F-4EAF-A749-7807444FC37C}",
+        "SourceVersion":  "7.1",
+        "SourceSHA256":  "8831A78065B7A267530692802F07F63491B7A0D994191E722B54D44BD9F09129",
+        "SourceOrigin":  "Confirmed Sandbox export: GST.json",
+        "Description":  "AIRIQ Domestic - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice"
+    },
+    {
+        "FlightType":  "Domestic",
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000101}",
+        "SourceCaseID":  "{B61CB389-28BD-4569-BF95-284B62972B23}",
+        "SourceVersion":  "9.0",
+        "SourceSHA256":  "FE0A1D5BC81D5AEDEDF548BFBC816333C822E94795324AB6E801D6765B7CB90B",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ Domestic - Inter State Sales of Goods from Registered Customer through Sales Order/Invoice."
+    },
+    {
+        "FlightType":  "Domestic",
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000102}",
+        "SourceCaseID":  "{CFE77ACE-1F20-4126-98D9-8D14B18088EE}",
+        "SourceVersion":  "8.0",
+        "SourceSHA256":  "1A5BF48623F1689A257B394AE856632B9D01407FEDACE402536AD9DCCCB0E1C5",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ Domestic - Intra State Sales of Goods from Unregistered Customer through Sales Order/Invoice"
+    },
+    {
+        "FlightType":  "Domestic",
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000103}",
+        "SourceCaseID":  "{11160E03-89D0-481D-B2EA-24898F3DB4AB}",
+        "SourceVersion":  "9.0",
+        "SourceSHA256":  "6C3E655A763F1C53D2327B8D528BCE11627FFE8A5013EFD4758D45B4720BD3D1",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ Domestic - Inter State Sales of Goods from Unregistered Customer through Sales Order/Invoice."
+    },
+    {
+        "FlightType":  "Domestic",
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000104}",
+        "SourceCaseID":  "{A8BF5AD2-5132-40E7-9DF1-893B3940F6EE}",
+        "SourceVersion":  "6.0",
+        "SourceSHA256":  "EB5A340268BFE914AF9D184B3E83ECEEC91F5C082A27F0F8D1C87C7C73A7F29D",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ Domestic - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice - Kerala Food Cess"
+    },
+    {
+        "FlightType":  "Domestic",
+        "CaseID":  "{A1D10001-7B10-4A10-9010-000000000105}",
+        "SourceCaseID":  "{364EABA8-DF5D-4174-951E-9C9B375830D6}",
+        "SourceVersion":  "1.0",
+        "SourceSHA256":  "5662FE2D9E710068764E337955174BFE4CF2A586B4610892FAE074F22742B54E",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ Domestic - Intra State Sales of Goods from UnRegistered Customer through Sales Order/Invoice - Kerala Food Cess"
+    },
+    {
+        "FlightType":  "International",
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000002}",
+        "SourceCaseID":  "{6B464955-261F-4EAF-A749-7807444FC37C}",
+        "SourceVersion":  "7.1",
+        "SourceSHA256":  "8831A78065B7A267530692802F07F63491B7A0D994191E722B54D44BD9F09129",
+        "SourceOrigin":  "Confirmed Sandbox export: GST.json",
+        "Description":  "AIRIQ International - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice"
+    },
+    {
+        "FlightType":  "International",
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000101}",
+        "SourceCaseID":  "{B61CB389-28BD-4569-BF95-284B62972B23}",
+        "SourceVersion":  "9.0",
+        "SourceSHA256":  "FE0A1D5BC81D5AEDEDF548BFBC816333C822E94795324AB6E801D6765B7CB90B",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ International - Inter State Sales of Goods from Registered Customer through Sales Order/Invoice."
+    },
+    {
+        "FlightType":  "International",
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000102}",
+        "SourceCaseID":  "{CFE77ACE-1F20-4126-98D9-8D14B18088EE}",
+        "SourceVersion":  "8.0",
+        "SourceSHA256":  "1A5BF48623F1689A257B394AE856632B9D01407FEDACE402536AD9DCCCB0E1C5",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ International - Intra State Sales of Goods from Unregistered Customer through Sales Order/Invoice"
+    },
+    {
+        "FlightType":  "International",
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000103}",
+        "SourceCaseID":  "{11160E03-89D0-481D-B2EA-24898F3DB4AB}",
+        "SourceVersion":  "9.0",
+        "SourceSHA256":  "6C3E655A763F1C53D2327B8D528BCE11627FFE8A5013EFD4758D45B4720BD3D1",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ International - Inter State Sales of Goods from Unregistered Customer through Sales Order/Invoice."
+    },
+    {
+        "FlightType":  "International",
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000104}",
+        "SourceCaseID":  "{A8BF5AD2-5132-40E7-9DF1-893B3940F6EE}",
+        "SourceVersion":  "6.0",
+        "SourceSHA256":  "EB5A340268BFE914AF9D184B3E83ECEEC91F5C082A27F0F8D1C87C7C73A7F29D",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ International - Intra State Sales of Goods from Registered Customer through Sales Order/Invoice - Kerala Food Cess"
+    },
+    {
+        "FlightType":  "International",
+        "CaseID":  "{A1D10002-7B10-4A10-9010-000000000105}",
+        "SourceCaseID":  "{364EABA8-DF5D-4174-951E-9C9B375830D6}",
+        "SourceVersion":  "1.0",
+        "SourceSHA256":  "5662FE2D9E710068764E337955174BFE4CF2A586B4610892FAE074F22742B54E",
+        "SourceOrigin":  "Pinned Microsoft package",
+        "Description":  "AIRIQ International - Intra State Sales of Goods from UnRegistered Customer through Sales Order/Invoice - Kerala Food Cess"
+    }
+]

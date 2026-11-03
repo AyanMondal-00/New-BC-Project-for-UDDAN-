@@ -1,0 +1,80 @@
+{
+  "Result": "PASS",
+  "Source": "UseCaseTree (3).json",
+  "SourceSHA256": "6e5821af368539cbdf9c0c80903a11ce4925f805d26a5072c3d15af1cf5f3f23",
+  "Output": "AIRIQ-GST-Custom/AIRIQ-UseCaseTree-Nodes.json",
+  "OutputSHA256": "52c6e5c786146ceac5da93bcc6738396a7b13d2926b8d686c2aa51c48cc8161f",
+  "Bytes": 3123,
+  "Nodes": 12,
+  "MicrosoftNodes": 11,
+  "MergedNodes": 23,
+  "Root": "array of objects",
+  "UTF8BOM": false,
+  "NullConditions": 0,
+  "OriginalCodesAndCaseIDsPreserved": true,
+  "MicrosoftSourceUnchanged": true,
+  "PlacementScope": "Supplied TE-112400 Item branch only; full tenant tree not supplied",
+  "Placements": [
+    {
+      "Code": "TE-112400A01",
+      "CaseID": "{A1D10001-7B10-4A10-9010-000000000103}",
+      "beforeStandard": "TE-112401"
+    },
+    {
+      "Code": "TE-112400A02",
+      "CaseID": "{A1D10002-7B10-4A10-9010-000000000103}",
+      "beforeStandard": "TE-112401"
+    },
+    {
+      "Code": "TE-112401A01",
+      "CaseID": "{A1D10001-7B10-4A10-9010-000000000105}",
+      "beforeStandard": "TE-112402"
+    },
+    {
+      "Code": "TE-112401A02",
+      "CaseID": "{A1D10002-7B10-4A10-9010-000000000105}",
+      "beforeStandard": "TE-112402"
+    },
+    {
+      "Code": "TE-112402A01",
+      "CaseID": "{A1D10001-7B10-4A10-9010-000000000104}",
+      "beforeStandard": "TE-112403"
+    },
+    {
+      "Code": "TE-112402A02",
+      "CaseID": "{A1D10002-7B10-4A10-9010-000000000104}",
+      "beforeStandard": "TE-112403"
+    },
+    {
+      "Code": "TE-112403A01",
+      "CaseID": "{A1D10001-7B10-4A10-9010-000000000102}",
+      "beforeStandard": "TE-112404"
+    },
+    {
+      "Code": "TE-112403A02",
+      "CaseID": "{A1D10002-7B10-4A10-9010-000000000102}",
+      "beforeStandard": "TE-112404"
+    },
+    {
+      "Code": "TE-112404A01",
+      "CaseID": "{A1D10001-7B10-4A10-9010-000000000101}",
+      "beforeStandard": "TE-112405"
+    },
+    {
+      "Code": "TE-112404A02",
+      "CaseID": "{A1D10002-7B10-4A10-9010-000000000101}",
+      "beforeStandard": "TE-112405"
+    },
+    {
+      "Code": "TE-112405A01",
+      "CaseID": "{A1D10001-7B10-4A10-9010-000000000001}",
+      "beforeStandard": "TE-112406"
+    },
+    {
+      "Code": "TE-112405A02",
+      "CaseID": "{A1D10002-7B10-4A10-9010-000000000002}",
+      "beforeStandard": "TE-112406"
+    }
+  ],
+  "RuntimeImport": "NOT RUN; no tenant changes"
+}

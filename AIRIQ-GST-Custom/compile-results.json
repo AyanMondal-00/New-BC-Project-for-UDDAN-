@@ -1,0 +1,23 @@
+﻿{
+    "Result":  "PASS",
+    "Date":  "2026-11-01",
+    "Project":  "AIRIQ",
+    "AppVersion":  "1.0.0.3",
+    "ALFiles":  123,
+    "CompilerExtension":  "18.1.2842859",
+    "CompilerVersion":  "18.1.43.24897",
+    "Runtime":  "Microsoft.NETCore.App 10.0.14 x64 (temporary local install)",
+    "MachineRuntimeInitiallyMissing":  true,
+    "ExitCode":  0,
+    "Errors":  0,
+    "Warnings":  3,
+    "WarningDetails":  "AL1025: existing Info.txt; temporary runtime LICENSE.txt and ThirdPartyNotices.txt",
+    "Artifact":  ".snapshots/airiq-gst-build/AIRIQ_1.0.0.3.app",
+    "ArtifactSHA256":  "C4AC8BC7356B3F7C89B04B74157695719BC2FD0213C7E8CDDF420022B3471A77",
+    "Log":  ".snapshots/airiq-gst-build/compile.log",
+    "RootAppSHA256":  "3F38DA2CDC62FFE7334F5DD1F108BAB18F4A4A9AD2368907D6456B76AE7DC870",
+    "GSTCompilationFixes":  "None required",
+    "SandboxExtensionDeployment":  "Ready for controlled testing with matching dependencies",
+    "GSTActivation":  "Gated: active tenant 7.1 comparison, execution-tree priority, and runtime acceptance unverified",
+    "TenantActions":  "None"
+}

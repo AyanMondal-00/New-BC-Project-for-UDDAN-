@@ -1,0 +1,43 @@
+{
+  "result": "PASS",
+  "results": [
+    {
+      "file": "AIRIQ-GST-Custom/AIRIQ-GST-Domestic.json",
+      "result": "PASS",
+      "bytes": 317145,
+      "sha256": "67dfbedc395f6c19bdb083855bd8e9b092e5849371d5d0cd533e6191da8589e6",
+      "root": "array of objects",
+      "cases": 6,
+      "utf8BOM": false,
+      "semanticDataUnchanged": true,
+      "caseIDs": [
+        "{A1D10001-7B10-4A10-9010-000000000001}",
+        "{A1D10001-7B10-4A10-9010-000000000101}",
+        "{A1D10001-7B10-4A10-9010-000000000102}",
+        "{A1D10001-7B10-4A10-9010-000000000103}",
+        "{A1D10001-7B10-4A10-9010-000000000104}",
+        "{A1D10001-7B10-4A10-9010-000000000105}"
+      ]
+    },
+    {
+      "file": "AIRIQ-GST-Custom/AIRIQ-GST-International.json",
+      "result": "PASS",
+      "bytes": 317205,
+      "sha256": "b03f43815756265cf148ab7f9fe0a504f0c5732aa66e2ad719c0a914fa5faea8",
+      "root": "array of objects",
+      "cases": 6,
+      "utf8BOM": false,
+      "semanticDataUnchanged": true,
+      "caseIDs": [
+        "{A1D10002-7B10-4A10-9010-000000000002}",
+        "{A1D10002-7B10-4A10-9010-000000000101}",
+        "{A1D10002-7B10-4A10-9010-000000000102}",
+        "{A1D10002-7B10-4A10-9010-000000000103}",
+        "{A1D10002-7B10-4A10-9010-000000000104}",
+        "{A1D10002-7B10-4A10-9010-000000000105}"
+      ]
+    }
+  ],
+  "microsoftSourcesUnchanged": true,
+  "runtimeImport": "NOT RUN; offline checks only"
+}

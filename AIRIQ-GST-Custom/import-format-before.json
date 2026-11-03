@@ -1,0 +1,72 @@
+[
+  {
+    "file": "GST.json",
+    "sha256": "8831a78065b7a267530692802f07f63491b7a0d994191e722b54d44bd9f09129",
+    "semanticSHA256": "8831a78065b7a267530692802f07f63491b7a0d994191e722b54d44bd9f09129",
+    "bom": false,
+    "bytes": 52433
+  },
+  {
+    "file": "AIRIQ-GST-Source/11160e03-89d0-481d-b2ea-24898f3db4ab.json",
+    "sha256": "6c3e655a763f1c53d2327b8d528bce11627ffe8a5013efd4758d45b4720bd3d1",
+    "semanticSHA256": "8a678124850cb1856c625b4161d286716dbf11a1ff74cd92d634492ef522c57c",
+    "bom": false,
+    "bytes": 128882
+  },
+  {
+    "file": "AIRIQ-GST-Source/364eaba8-df5d-4174-951e-9c9b375830d6.json",
+    "sha256": "5662fe2d9e710068764e337955174bfe4cf2a586b4610892fae074f22742b54e",
+    "semanticSHA256": "09228132653edf104872203a2ee54265c9dbcabf12cf5ce2ce86e4643fd233de",
+    "bom": false,
+    "bytes": 310911
+  },
+  {
+    "file": "AIRIQ-GST-Source/6b464955-261f-4eaf-a749-7807444fc37c.json",
+    "sha256": "47e1d1885fb3301150d7d6c7314e81ceebf5745e6c3aaac2090f03f2e17a5d08",
+    "semanticSHA256": "fa0a6b7561cb5e6d6af04c1ca5592f109ec80f995eb4eae492320eb329933dbe",
+    "bom": false,
+    "bytes": 216027
+  },
+  {
+    "file": "AIRIQ-GST-Source/9b72fc90-6211-4e8d-8ea3-3bc5d1c7601b.json",
+    "sha256": "97896ad5f2854e4920fd188976e219173c5cc9fca6364b1aa254629eaf145ff2",
+    "semanticSHA256": "fa4684543a676a83171aff30a81cb54278d52d1b2553a0d3241f92b07012baff",
+    "bom": false,
+    "bytes": 17890
+  },
+  {
+    "file": "AIRIQ-GST-Source/a8bf5ad2-5132-40e7-9df1-893b3940f6ee.json",
+    "sha256": "eb5a340268bfe914af9d184b3e83eceec91f5c082a27f0f8d1c87c7c73a7f29d",
+    "semanticSHA256": "4abc34b9eca374cd80e6883aa3104fc2057232b898547d3f3e432dddf909dbf9",
+    "bom": false,
+    "bytes": 309781
+  },
+  {
+    "file": "AIRIQ-GST-Source/b61cb389-28bd-4569-bf95-284b62972b23.json",
+    "sha256": "fe0a1d5bc81d5aededf548bfbc816333c822e94795324ab6e801d6765b7cb90b",
+    "semanticSHA256": "b31851b427e8b4d2e5df2ef8a16665bce8ee64fec2b0730874899ff44a45a262",
+    "bom": false,
+    "bytes": 126125
+  },
+  {
+    "file": "AIRIQ-GST-Source/cfe77ace-1f20-4126-98d9-8d14b18088ee.json",
+    "sha256": "1a5bf48623f1689a257b394ae856632b9d01407fedace402536ad9dcccb0e1c5",
+    "semanticSHA256": "11d9f4c2755ed1cf957d1984a1ce3e2a349a5b572b27e742f2545e1858b666d3",
+    "bom": false,
+    "bytes": 217467
+  },
+  {
+    "file": "AIRIQ-GST-Custom/AIRIQ-GST-Domestic.json",
+    "sha256": "2d96913acbb60315dddad2d3c54ef0bda5b817c183424e3d0189751ce4d40011",
+    "semanticSHA256": "67dfbedc395f6c19bdb083855bd8e9b092e5849371d5d0cd533e6191da8589e6",
+    "bom": true,
+    "bytes": 3285295
+  },
+  {
+    "file": "AIRIQ-GST-Custom/AIRIQ-GST-International.json",
+    "sha256": "925d00398b5777a69f4e36de57183701d856b50d1aa999c790f4bc62859b6826",
+    "semanticSHA256": "b03f43815756265cf148ab7f9fe0a504f0c5732aa66e2ad719c0a914fa5faea8",
+    "bom": true,
+    "bytes": 3285355
+  }
+]

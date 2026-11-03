@@ -204,6 +204,13 @@ table 50400 "Normal Sales"
     begin
         if "Serial No." <= 0 then
             "Serial No." := GetNextSerialNo();
+
+        CalculateGST();
+    end;
+
+    trigger OnModify()
+    begin
+        CalculateGST();
     end;
 
     local procedure GetNextSerialNo(): Integer
@@ -230,7 +237,7 @@ table 50400 "Normal Sales"
         // Other Charges multiplied by Pax
         TotalOtherCharges := "Other Charges" * Pax;
 
-        if UpperCase(Type) = 'DOMESTIC' then begin
+        if UpperCase(DelChr(Type, '<>', ' ')) = 'DOMESTIC' then begin
             // Domestic Taxable Basis: 5%
             "Taxable Basis" := TotalBaseFare * 0.05;
 
@@ -252,13 +259,8 @@ table 50400 "Normal Sales"
             IGST := "Taxable Basis" * 0.18;
         end;
 
-        // Final Amount
-        "Total Amount" :=
-            TotalBaseFare +
-            TotalOtherCharges +
-            CGST +
-            SGST +
-            IGST;
+        // GST is shown separately from the fare total.
+        "Total Amount" := TotalBaseFare + TotalOtherCharges;
     end;
 
     local procedure CheckDuplicatePNR()

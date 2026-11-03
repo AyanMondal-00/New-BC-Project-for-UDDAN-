@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>2in</Height>
+        <Style />
+      </Body>
+      <Width>6.5in</Width>
+      <Page>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>0eeb6585-38ae-40f1-885b-8d50088d51b4</rd:ReportID>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Fields>
+        <Field Name="CreditNoteNo">
+          <DataField>CreditNoteNo</DataField>
+        </Field>
+        <Field Name="RefNo">
+          <DataField>RefNo</DataField>
+        </Field>
+        <Field Name="CreditNoteDate">
+          <DataField>CreditNoteDate</DataField>
+        </Field>
+        <Field Name="PlaceOfSupply">
+          <DataField>PlaceOfSupply</DataField>
+        </Field>
+        <Field Name="AgainstInvoiceNo">
+          <DataField>AgainstInvoiceNo</DataField>
+        </Field>
+        <Field Name="InvoiceDate">
+          <DataField>InvoiceDate</DataField>
+        </Field>
+        <Field Name="HeaderPNR">
+          <DataField>HeaderPNR</DataField>
+        </Field>
+        <Field Name="Reason">
+          <DataField>Reason</DataField>
+        </Field>
+        <Field Name="SellerName">
+          <DataField>SellerName</DataField>
+        </Field>
+        <Field Name="SellerAddress1">
+          <DataField>SellerAddress1</DataField>
+        </Field>
+        <Field Name="SellerAddress2">
+          <DataField>SellerAddress2</DataField>
+        </Field>
+        <Field Name="SellerAddress3">
+          <DataField>SellerAddress3</DataField>
+        </Field>
+        <Field Name="SellerGSTIN">
+          <DataField>SellerGSTIN</DataField>
+        </Field>
+        <Field Name="CustomerName">
+          <DataField>CustomerName</DataField>
+        </Field>
+        <Field Name="CustomerAddress1">
+          <DataField>CustomerAddress1</DataField>
+        </Field>
+        <Field Name="CustomerAddress2">
+          <DataField>CustomerAddress2</DataField>
+        </Field>
+        <Field Name="CustomerAddress3">
+          <DataField>CustomerAddress3</DataField>
+        </Field>
+        <Field Name="CustomerGSTIN">
+          <DataField>CustomerGSTIN</DataField>
+        </Field>
+        <Field Name="ValueExclGST">
+          <DataField>ValueExclGST</DataField>
+        </Field>
+        <Field Name="ValueExclGSTFormat">
+          <DataField>ValueExclGSTFormat</DataField>
+        </Field>
+        <Field Name="CGSTReversed">
+          <DataField>CGSTReversed</DataField>
+        </Field>
+        <Field Name="CGSTReversedFormat">
+          <DataField>CGSTReversedFormat</DataField>
+        </Field>
+        <Field Name="SGSTReversed">
+          <DataField>SGSTReversed</DataField>
+        </Field>
+        <Field Name="SGSTReversedFormat">
+          <DataField>SGSTReversedFormat</DataField>
+        </Field>
+        <Field Name="CreditNoteValue">
+          <DataField>CreditNoteValue</DataField>
+        </Field>
+        <Field Name="CreditNoteValueFormat">
+          <DataField>CreditNoteValueFormat</DataField>
+        </Field>
+        <Field Name="TotalCancelCharges">
+          <DataField>TotalCancelCharges</DataField>
+        </Field>
+        <Field Name="TotalCancelChargesFormat">
+          <DataField>TotalCancelChargesFormat</DataField>
+        </Field>
+        <Field Name="CGSTOnCharges">
+          <DataField>CGSTOnCharges</DataField>
+        </Field>
+        <Field Name="CGSTOnChargesFormat">
+          <DataField>CGSTOnChargesFormat</DataField>
+        </Field>
+        <Field Name="SGSTOnCharges">
+          <DataField>SGSTOnCharges</DataField>
+        </Field>
+        <Field Name="SGSTOnChargesFormat">
+          <DataField>SGSTOnChargesFormat</DataField>
+        </Field>
+        <Field Name="NetRefund">
+          <DataField>NetRefund</DataField>
+        </Field>
+        <Field Name="NetRefundFormat">
+          <DataField>NetRefundFormat</DataField>
+        </Field>
+        <Field Name="NetRefundInWords">
+          <DataField>NetRefundInWords</DataField>
+        </Field>
+        <Field Name="Narration">
+          <DataField>Narration</DataField>
+        </Field>
+        <Field Name="BankName">
+          <DataField>BankName</DataField>
+        </Field>
+        <Field Name="BankAccountNo">
+          <DataField>BankAccountNo</DataField>
+        </Field>
+        <Field Name="BankIFSC">
+          <DataField>BankIFSC</DataField>
+        </Field>
+        <Field Name="Website">
+          <DataField>Website</DataField>
+        </Field>
+        <Field Name="ContactEmail">
+          <DataField>ContactEmail</DataField>
+        </Field>
+        <Field Name="SlNo">
+          <DataField>SlNo</DataField>
+        </Field>
+        <Field Name="PassengerName">
+          <DataField>PassengerName</DataField>
+        </Field>
+        <Field Name="LinePNR">
+          <DataField>LinePNR</DataField>
+        </Field>
+        <Field Name="TravelDate">
+          <DataField>TravelDate</DataField>
+        </Field>
+        <Field Name="SAC">
+          <DataField>SAC</DataField>
+        </Field>
+        <Field Name="Qty">
+          <DataField>Qty</DataField>
+        </Field>
+        <Field Name="QtyFormat">
+          <DataField>QtyFormat</DataField>
+        </Field>
+        <Field Name="TktValue">
+          <DataField>TktValue</DataField>
+        </Field>
+        <Field Name="TktValueFormat">
+          <DataField>TktValueFormat</DataField>
+        </Field>
+        <Field Name="CancelCharge">
+          <DataField>CancelCharge</DataField>
+        </Field>
+        <Field Name="CancelChargeFormat">
+          <DataField>CancelChargeFormat</DataField>
+        </Field>
+        <Field Name="LineGST">
+          <DataField>LineGST</DataField>
+        </Field>
+        <Field Name="LineGSTFormat">
+          <DataField>LineGSTFormat</DataField>
+        </Field>
+        <Field Name="RefundAmount">
+          <DataField>RefundAmount</DataField>
+        </Field>
+        <Field Name="RefundAmountFormat">
+          <DataField>RefundAmountFormat</DataField>
+        </Field>
+        <Field Name="TaxComponent">
+          <DataField>TaxComponent</DataField>
+        </Field>
+        <Field Name="TaxRate">
+          <DataField>TaxRate</DataField>
+        </Field>
+        <Field Name="ReversedOnTickets">
+          <DataField>ReversedOnTickets</DataField>
+        </Field>
+        <Field Name="ReversedOnTicketsFormat">
+          <DataField>ReversedOnTicketsFormat</DataField>
+        </Field>
+        <Field Name="OnCancelChg">
+          <DataField>OnCancelChg</DataField>
+        </Field>
+        <Field Name="OnCancelChgFormat">
+          <DataField>OnCancelChgFormat</DataField>
+        </Field>
+        <Field Name="NetGST">
+          <DataField>NetGST</DataField>
+        </Field>
+        <Field Name="NetGSTFormat">
+          <DataField>NetGSTFormat</DataField>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+    </DataSet>
+  </DataSets>
+</Report>
