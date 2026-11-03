@@ -38,14 +38,15 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             begin
                 if Rec.IsTemporary() then
                     exit;
+
                 if (Rec."Document Type" <> Rec."Document Type"::Invoice) or
-                   (Rec.Type <> Rec.Type::Item) or (Rec."No." = '') then
+                   (Rec.Type <> Rec.Type::Item) or
+                   (Rec."No." = '') then
                     exit;
+
                 if Rec.FlightType = xRec.FlightType then
                     exit;
 
-                // Re-run standard tax selection when FlightType changes or is cleared.
-                // The custom formulas read Amount; never reduce the commercial fields.
                 CalculateTax.CallTaxEngineOnSalesLine(Rec, xRec);
             end;
         }
@@ -59,6 +60,12 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
         field(50427; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
+            DataClassification = CustomerContent;
+        }
+
+        field(50433; "AIRIQ GST Base Fare"; Decimal)
+        {
+            Caption = 'AIRIQ GST Base Fare';
             DataClassification = CustomerContent;
         }
 

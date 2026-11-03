@@ -50,6 +50,8 @@ try {
  Assert ($manifest.Count -eq 12) 'manifest contains 12 cases'
  foreach ($flight in @('Domestic','International')) {
   $path=Join-Path $OutputFolder "AIRIQ-GST-$flight.json"
+  $fileBytes=[IO.File]::ReadAllBytes($path)
+  Assert (-not ($fileBytes.Length -ge 3 -and $fileBytes[0] -eq 239 -and $fileBytes[1] -eq 187 -and $fileBytes[2] -eq 191)) 'import file has no UTF-8 BOM'
   $raw=Get-Content $path -Raw
   Assert ($raw.TrimStart().StartsWith('[')) 'import file is an array'
   $cases=$raw|ConvertFrom-Json
@@ -73,8 +75,8 @@ try {
     Assert ($s.Version -eq 7 -and $s.MinorVersion -eq 1) 'confirmed Sandbox source 7.1'
    } else {Assert ((Json $s) -ceq (Json $installed)) 'other Microsoft sources unchanged'}
    Assert ($c.CaseID -ne $s.CaseID -and $c.ChangedBy -eq 'AIRIQ' -and [guid]$c.CaseID -ne [guid]::Empty) 'custom identity'
-   $minor=if ([guid]$s.CaseID -eq [guid]'6b464955-261f-4eaf-a749-7807444fc37c') {2} else {1}
-   Assert ($c.Version -eq 1 -and $c.MinorVersion -eq $minor) 'custom version 1.2 for updated cases; otherwise 1.1'
+   $minor=if ([guid]$s.CaseID -eq [guid]'6b464955-261f-4eaf-a749-7807444fc37c') {3} else {2}
+   Assert ($c.Version -eq 1 -and $c.MinorVersion -eq $minor) 'custom version increased for all amended cases'
    Assert ($c.Description.Length -le 250) 'description fits schema'
    Assert ((Json @($c.PSObject.Properties.Name)) -ceq (Json @($s.PSObject.Properties.Name))) 'same schema properties'
    foreach ($p in $s.PSObject.Properties.Name) {
@@ -107,26 +109,36 @@ try {
     $names=@($formula.Tokens.TokenName)
     $used=@([regex]::Matches($formula.Expression,'\{[^}]+\}')|ForEach-Object {$_.Value})
     Assert ((Json @($names|Sort-Object)) -ceq (Json @($used|Sort-Object))) 'all tokens defined exactly once'
-    $amount=@($formula.Tokens|Where-Object {$_.TokenName -eq '{AIRIQAmount}'})[0].TokenValue
-    Assert ($amount.Type -eq 'Lookup' -and $amount.Lookup.SourceType -eq 'Current Record' -and $amount.Lookup.TableName -eq 'Sales Line' -and $amount.Lookup.FieldName -eq 'Amount') 'original Amount token; no reduced component lookup'
+    $fare=@($formula.Tokens|Where-Object {$_.TokenName -eq '{AIRIQFare}'})[0].TokenValue
+    Assert ($fare.Type -eq 'Lookup' -and $fare.Lookup.SourceType -eq 'Current Record' -and $fare.Lookup.TableName -eq 'Sales Line' -and $fare.Lookup.FieldName -eq 'AIRIQ GST Base Fare') 'numeric Base Fare direct Sales Line lookup'
+    $pax=@($formula.Tokens|Where-Object {$_.TokenName -eq '{AIRIQPax}'})[0].TokenValue
+    Assert ($pax.Type -eq 'Lookup' -and $pax.Lookup.SourceType -eq 'Current Record' -and $pax.Lookup.TableName -eq 'Sales Line' -and $pax.Lookup.FieldName -eq 'Quantity') 'Pax uses existing Sales Line quantity'
     if ($comp.ComponentName -ne 'GST Base Amount') {
      $rate=@($formula.Tokens|Where-Object {$_.TokenName -eq '{AIRIQRate}'})[0].TokenValue
      Assert ($rate.Type -eq 'Lookup' -and $rate.Lookup.SourceType -eq 'Component Percent' -and $rate.Lookup.ComponentName -eq $comp.ComponentName) 'configured component rate'
     }
     foreach ($a in @([decimal]0,[decimal]1,[decimal]10000,[decimal]-10000,[decimal]1234.56)) {
+     foreach ($p in @([decimal]1,[decimal]2,[decimal]3)) {
+     foreach ($charges in @([decimal]0,[decimal]250)) {
      foreach ($r in @([decimal]0,[decimal]2.5,[decimal]9,[decimal]18)) {
       $factor=if ($flight -eq 'Domestic') {[decimal]0.05} else {[decimal]0.10}
-      $want=$a*$factor
+      $want=$a*$p*$factor
       if ($comp.ComponentName -ne 'GST Base Amount') {$want=$want*$r/100}
-      $got=Evaluate-Formula $formula.Expression @{'{AIRIQAmount}'=$a;'{AIRIQRate}'=$r}
-      Assert ([math]::Abs($got-$want) -lt [decimal]0.0000000001) 'numeric base/rate consistency without double scaling'
+      $invoiceAmount=($a+$charges)*$p
+      $got=Evaluate-Formula $formula.Expression @{'{AIRIQFare}'=$a;'{AIRIQPax}'=$p;'{AIRIQRate}'=$r}
+      Assert ([math]::Abs($got-$want) -lt [decimal]0.0000000001 -and ($invoiceAmount-($a*$p)) -eq ($charges*$p)) 'fare times Pax taxed; other charges remain invoiced'
       $numeric++
+     }
+     }
      }
     }
    }
   }
  }
  Assert (@($all.CaseID|Sort-Object -Unique).Count -eq 12) 'no duplicate custom IDs'
+ $tree=Get-Content (Join-Path $PSScriptRoot 'GST Amadment Json/AIRIQ-UseCaseTree-Nodes.json') -Raw|ConvertFrom-Json
+ Assert ($tree.Count -eq 12 -and @($tree.Code|Sort-Object -Unique).Count -eq 12) 'twelve distinct existing tree node codes'
+ Assert ((Json @($tree.CaseID|Sort-Object)) -ceq (Json @($all.CaseID|Sort-Object))) 'existing tree nodes retain all twelve CaseIDs'
  Assert ($all.CaseID -contains '{A1D10001-7B10-4A10-9010-000000000001}' -and $all.CaseID -contains '{A1D10002-7B10-4A10-9010-000000000002}') 'previous custom IDs preserved'
  $report=[ordered]@{Result='PASS';Checks=$script:checks;Cases=$all.Count;NumericScenarios=$numeric;
   IndiaGSTPackage=$dep.version;PackageSHA256=(Get-FileHash $package -Algorithm SHA256).Hash;

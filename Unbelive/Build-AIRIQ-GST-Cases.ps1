@@ -37,7 +37,7 @@ foreach ($flight in @('Domestic','International')) {
   $clone.Description = "AIRIQ $flight - $($original.Description)"
   $clone.ChangedBy = 'AIRIQ'
   $clone.Version = 1
-  $clone.MinorVersion = if ($i -eq 0) {2} else {1}
+  $clone.MinorVersion = if ($i -eq 0) {3} else {2}
   # Preserve parent rate inheritance. PresentationOrder does not set execution priority.
   $invoice = @($clone.Condition.Body | Where-Object { $_.LHS.Lookup.FieldName -eq 'Document Type' -and $_.RHS.Value -eq 'Invoice' })
   $item = @($clone.Condition.Body | Where-Object { $_.LHS.Lookup.FieldName -eq 'Type' -and $_.RHS.Value -eq 'Item' })
@@ -51,13 +51,18 @@ foreach ($flight in @('Domestic','International')) {
   foreach ($component in $clone.Components) {
    $name = $component.ComponentName
    if ($name -notin @('GST Base Amount','CGST','SGST','IGST','KFloodCess')) {throw "Unexpected component $name"}
-   $tokens = @([pscustomobject]@{TokenName='{AIRIQAmount}';TokenValue=@{Type='Lookup';Lookup=@{SourceType='Current Record';TableName='Sales Line';FieldName='Amount'}}})
-   $expression = "{AIRIQAmount}/$divisor"
+   # Explicit Sales Line fields are resolved by the Tax Engine; custom fields
+   # are not implicitly available as JSON variables.
+   $tokens = @(
+    [pscustomobject]@{TokenName='{AIRIQFare}';TokenValue=@{Type='Lookup';Lookup=@{SourceType='Current Record';TableName='Sales Line';FieldName='AIRIQ GST Base Fare'}}}
+    [pscustomobject]@{TokenName='{AIRIQPax}';TokenValue=@{Type='Lookup';Lookup=@{SourceType='Current Record';TableName='Sales Line';FieldName='Quantity'}}}
+   )
+   $expression = "{AIRIQFare}*{AIRIQPax}/$divisor"
    if ($name -ne 'GST Base Amount') {
     $expression += '*{AIRIQRate}/100'
     $tokens += [pscustomobject]@{TokenName='{AIRIQRate}';TokenValue=@{Type='Lookup';Lookup=@{SourceType='Component Percent';ComponentName=$name}}}
    }
-   # Each formula reads ORIGINAL Amount; each reduction occurs once.
+   # Each formula reads fare per passenger and line quantity; charges stay out.
    $component.Formula.Expression = $expression
    $component.Formula.Tokens = $tokens
   }

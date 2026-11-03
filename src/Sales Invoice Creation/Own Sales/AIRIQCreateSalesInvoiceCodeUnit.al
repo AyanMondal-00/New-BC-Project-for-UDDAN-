@@ -187,6 +187,9 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
         SalesLine.BaseFare :=
             Format(NormalSales."Base Fare");
 
+        // Numeric fare per passenger, available to the Tax Engine before price validation.
+        SalesLine."AIRIQ GST Base Fare" := NormalSales."Base Fare";
+
         // EXISTING UNIT PRICE MAPPING
         SalesLine.Validate(
             "Unit Price",

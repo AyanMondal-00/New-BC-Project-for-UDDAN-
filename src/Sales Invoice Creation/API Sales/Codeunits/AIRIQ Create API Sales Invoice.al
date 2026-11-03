@@ -101,6 +101,9 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         // PNR DESCRIPTION
         SalesLine.Description := APISales.PNR;
 
+        // This source has Rate but no separate Base Fare or Other Charges.
+        SalesLine."AIRIQ GST Base Fare" := APISales.Rate;
+
         // FLIGHT TYPE BEFORE QUANTITY AND PRICE
         SalesLine.Validate(
             FlightType,

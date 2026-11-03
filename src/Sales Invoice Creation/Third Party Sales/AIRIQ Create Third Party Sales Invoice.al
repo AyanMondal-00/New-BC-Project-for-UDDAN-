@@ -118,6 +118,9 @@ codeunit 50437 "Third Party Sales Invoice"
         SalesLine.Description :=
             ThirdPartySales.PNR;
 
+        // This source has Rate but no separate Base Fare or Other Charges.
+        SalesLine."AIRIQ GST Base Fare" := ThirdPartySales.Rate;
+
         // FLIGHT TYPE BEFORE QUANTITY AND PRICE
         SalesLine.Validate(
             FlightType,

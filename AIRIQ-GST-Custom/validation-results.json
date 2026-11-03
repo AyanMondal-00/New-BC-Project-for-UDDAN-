@@ -1,8 +1,8 @@
 ﻿{
     "Result":  "PASS",
-    "Checks":  1300,
+    "Checks":  4940,
     "Cases":  12,
-    "NumericScenarios":  720,
+    "NumericScenarios":  4320,
     "IndiaGSTPackage":  "28.5.54976.57206",
     "PackageSHA256":  "4017040BA30FDAD38EDE881072B9CE0FD4B51507A229D4C34873EDE547DE8E70",
     "Scope":  "Item, Invoice, registered/unregistered, intra/inter, non-FOC, tax-exclusive; Kerala cess source guards preserved",

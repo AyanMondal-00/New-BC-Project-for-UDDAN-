@@ -36,6 +36,15 @@ pageextension 50428 "AIRIQ Sales Invoice Line PgExt"
                 Editable = false;
             }
 
+            // New GST Amendment Field
+            field("AIRIQ GST Base Fare"; Rec."AIRIQ GST Base Fare")
+            {
+                ApplicationArea = All;
+                Caption = 'AIRIQ GST Base Fare';
+                Editable = false;
+                ToolTip = 'Specifies the base fare per unit used for AIRIQ GST taxable base calculation.';
+            }
+
             field("Other Charges"; Rec."Other Charges")
             {
                 ApplicationArea = All;
