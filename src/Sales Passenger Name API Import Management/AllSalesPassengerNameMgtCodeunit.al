@@ -1,4 +1,4 @@
-codeunit 50440 "Passenger Name Import Mgt."
+codeunit 50448 "Passenger Name Import Mgt."
 {
     procedure ImportPassengersFromRow(RowObject: JsonObject; RefNoValue: Integer; PnrValue: Text[10])
     var

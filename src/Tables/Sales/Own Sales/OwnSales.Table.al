@@ -1,3 +1,4 @@
+
 table 50400 "Normal Sales"
 {
     Caption = 'Normal Sales';
@@ -15,19 +16,23 @@ table 50400 "Normal Sales"
         {
             Caption = 'Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Date");
+
                 if DT2Time(Rec."Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Date");
-                Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(3; "Invoice Number"; Code[50])
         {
@@ -41,11 +46,11 @@ table 50400 "Normal Sales"
             DataClassification = CustomerContent;
             ObsoleteState = Removed;
         }
+
         field(22; "Agency ID"; Code[30])
         {
             Caption = 'Agency ID';
             DataClassification = CustomerContent;
-
         }
 
         field(5; "Agency Name"; Text[100])
@@ -64,6 +69,7 @@ table 50400 "Normal Sales"
                 CheckDuplicateRefNoAQNumber();
             end;
         }
+
         field(23; "Select"; Boolean)
         {
             Caption = 'Select';
@@ -80,7 +86,6 @@ table 50400 "Normal Sales"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
-
         }
 
         field(8; Passenger; Text[100])
@@ -88,6 +93,7 @@ table 50400 "Normal Sales"
             Caption = 'Passenger';
             DataClassification = CustomerContent;
         }
+
         field(9; Pax; Integer)
         {
             Caption = 'Pax';
@@ -95,7 +101,7 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateGST();
+                CalculateAmounts();
             end;
         }
 
@@ -103,19 +109,23 @@ table 50400 "Normal Sales"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
                 SelectedDate := DT2Date(Rec."Travel Date");
+
                 if DT2Time(Rec."Travel Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Travel Date");
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Travel Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(11; Sector; Text[200])
         {
@@ -130,7 +140,7 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateGST();
+                CalculateAmounts();
             end;
         }
 
@@ -141,7 +151,7 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateGST();
+                CalculateAmounts();
             end;
         }
 
@@ -152,43 +162,54 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateGST();
+                CalculateAmounts();
             end;
+        }
+
+        // NEW RATE FIELD
+        field(25; "Rate"; Decimal)
+        {
+            Caption = 'Rate';
+            Editable = false;
+            DataClassification = CustomerContent;
         }
 
         field(15; "Taxable Basis"; Decimal)
         {
             Caption = 'Taxable Basis';
-            DataClassification = CustomerContent;
             Editable = false;
+            DataClassification = CustomerContent;
         }
 
         field(16; CGST; Decimal)
         {
             Caption = 'CGST';
-            DataClassification = CustomerContent;
+            BlankZero = true;
             Editable = false;
+            DataClassification = CustomerContent;
         }
 
         field(17; SGST; Decimal)
         {
             Caption = 'SGST';
-            DataClassification = CustomerContent;
+            BlankZero = true;
             Editable = false;
+            DataClassification = CustomerContent;
         }
 
         field(18; IGST; Decimal)
         {
             Caption = 'IGST';
-            DataClassification = CustomerContent;
+            BlankZero = true;
             Editable = false;
+            DataClassification = CustomerContent;
         }
 
         field(19; "Total Amount"; Decimal)
         {
             Caption = 'Total Amount';
-            DataClassification = CustomerContent;
             Editable = false;
+            DataClassification = CustomerContent;
         }
     }
 
@@ -205,13 +226,17 @@ table 50400 "Normal Sales"
         if "Serial No." <= 0 then
             "Serial No." := GetNextSerialNo();
 
-        CalculateGST();
+        CalculateAmounts();
     end;
 
     trigger OnModify()
     begin
-        CalculateGST();
+        CalculateAmounts();
     end;
+
+    // ==========================================
+    // SERIAL NUMBER GENERATION
+    // ==========================================
 
     local procedure GetNextSerialNo(): Integer
     var
@@ -226,42 +251,56 @@ table 50400 "Normal Sales"
         exit(1);
     end;
 
-    procedure CalculateGST()
+    // ==========================================
+    // RATE AND GST CALCULATION
+    // ==========================================
+
+    procedure CalculateAmounts()
     var
         TotalBaseFare: Decimal;
-        TotalOtherCharges: Decimal;
     begin
-        // Base Fare multiplied by Pax
         TotalBaseFare := "Base Fare" * Pax;
 
-        // Other Charges multiplied by Pax
-        TotalOtherCharges := "Other Charges" * Pax;
+        // Rate Calculation
+        Rate := ("Base Fare" + "Other Charges") * Pax;
 
-        if UpperCase(DelChr(Type, '<>', ' ')) = 'DOMESTIC' then begin
-            // Domestic Taxable Basis: 5%
-            "Taxable Basis" := TotalBaseFare * 0.05;
+        // Total Amount excludes separately calculated GST
+        "Total Amount" := Rate;
 
-            // CGST: 9%
-            CGST := "Taxable Basis" * 0.09;
+        // Reset GST Values
+        "Taxable Basis" := 0;
+        CGST := 0;
+        SGST := 0;
+        IGST := 0;
 
-            // SGST: 9%
-            SGST := "Taxable Basis" * 0.09;
+        case UpperCase(DelChr(Type, '<>', ' ')) of
 
-            IGST := 0;
-        end else begin
-            // International Taxable Basis: 10%
-            "Taxable Basis" := TotalBaseFare * 0.10;
+            'DOMESTIC':
+                begin
+                    // Taxable Basis = Base Fare * Pax * 5%
+                    "Taxable Basis" := TotalBaseFare * 5 / 100;
 
-            CGST := 0;
-            SGST := 0;
+                    // CGST = Taxable Basis * 9%
+                    CGST := "Taxable Basis" * 9 / 100;
 
-            // IGST: 18%
-            IGST := "Taxable Basis" * 0.18;
+                    // SGST = Taxable Basis * 9%
+                    SGST := "Taxable Basis" * 9 / 100;
+                end;
+
+            'INTERNATIONAL':
+                begin
+                    // Taxable Basis = Base Fare * Pax * 10%
+                    "Taxable Basis" := TotalBaseFare * 10 / 100;
+
+                    // IGST = Taxable Basis * 18%
+                    IGST := "Taxable Basis" * 18 / 100;
+                end;
         end;
-
-        // GST is shown separately from the fare total.
-        "Total Amount" := TotalBaseFare + TotalOtherCharges;
     end;
+
+    // ==========================================
+    // DUPLICATE PNR CHECK
+    // ==========================================
 
     local procedure CheckDuplicatePNR()
     var
@@ -275,26 +314,46 @@ table 50400 "Normal Sales"
 
         NormalSales.Reset();
         NormalSales.SetRange(PNR, Rec.PNR);
+
         if Rec."Serial No." <> 0 then
-            NormalSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            NormalSales.SetFilter(
+                "Serial No.",
+                '<>%1',
+                Rec."Serial No.");
+
         if not NormalSales.IsEmpty() then
-            Error('The PNR %1 already exists in Normal Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Normal Sales.',
+                Rec.PNR);
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, Rec.PNR);
+
         if not SamplePurchase.IsEmpty() then
-            Error('The PNR %1 already exists in Sample Purchase.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Sample Purchase.',
+                Rec.PNR);
 
         APISalesFormat.Reset();
         APISalesFormat.SetRange(PNR, Rec.PNR);
+
         if not APISalesFormat.IsEmpty() then
-            Error('The PNR %1 already exists in API Sales Format.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in API Sales Format.',
+                Rec.PNR);
 
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The PNR %1 already exists in Third-Party Supplier Sales.', Rec.PNR);
+            Error(
+                'The PNR %1 already exists in Third-Party Supplier Sales.',
+                Rec.PNR);
     end;
+
+    // ==========================================
+    // DUPLICATE AQ NUMBER CHECK
+    // ==========================================
 
     local procedure CheckDuplicateRefNoAQNumber()
     var
@@ -306,20 +365,39 @@ table 50400 "Normal Sales"
             exit;
 
         NormalSales.Reset();
-        NormalSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        NormalSales.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
         if Rec."Serial No." <> 0 then
-            NormalSales.SetFilter("Serial No.", '<>%1', Rec."Serial No.");
+            NormalSales.SetFilter(
+                "Serial No.",
+                '<>%1',
+                Rec."Serial No.");
+
         if not NormalSales.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in Normal Sales.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in Normal Sales.',
+                Rec."Ref No./AQ Number");
 
         APISalesFormat.Reset();
-        APISalesFormat.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        APISalesFormat.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
         if not APISalesFormat.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in API Sales Format.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in API Sales Format.',
+                Rec."Ref No./AQ Number");
 
         ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+        ThirdPartySupplierSales.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
         if not ThirdPartySupplierSales.IsEmpty() then
-            Error('The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.', Rec."Ref No./AQ Number");
+            Error(
+                'The Ref No./AQ Number %1 already exists in Third-Party Supplier Sales.',
+                Rec."Ref No./AQ Number");
     end;
 }

@@ -4,7 +4,7 @@ report 50390 "AIRIQ Sales Invoice"
     ApplicationArea = All;
     UsageCategory = ReportsAndAnalysis;
     DefaultLayout = RDLC;
-    RDLCLayout = 'RDL File/AIRIQ_Sales_Invoice.rdl';
+    RDLCLayout = 'RDL File for Sales format/AIRIQ_Sales_Invoice.rdl';
     dataset
     {
         dataitem(Invoice; "Sales Invoice Header")

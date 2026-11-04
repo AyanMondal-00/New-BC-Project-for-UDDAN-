@@ -4,7 +4,7 @@ report 50391 "AIRIQ Credit Note Invoice"
     ApplicationArea = All;
     UsageCategory = ReportsAndAnalysis;
     DefaultLayout = RDLC;
-    RDLCLayout = 'RDL File/AIRIQ_CreditNote.rdl';
+    RDLCLayout = 'RDL File for Sales format/AIRIQ_CreditNote.rdl';
 
     dataset
     {
