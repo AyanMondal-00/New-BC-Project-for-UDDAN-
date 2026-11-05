@@ -1,0 +1,162 @@
+[
+  {
+    "CaseID": "{8C726039-861D-4A4D-9DAE-4AD8D4F5F565}",
+    "FlightType": "Domestic",
+    "Scenario": 1,
+    "InvoiceSourceCaseID": "{A1D10001-7B10-4A10-9010-000000000001}",
+    "StandardReturnSourceCaseID": "{26581492-A8D9-41EB-B84E-40671AE8CC3C}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{952B1DED-477B-4F63-9460-C2157194B71D}",
+    "FlightType": "Domestic",
+    "Scenario": 2,
+    "InvoiceSourceCaseID": "{A1D10001-7B10-4A10-9010-000000000101}",
+    "StandardReturnSourceCaseID": "{2167C0D3-971D-481A-86BA-F45FB92025FB}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{D066C5EA-32A0-4549-BB73-5FE9FB7927DE}",
+    "FlightType": "Domestic",
+    "Scenario": 3,
+    "InvoiceSourceCaseID": "{A1D10001-7B10-4A10-9010-000000000102}",
+    "StandardReturnSourceCaseID": "{08F3F188-43F5-441F-AB95-BE332651AD3D}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{EA1B96D1-9501-4D94-85AF-F21F030F4072}",
+    "FlightType": "Domestic",
+    "Scenario": 4,
+    "InvoiceSourceCaseID": "{A1D10001-7B10-4A10-9010-000000000103}",
+    "StandardReturnSourceCaseID": "{77DC6AF2-5D31-4450-8F78-E2F7383B9EAB}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{D93F3BED-9F35-42B0-B328-C9151A1B52DB}",
+    "FlightType": "Domestic",
+    "Scenario": 5,
+    "InvoiceSourceCaseID": "{A1D10001-7B10-4A10-9010-000000000104}",
+    "StandardReturnSourceCaseID": "{26581492-A8D9-41EB-B84E-40671AE8CC3C}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification",
+      "No verified goods-return KFloodCess posting setup; component has no posting mapping"
+    ]
+  },
+  {
+    "CaseID": "{F8539BCB-7DE0-4680-8833-2DA0798ECB85}",
+    "FlightType": "Domestic",
+    "Scenario": 6,
+    "InvoiceSourceCaseID": "{A1D10001-7B10-4A10-9010-000000000105}",
+    "StandardReturnSourceCaseID": "{08F3F188-43F5-441F-AB95-BE332651AD3D}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification",
+      "No verified goods-return KFloodCess posting setup; component has no posting mapping"
+    ]
+  },
+  {
+    "CaseID": "{253D80CE-50AF-4E45-A3B4-15BE6899FCB9}",
+    "FlightType": "International",
+    "Scenario": 1,
+    "InvoiceSourceCaseID": "{A1D10002-7B10-4A10-9010-000000000002}",
+    "StandardReturnSourceCaseID": "{26581492-A8D9-41EB-B84E-40671AE8CC3C}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{5FCD4C7F-4D4D-4AFA-8AE3-04813BA636D1}",
+    "FlightType": "International",
+    "Scenario": 2,
+    "InvoiceSourceCaseID": "{A1D10002-7B10-4A10-9010-000000000101}",
+    "StandardReturnSourceCaseID": "{2167C0D3-971D-481A-86BA-F45FB92025FB}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{5EA15565-6963-4BAE-BF5B-AD87F37F90A2}",
+    "FlightType": "International",
+    "Scenario": 3,
+    "InvoiceSourceCaseID": "{A1D10002-7B10-4A10-9010-000000000102}",
+    "StandardReturnSourceCaseID": "{08F3F188-43F5-441F-AB95-BE332651AD3D}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{F88C7163-4D06-49AB-9CF6-15B6A12EF29B}",
+    "FlightType": "International",
+    "Scenario": 4,
+    "InvoiceSourceCaseID": "{A1D10002-7B10-4A10-9010-000000000103}",
+    "StandardReturnSourceCaseID": "{77DC6AF2-5D31-4450-8F78-E2F7383B9EAB}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification"
+    ]
+  },
+  {
+    "CaseID": "{16B92FDA-248F-41A0-87F4-BB32B508637A}",
+    "FlightType": "International",
+    "Scenario": 5,
+    "InvoiceSourceCaseID": "{A1D10002-7B10-4A10-9010-000000000104}",
+    "StandardReturnSourceCaseID": "{26581492-A8D9-41EB-B84E-40671AE8CC3C}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification",
+      "No verified goods-return KFloodCess posting setup; component has no posting mapping"
+    ]
+  },
+  {
+    "CaseID": "{40247520-EB3D-4F60-B8FE-890F5FF5091B}",
+    "FlightType": "International",
+    "Scenario": 6,
+    "InvoiceSourceCaseID": "{A1D10002-7B10-4A10-9010-000000000105}",
+    "StandardReturnSourceCaseID": "{08F3F188-43F5-441F-AB95-BE332651AD3D}",
+    "ParentCaseId": "{9B72FC90-6211-4E8D-8EA3-3BC5D1C7601B}",
+    "ReadyForImport": false,
+    "Blockers": [
+      "Tenant tree placement and release/enable verification",
+      "Per-passenger source fare verification",
+      "No verified goods-return KFloodCess posting setup; component has no posting mapping"
+    ]
+  }
+]

@@ -291,7 +291,8 @@ table 50403 "Sales Return"
             IGST := "Taxable Value" * 0.18;
         end;
 
-        "Sold Value" := TotalBaseFare + TotalOtherCharges + CGST + SGST + IGST;
+        // GST is shown separately from the fare total.
+        "Sold Value" := TotalBaseFare + TotalOtherCharges;
     end;
     local procedure GetNextSerialNo(): Integer
     var
