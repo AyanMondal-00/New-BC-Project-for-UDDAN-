@@ -171,7 +171,7 @@ table 50302 "Purchase Return"
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
-            Editable = false;
+            Editable = true;
         }
 
         field(18; Discount; Decimal)
@@ -194,7 +194,7 @@ table 50302 "Purchase Return"
         {
             Caption = 'Amount';
             DataClassification = CustomerContent;
-            Editable = false;
+            Editable = true;
         }
 
         field(21; "Travel Date"; DateTime)
@@ -259,9 +259,13 @@ table 50302 "Purchase Return"
 
     trigger OnInsert()
     begin
-        "Serial No." := GetNextSerialNo();
+        if "Serial No." = 0 then
+            "Serial No." := GetNextSerialNo();
 
-        CalculateReturnAmount();
+        if Rate = 0 then
+            Rate := "Base Fare" + Others;
+        if Amount = 0 then
+            Amount := Rate * Pax;
     end;
 
     // =========================================

@@ -29,7 +29,8 @@ codeunit 50715 "AIRIQ SR Create Memo"
         Source.TestField("A/C Name");
         Source.TestField(PNR);
 
-        // Prevent duplicate Credit Memo for same return
+        // Prevent duplicate credit memo
+        Existing.Reset();
         Existing.SetRange(
             "Document Type",
             Existing."Document Type"::"Credit Memo");
@@ -39,33 +40,42 @@ codeunit 50715 "AIRIQ SR Create Memo"
 
         if Existing.FindFirst() then
             Error(
-                'Sales Return %1 already has Sales Credit Memo %2.',
+                'Sales Return %1 already has Credit Memo %2.',
                 Source."Return No.",
                 Existing."No.");
 
+        Posted.Reset();
         Posted.SetRange(
             "AIRIQ Return No.",
             Source."Return No.");
 
         if Posted.FindFirst() then
             Error(
-                'Sales Return %1 already has posted Sales Credit Memo %2.',
+                'Sales Return %1 already has Posted Credit Memo %2.',
                 Source."Return No.",
                 Posted."No.");
 
         if Source."AIRIQ Memo Created" or
            (Source."AIRIQ Memo No." <> '') then
             Error(
-                'Sales Return %1 already has Sales Credit Memo %2. Deleted drafts retain their source link.',
+                'Sales Return %1 is already linked to Credit Memo %2.',
                 Source."Return No.",
                 Source."AIRIQ Memo No.");
 
-        if (Source.PAX <= 0) or
-           (Source."Base Fare" <= 0) then
-            Error(
-                'Positive PAX and Base Fare are required. Base Fare supplies Unit Price Excl. VAT.');
+        if Source.PAX <= 0 then
+            Error('PAX must be greater than zero.');
 
-        // Find Customer
+        if Source."Base Fare" <= 0 then
+            Error('Base Fare must be greater than zero.');
+
+        if Source."Other Charges" < 0 then
+            Error('Other Charges cannot be negative.');
+
+        if Source."XXLN Charges" < 0 then
+            Error('XXLN Charges cannot be negative.');
+
+        // Customer Mapping
+        Customer.Reset();
         Customer.SetRange(Name, Source."A/C Name");
 
         if Customer.Count() <> 1 then
@@ -75,18 +85,16 @@ codeunit 50715 "AIRIQ SR Create Memo"
 
         Customer.FindFirst();
 
-        // NEW: Find original Posted Sales Invoice
+        // Original Posted Invoice
         if not OriginalInvoice.Get(Source."Invoice No.") then
             Error(
-                'Original Posted Sales Invoice %1 was not found. Check Invoice No. in Sales Return %2.',
-                Source."Invoice No.",
-                Source."Return No.");
+                'Original Posted Sales Invoice %1 not found.',
+                Source."Invoice No.");
 
-        // NEW: Verify Customer
         if OriginalInvoice."Sell-to Customer No." <>
            Customer."No." then
             Error(
-                'Customer mismatch for Original Invoice %1. Invoice Customer: %2. Sales Return Customer: %3.',
+                'Original Invoice %1 belongs to Customer %2, but Sales Return belongs to %3.',
                 OriginalInvoice."No.",
                 OriginalInvoice."Sell-to Customer No.",
                 Customer."No.");
@@ -94,22 +102,24 @@ codeunit 50715 "AIRIQ SR Create Memo"
         if StrLen(Source."Agency ID") >
            MaxStrLen(Header."Agency ID") then
             Error(
-                'Agency ID %1 exceeds the existing Sales Header Agency ID length.',
+                'Agency ID %1 exceeds Sales Header field length.',
                 Source."Agency ID");
 
-        // Find Item by PNR
+        // Item Mapping by PNR
+        Item.Reset();
         Item.SetRange(Description, Source.PNR);
 
         if Item.Count() <> 1 then
             Error(
-                'Exactly one Item Description must match PNR %1.',
+                'Exactly one Item must match PNR %1.',
                 Source.PNR);
 
         Item.FindFirst();
         Item.TestField("GST Group Code");
         Item.TestField("HSN/SAC Code");
 
-        // Passenger validation
+        // Passenger Mapping
+        Passenger.Reset();
         Passenger.SetCurrentKey(
             "Return No.", PNR, "SL No.");
 
@@ -121,10 +131,9 @@ codeunit 50715 "AIRIQ SR Create Memo"
 
         ValidatePassengers(Source, Passenger);
 
-        if (Passenger.Count() <> 0) and
-           (Passenger.Count() <> Source.PAX) then
+        if Passenger.Count() <> Source.PAX then
             Error(
-                'Passenger count %1 differs from PAX %2 for Return %3 / PNR %4.',
+                'Passenger Count %1 does not match PAX %2 for Return %3 / PNR %4.',
                 Passenger.Count(),
                 Source.PAX,
                 Source."Return No.",
@@ -135,8 +144,10 @@ codeunit 50715 "AIRIQ SR Create Memo"
 
         // Create Credit Memo Header
         Header.Init();
+
         Header."Document Type" :=
             Header."Document Type"::"Credit Memo";
+
         Header.Insert(true);
 
         Header.Validate(
@@ -144,7 +155,14 @@ codeunit 50715 "AIRIQ SR Create Memo"
             Customer."No.");
 
         Header.Validate("Prices Including VAT", false);
-        Header.Validate("Document Date", Today());
+
+        if Source."Entry Date" <> 0DT then
+            Header.Validate(
+                "Document Date",
+                DT2Date(Source."Entry Date"))
+        else
+            Header.Validate("Document Date", Today());
+
         Header.Validate("Location Code", 'SILIGURI');
 
         Header."Agency ID" := Source."Agency ID";
@@ -157,6 +175,7 @@ codeunit 50715 "AIRIQ SR Create Memo"
             Header."Sales Type" :=
                 Header."Sales Type"::"Third Party Sales";
 
+        // Custom Header Mapping
         Header."AIRIQ Return No." :=
             Source."Return No.";
 
@@ -166,7 +185,6 @@ codeunit 50715 "AIRIQ SR Create Memo"
         Header."AIRIQ Bill No." :=
             Source."Bill No.";
 
-        // NEW: Automatically map verified Posted Invoice No.
         Header."AIRIQ Original Invoice" :=
             OriginalInvoice."No.";
 
@@ -174,57 +192,44 @@ codeunit 50715 "AIRIQ SR Create Memo"
             Source."Entry Date";
 
         Header."AIRIQ Reference" :=
-            Source."Reference";
+            Source.Reference;
 
         Header."AIRIQ Narration" :=
-            Source."Narration";
+            Source.Narration;
 
         Header."AIRIQ Supplier" :=
-            Source."Supplier";
+            Source.Supplier;
 
         Header."AIRIQ Sale Type" :=
             Source."Sale Type";
 
         Header.Modify(true);
 
-        // Create Passenger Lines
+        // Create one line per passenger
         LineNo := 10000;
 
         if Passenger.FindSet() then
             repeat
-                AddLine(
+                AddPassengerLine(
                     Header,
                     Source,
                     Item,
-                    Passenger."Passenger Name",
-                    Passenger.Type,
-                    Passenger."SL No.",
-                    1,
+                    Passenger,
                     LineNo);
 
                 LineNo += 10000;
-            until Passenger.Next() = 0
-        else
-            AddLine(
-                Header,
-                Source,
-                Item,
-                Source."Passenger Name",
-                '',
-                0,
-                Source.PAX,
-                LineNo);
+            until Passenger.Next() = 0;
 
-        // Update Sales Return
+        // Mark source as processed
         Source."AIRIQ Memo Created" := true;
         Source."AIRIQ Memo No." := Header."No.";
+
         Source.Modify(true);
 
-        ReportGST(Header, Source);
-
         Message(
-            'Sales Credit Memo %1 created against Original Posted Sales Invoice %2. Review standard GST Reference Invoice No. before posting.',
+            'Sales Credit Memo %1 created successfully with %2 passenger lines against Invoice %3. Review amounts and standard GST reference before posting.',
             Header."No.",
+            Source.PAX,
             OriginalInvoice."No.");
     end;
 
@@ -235,25 +240,21 @@ codeunit 50715 "AIRIQ SR Create Memo"
         ReturnPassenger: Record "Sales Return Passenger Name";
     begin
         if Passenger.IsEmpty() then begin
+            ReturnPassenger.Reset();
             ReturnPassenger.SetRange(
                 "Return No.",
                 Source."Return No.");
 
             if not ReturnPassenger.IsEmpty() then
                 Error(
-                    'Passenger records exist for Return No. %1, but none match PNR %2. Correct the passenger PNR before creating the credit memo.',
+                    'Passengers exist for Return %1 but their PNR does not match %2. Check Passenger List.',
                     Source."Return No.",
                     Source.PNR);
 
-            if DelChr(
-                Source."Passenger Name",
-                '<>', ' ') = '' then
-                Error(
-                    'No passenger names were found for Return No. %1 / PNR %2. Open View Passenger on the Sales Return and add the passenger names before creating the credit memo.',
-                    Source."Return No.",
-                    Source.PNR);
-
-            exit;
+            Error(
+                'No passengers found for Return %1 / PNR %2.',
+                Source."Return No.",
+                Source.PNR);
         end;
 
         if Passenger.FindSet() then
@@ -262,117 +263,48 @@ codeunit 50715 "AIRIQ SR Create Memo"
                     Passenger."Passenger Name",
                     '<>', ' ') = '' then
                     Error(
-                        'Passenger name is blank at SL No. %1 for Return No. %2 / PNR %3.',
-                        Passenger."SL No.",
-                        Source."Return No.",
-                        Source.PNR);
+                        'Passenger Name is blank at SL No. %1.',
+                        Passenger."SL No.");
             until Passenger.Next() = 0;
     end;
 
-    local procedure ReportGST(
-        Header: Record "Sales Header";
-        Source: Record "Sales Return")
-    var
-        Line: Record "Sales Line";
-        TaxValue: Record "Tax Transaction Value";
-        Component: Record "Tax Component";
-        CGSTAmount: Decimal;
-        SGSTAmount: Decimal;
-        IGSTAmount: Decimal;
-        FoundGST: Boolean;
-    begin
-        Line.SetRange(
-            "Document Type",
-            Header."Document Type");
-
-        Line.SetRange(
-            "Document No.",
-            Header."No.");
-
-        if Line.FindSet() then
-            repeat
-                TaxValue.Reset();
-                TaxValue.SetRange(
-                    "Tax Record ID",
-                    Line.RecordId());
-
-                TaxValue.SetRange("Tax Type", 'GST');
-
-                TaxValue.SetRange(
-                    "Value Type",
-                    TaxValue."Value Type"::COMPONENT);
-
-                if TaxValue.FindSet() then
-                    repeat
-                        Component.Reset();
-
-                        Component.SetRange(
-                            "Tax Type",
-                            TaxValue."Tax Type");
-
-                        Component.SetRange(
-                            ID,
-                            TaxValue."Value ID");
-
-                        if Component.FindFirst() then begin
-                            case UpperCase(Component.Name) of
-                                'CGST':
-                                    begin
-                                        CGSTAmount += TaxValue.Amount;
-                                        FoundGST := true;
-                                    end;
-
-                                'SGST':
-                                    begin
-                                        SGSTAmount += TaxValue.Amount;
-                                        FoundGST := true;
-                                    end;
-
-                                'IGST':
-                                    begin
-                                        IGSTAmount += TaxValue.Amount;
-                                        FoundGST := true;
-                                    end;
-                            end;
-                        end;
-                    until TaxValue.Next() = 0;
-            until Line.Next() = 0;
-
-        if not FoundGST then
-            Message(
-                'No standard GST component results were found for Credit Memo %1. Review tax configuration and posting preview before posting. Source CGST/SGST/IGST: %2 / %3 / %4.',
-                Header."No.",
-                Source.CGST,
-                Source.SGST,
-                Source.IGST)
-        else
-            if (Abs(CGSTAmount - Source.CGST) > 0.01) or
-               (Abs(SGSTAmount - Source.SGST) > 0.01) or
-               (Abs(IGSTAmount - Source.IGST) > 0.01) then
-                Message(
-                    'GST differs for Credit Memo %1. Source CGST/SGST/IGST: %2 / %3 / %4. BC calculated: %5 / %6 / %7. Standard GST has not been overridden.',
-                    Header."No.",
-                    Source.CGST,
-                    Source.SGST,
-                    Source.IGST,
-                    CGSTAmount,
-                    SGSTAmount,
-                    IGSTAmount);
-    end;
-
-    local procedure AddLine(
+    local procedure AddPassengerLine(
         Header: Record "Sales Header";
         Source: Record "Sales Return";
         Item: Record Item;
-        PassengerName: Text[100];
-        PassengerType: Text[50];
-        PassengerSL: Integer;
-        Qty: Decimal;
+        Passenger: Record "Sales Return Passenger Name";
         LineNo: Integer)
     var
         Line: Record "Sales Line";
         CalculateTax: Codeunit "Calculate Tax";
+        UnitTicketPrice: Decimal;
+        PassengerSoldValue: Decimal;
+        PassengerTaxableValue: Decimal;
+        PassengerCGST: Decimal;
+        PassengerSGST: Decimal;
+        PassengerIGST: Decimal;
     begin
+        // Base Fare and Other Charges are per passenger
+        UnitTicketPrice :=
+            Source."Base Fare" +
+            Source."Other Charges";
+
+        // Sold Value and source GST are total values
+        PassengerSoldValue :=
+            Source."Sold Value" / Source.PAX;
+
+        PassengerTaxableValue :=
+            Source."Taxable Value" / Source.PAX;
+
+        PassengerCGST :=
+            Source.CGST / Source.PAX;
+
+        PassengerSGST :=
+            Source.SGST / Source.PAX;
+
+        PassengerIGST :=
+            Source.IGST / Source.PAX;
+
         Line.Init();
 
         Line."Document Type" :=
@@ -382,83 +314,101 @@ codeunit 50715 "AIRIQ SR Create Memo"
             Header."No.";
 
         Line."Line No." := LineNo;
+
         Line.Insert(true);
 
         Line.Validate(Type, Line.Type::Item);
         Line.Validate("No.", Item."No.");
 
-        Line.Description := Source.PNR;
+        Line.Validate(
+            "Location Code",
+            Header."Location Code");
 
         Line.Validate(FlightType, Source.Type);
-        Line.Validate(Quantity, Qty);
 
-        Line.BaseFare := Format(Source."Base Fare");
+        // One passenger = one quantity
+        Line.Validate(Quantity, 1);
 
+        // Unit Price Excl. VAT
         Line.Validate(
             "Unit Price",
-            Source."Base Fare");
+            UnitTicketPrice);
 
         Line.Validate("Line Discount %", 0);
         Line.Validate("Allow Invoice Disc.", false);
 
+        Line.Description := Source.PNR;
+
+        Line.BaseFare :=
+            Format(Source."Base Fare");
+
+        // Passenger Details
+        Line."Passenger Name" :=
+            Passenger."Passenger Name";
+
+        Line."AIRIQ Passenger Type" :=
+            Passenger.Type;
+
+        Line."AIRIQ Passenger SL" :=
+            Passenger."SL No.";
+
+        // Travel Details
         Line."Travel Date" :=
             Source."Travel Date";
 
         Line.Sector := Source.Sector;
 
-        Line."Passenger Name" :=
-            PassengerName;
-
-        Line."AIRIQ Taxable Value" :=
-            Source."Taxable Value";
-
-        Line."AIRIQ Source CGST" :=
-            Source."CGST";
-
-        Line."AIRIQ Source SGST" :=
-            Source."SGST";
-
-        Line."AIRIQ Source IGST" :=
-            Source."IGST";
-
-        Line."AIRIQ Sold Value" :=
-            Source."Sold Value";
-
-        Line."AIRIQ XXLN Charges" :=
-            Source."XXLN Charges";
-
-        Line."AIRIQ Refund Amount" :=
-            Source."Refund Amount";
-
         Line."AIRIQ Country" :=
-            Source."Country";
+            Source.Country;
 
         Line."AIRIQ State" :=
-            Source."State";
+            Source.State;
 
         Line."AIRIQ City" :=
-            Source."City";
+            Source.City;
 
         Line."AIRIQ Travel Time" :=
-            Source."Time";
+            Source.Time;
 
         Line."AIRIQ Airline" :=
-            Source."Airline";
+            Source.Airline;
 
         Line."AIRIQ Airline Code" :=
             Source."Airline Code";
 
         Line."AIRIQ Reference" :=
-            Source."Reference";
+            Source.Reference;
 
-        Line."AIRIQ Passenger Type" :=
-            PassengerType;
+        // Passenger-wise source amounts
+        // Informational only; standard tax engine
+        // determines actual GST.
+        Line."AIRIQ Taxable Value" :=
+            PassengerTaxableValue;
 
-        Line."AIRIQ Passenger SL" :=
-            PassengerSL;
+        Line."AIRIQ Source CGST" :=
+            PassengerCGST;
+
+        Line."AIRIQ Source SGST" :=
+            PassengerSGST;
+
+        Line."AIRIQ Source IGST" :=
+            PassengerIGST;
+
+        Line."AIRIQ Sold Value" :=
+            PassengerSoldValue;
+
+        // XXLN Charges is per passenger
+        Line."AIRIQ XXLN Charges" :=
+            Source."XXLN Charges";
+
+        // Preserve source refund value without
+        // assuming whether it is total or per PAX.
+        Line."AIRIQ Refund Amount" :=
+            Source."Refund Amount";
 
         Line.Modify(true);
 
+        // Standard BC Tax Engine
         CalculateTax.CallTaxEngineOnSalesLine(
             Line,
             Line);

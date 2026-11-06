@@ -1,3 +1,4 @@
+
 tableextension 50715 "AIRIQ SR Header" extends "Sales Header"
 {
     fields
@@ -13,6 +14,7 @@ tableextension 50715 "AIRIQ SR Header" extends "Sales Header"
         field(50723; "AIRIQ Sale Type"; Option) { DataClassification = CustomerContent; OptionMembers = Own,ThirdParty; }
     }
 }
+
 tableextension 50716 "AIRIQ SR Line" extends "Sales Line"
 {
     fields
@@ -35,13 +37,29 @@ tableextension 50716 "AIRIQ SR Line" extends "Sales Line"
         field(50730; "AIRIQ Passenger SL"; Integer) { DataClassification = CustomerContent; }
     }
 }
+
 tableextension 50717 "AIRIQ SR Tracking" extends "Sales Return"
 {
     fields
     {
         field(50715; "AIRIQ Memo Created"; Boolean) { DataClassification = CustomerContent; Editable = false; }
         field(50716; "AIRIQ Memo No."; Code[20]) { DataClassification = CustomerContent; Editable = false; }
-        field(50717; "AIRIQ Credit Unit Price"; Decimal) { DataClassification = CustomerContent; Caption = 'Reviewed Credit Unit Price'; MinValue = 0; ObsoleteState = Pending; ObsoleteReason = 'Base Fare now supplies Unit Price Excl. VAT directly.'; ObsoleteTag = '1.0'; }
-        field(50718; "AIRIQ Price Reviewed"; Boolean) { DataClassification = CustomerContent; Caption = 'Credit Price Reviewed'; ObsoleteState = Pending; ObsoleteReason = 'Base Fare now supplies Unit Price Excl. VAT directly.'; ObsoleteTag = '1.0'; }
+        field(50717; "AIRIQ Credit Unit Price"; Decimal)
+        {
+            DataClassification = CustomerContent;
+            Caption = 'Reviewed Credit Unit Price';
+            MinValue = 0;
+            ObsoleteState = Pending;
+            ObsoleteReason = 'Base Fare now supplies Unit Price Excl. VAT directly.';
+            ObsoleteTag = '1.0';
+        }
+        field(50718; "AIRIQ Price Reviewed"; Boolean)
+        {
+            DataClassification = CustomerContent;
+            Caption = 'Credit Price Reviewed';
+            ObsoleteState = Pending;
+            ObsoleteReason = 'Base Fare now supplies Unit Price Excl. VAT directly.';
+            ObsoleteTag = '1.0';
+        }
     }
 }

@@ -1,3 +1,4 @@
+
 tableextension 50718 "AIRIQ SR Posted Header" extends "Sales Cr.Memo Header"
 {
     fields
@@ -47,7 +48,9 @@ codeunit 50719 "AIRIQ SR Posting"
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeSalesCrMemoHeaderInsert', '', false, false)]
     local procedure HeaderCopy(var SalesCrMemoHeader: Record "Sales Cr.Memo Header"; var SalesHeader: Record "Sales Header"; CommitIsSuppressed: Boolean; var IsHandled: Boolean; var SalesInvHeader: Record "Sales Invoice Header")
     begin
-        if SalesHeader."AIRIQ Return No." = '' then exit;
+        if SalesHeader."AIRIQ Return No." = '' then
+            exit;
+
         SalesCrMemoHeader."AIRIQ Return No." := SalesHeader."AIRIQ Return No.";
         SalesCrMemoHeader."AIRIQ Return Serial" := SalesHeader."AIRIQ Return Serial";
         SalesCrMemoHeader."AIRIQ Bill No." := SalesHeader."AIRIQ Bill No.";
@@ -62,7 +65,9 @@ codeunit 50719 "AIRIQ SR Posting"
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeSalesCrMemoLineInsert', '', false, false)]
     local procedure LineCopy(var SalesCrMemoLine: Record "Sales Cr.Memo Line"; SalesCrMemoHeader: Record "Sales Cr.Memo Header"; SalesLine: Record "Sales Line"; CommitIsSuppressed: Boolean; var IsHandled: Boolean; var SalesHeader: Record "Sales Header"; var SalesShptHeader: Record "Sales Shipment Header"; var ReturnRcptHeader: Record "Return Receipt Header"; var PostingSalesLine: Record "Sales Line")
     begin
-        if SalesHeader."AIRIQ Return No." = '' then exit;
+        if SalesHeader."AIRIQ Return No." = '' then
+            exit;
+
         SalesCrMemoLine."AIRIQ Taxable Value" := SalesLine."AIRIQ Taxable Value";
         SalesCrMemoLine."AIRIQ Source CGST" := SalesLine."AIRIQ Source CGST";
         SalesCrMemoLine."AIRIQ Source SGST" := SalesLine."AIRIQ Source SGST";

@@ -1,3 +1,4 @@
+
 table 50407 "Sales Return Passenger Name"
 {
     Caption = 'Sales Return Passenger Name';

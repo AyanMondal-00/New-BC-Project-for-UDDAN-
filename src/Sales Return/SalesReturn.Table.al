@@ -1,3 +1,4 @@
+
 table 50403 "Sales Return"
 {
     Caption = 'Sales Return';
@@ -15,19 +16,26 @@ table 50403 "Sales Return"
         {
             Caption = 'Entry Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
+                if Rec."Entry Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Entry Date");
+
                 if DT2Time(Rec."Entry Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Entry Date");
-                Rec."Entry Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Entry Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(3; "Bill No."; Code[50])
         {
@@ -98,19 +106,26 @@ table 50403 "Sales Return"
         {
             Caption = 'Travel Date';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             var
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
+                if Rec."Travel Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Travel Date");
+
                 if DT2Time(Rec."Travel Date") = 000000T then
                     CurrentTime := DT2Time(CurrentDateTime())
                 else
                     CurrentTime := DT2Time(Rec."Travel Date");
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+
+                Rec."Travel Date" :=
+                    CreateDateTime(SelectedDate, CurrentTime);
             end;
-    }
+        }
 
         field(14; Time; Time)
         {
@@ -175,6 +190,7 @@ table 50403 "Sales Return"
                 CalculateGST();
             end;
         }
+
         field(33; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
@@ -185,6 +201,7 @@ table 50403 "Sales Return"
                 CalculateGST();
             end;
         }
+
         field(22; "Taxable Value"; Decimal)
         {
             Caption = 'Taxable Value';
@@ -244,8 +261,6 @@ table 50403 "Sales Return"
             Caption = 'Supplier';
             DataClassification = CustomerContent;
         }
-
-
     }
 
     keys
@@ -256,12 +271,9 @@ table 50403 "Sales Return"
         }
     }
 
-
-
     trigger OnInsert()
     begin
-        // Always generate Serial No. in Business Central.
-        // Ignore any Serial No. supplied by Excel or another caller.
+        // Generate Serial No. centrally in the table.
         "Serial No." := GetNextSerialNo();
         CalculateGST();
     end;
@@ -291,20 +303,18 @@ table 50403 "Sales Return"
             IGST := "Taxable Value" * 0.18;
         end;
 
-        // GST is shown separately from the fare total.
         "Sold Value" := TotalBaseFare + TotalOtherCharges;
     end;
+
     local procedure GetNextSerialNo(): Integer
     var
         SerialCounter: Record "Sales Return Serial Counter";
         SalesReturn: Record "Sales Return";
         LastUsedNo: Integer;
     begin
-        // Lock both tables to protect serial generation.
         SerialCounter.LockTable();
         SalesReturn.LockTable();
 
-        // Always find the actual highest existing Serial No.
         SalesReturn.Reset();
         SalesReturn.SetCurrentKey("Serial No.");
 
@@ -315,11 +325,9 @@ table 50403 "Sales Return"
             SerialCounter.Insert();
         end;
 
-        // Synchronize counter with existing records.
         if SalesReturn.FindLast() then
             if SalesReturn."Serial No." >
-               SerialCounter."Last Serial No."
-            then
+               SerialCounter."Last Serial No." then
                 SerialCounter."Last Serial No." :=
                     SalesReturn."Serial No.";
 
@@ -328,12 +336,9 @@ table 50403 "Sales Return"
         if LastUsedNo >= 2147483647 then
             Error('Sales Return Serial No. limit reached.');
 
-        // Save the next number permanently.
         SerialCounter."Last Serial No." := LastUsedNo + 1;
         SerialCounter.Modify();
 
         exit(LastUsedNo + 1);
     end;
-
-
 }

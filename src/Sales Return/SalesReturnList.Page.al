@@ -1,3 +1,4 @@
+
 page 50413 "Sales Return List"
 {
     Caption = 'Sales Return / Cancellation Charge Format';
@@ -17,6 +18,7 @@ page 50413 "Sales Return List"
                     ApplicationArea = All;
                     Editable = false;
                 }
+
                 field("Entry Date"; Rec."Entry Date")
                 {
                     ApplicationArea = All;
@@ -107,7 +109,9 @@ page 50413 "Sales Return List"
                     var
                         PassengerList: Page "Sales Return Passenger List";
                     begin
-                        PassengerList.SetReturnNoAndPNR(Rec."Return No.", Rec.PNR);
+                        PassengerList.SetReturnNoAndPNR(
+                            Rec."Return No.",
+                            Rec.PNR);
                         PassengerList.RunModal();
                     end;
                 }
@@ -131,10 +135,12 @@ page 50413 "Sales Return List"
                 {
                     ApplicationArea = All;
                 }
+
                 field("Other Charges"; Rec."Other Charges")
                 {
                     ApplicationArea = All;
                 }
+
                 field("Taxable Value"; Rec."Taxable Value")
                 {
                     ApplicationArea = All;
@@ -179,8 +185,6 @@ page 50413 "Sales Return List"
                 {
                     ApplicationArea = All;
                 }
-
-
             }
         }
     }
@@ -214,19 +218,4 @@ page 50413 "Sales Return List"
 
     var
         ViewPassengerText: Text[30];
-
-    trigger OnNewRecord(BelowxRec: Boolean)
-    var
-        SalesReturn: Record "Sales Return";
-    begin
-        SalesReturn.Reset();
-
-        if SalesReturn.FindLast() then
-            if SalesReturn."Serial No." >= 1 then
-                Rec."Serial No." := SalesReturn."Serial No." + 1
-            else
-                Rec."Serial No." := 1
-        else
-            Rec."Serial No." := 1;
-    end;
 }

@@ -1,3 +1,4 @@
+
 page 50418 "Sales Return Passenger List"
 {
     Caption = 'Sales Return Passenger Name List';
@@ -22,6 +23,14 @@ page 50418 "Sales Return Passenger List"
                 {
                     ApplicationArea = All;
                     Editable = false;
+                }
+
+                field(PNR; Rec.PNR)
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                    Visible = true;
+                    ToolTip = 'PNR must match the Sales Return PNR. This field is part of the passenger primary key; correct mismatches by recreating the affected passenger record.';
                 }
 
                 field("Passenger Name"; Rec."Passenger Name")
@@ -78,6 +87,7 @@ page 50418 "Sales Return Passenger List"
 
         Rec.FilterGroup(2);
         Rec.SetRange("Return No.", CurrentReturnNo);
+        Rec.SetRange(PNR, CurrentPNR);
         Rec.FilterGroup(0);
     end;
 

@@ -16,7 +16,7 @@ page 50312 "Purchase Return"
                 field("Serial No."; Rec."Serial No.")
                 {
                     ApplicationArea = All;
-                    Editable = false;
+                    Editable = true;
                 }
 
                 field("Entry Date"; Rec."Entry Date")
