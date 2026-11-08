@@ -24,7 +24,7 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                 }
 
-                field("Invoice Number"; Rec."Invoice Number")   
+                field("Invoice Number"; Rec."Invoice Number")
                 {
                     ApplicationArea = All;
                 }
@@ -152,7 +152,7 @@ page 50410 "Normal Sales List"
     {
         area(Processing)
         {
-            action("Choose Date to Date")
+            action("Date to Date API Import")
             {
                 ApplicationArea = All;
                 Caption = 'Choose Date to Date';
@@ -190,23 +190,21 @@ page 50410 "Normal Sales List"
                 end;
             }
 
+            // =====================================================
+            // MAIN DUAL SELECTION INVOICE ACTION
+            // =====================================================
+
             action("Create Own Sales Invoice")
             {
                 ApplicationArea = All;
                 Caption = 'Create Own Sales Invoice';
+                ToolTip =
+                    'Create Sales Invoices for checked rows first. If no rows are checked, process BC selected rows using Ctrl+A, Ctrl+Click or Shift+Click.';
                 Image = CreateDocument;
 
                 trigger OnAction()
-                var
-                    SelectedNormalSales: Record "Normal Sales";
-                    SalesInvoiceMgt: Codeunit "AIRIQ Sales Invoice Mgt";
                 begin
-                    CurrPage.SetSelectionFilter(SelectedNormalSales);
-
-                    SalesInvoiceMgt.CreateOwnSalesInvoices(
-                        SelectedNormalSales);
-
-                    CurrPage.Update(false);
+                    CreateInvoices();
                 end;
             }
 
@@ -218,7 +216,8 @@ page 50410 "Normal Sales List"
 
                 trigger OnAction()
                 var
-                    OwnSalesExcelImportMgt: Codeunit "Own Sales Excel Import Mgt.";
+                    OwnSalesExcelImportMgt:
+                        Codeunit "Own Sales Excel Import Mgt.";
                 begin
                     OwnSalesExcelImportMgt.ImportFromExcel();
                     CurrPage.Update(false);
@@ -226,6 +225,93 @@ page 50410 "Normal Sales List"
             }
         }
     }
+
+    // =========================================================
+    // DUAL SELECTION INVOICE CREATION
+    // =========================================================
+    //
+    // Priority 1: Select Checkbox
+    // Priority 2: Native BC Row Selection
+    //
+    // Existing Codeunit processing modes are preserved.
+    // =========================================================
+
+    local procedure CreateInvoices()
+    var
+        SelectedNormalSales: Record "Normal Sales";
+        SalesInvoiceMgt: Codeunit "AIRIQ Sales Invoice Mgt";
+        SelectionMode: Text;
+    begin
+        // Save any pending changes on the current row.
+        CurrPage.SaveRecord();
+
+        // STEP 1:
+        // Check checkbox-selected rows within active page filters.
+
+        SelectedNormalSales.CopyFilters(Rec);
+
+        // FilterGroup 10 ensures that the checkbox condition
+        // intersects with existing page filters.
+
+        SelectedNormalSales.FilterGroup(10);
+        SelectedNormalSales.SetRange("Select", true);
+        SelectedNormalSales.FilterGroup(0);
+
+        if not SelectedNormalSales.IsEmpty() then begin
+
+            // Checkbox selection takes priority.
+
+            SelectionMode := 'Checked rows within page filters';
+
+        end else begin
+
+            // STEP 2:
+            // No checked rows found.
+            // Clear previous filters before native selection.
+
+            SelectedNormalSales.Reset();
+
+            // Preserve current page filters and native selection.
+
+            SelectedNormalSales.Copy(Rec);
+
+            CurrPage.SetSelectionFilter(SelectedNormalSales);
+
+            SelectionMode :=
+                'Native selected rows (current row if no multi-selection)';
+        end;
+
+        // STEP 3:
+        // Validate selected records.
+
+        if SelectedNormalSales.IsEmpty() then begin
+            Message(
+                'No records found for selection mode: %1.',
+                SelectionMode);
+            exit;
+        end;
+
+        // STEP 4:
+        // Preserve existing transaction boundary.
+
+        Commit();
+
+        // STEP 5:
+        // Reuse existing invoice management logic.
+
+        SalesInvoiceMgt.CreateOwnSalesInvoicesForMode(
+            SelectedNormalSales,
+            SelectionMode);
+
+        // STEP 6:
+        // Refresh status after processing.
+
+        CurrPage.Update(false);
+    end;
+
+    // =========================================================
+    // EXISTING STATUS DISPLAY
+    // =========================================================
 
     trigger OnAfterGetRecord()
     begin

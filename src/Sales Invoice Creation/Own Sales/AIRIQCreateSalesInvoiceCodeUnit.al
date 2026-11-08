@@ -8,6 +8,7 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
         CreateOwnSalesInvoice(Rec);
     end;
 
+    [CommitBehavior(CommitBehavior::Error)]
     procedure CreateOwnSalesInvoice(var NormalSales: Record "Normal Sales")
     var
         SalesHeader: Record "Sales Header";
@@ -15,20 +16,43 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
         Customer: Record Customer;
         Item: Record Item;
         Passenger: Record "Own Sales Passenger Name";
+        SameAQSales: Record "Normal Sales";
+        PostedInvoice: Record "Sales Invoice Header";
         AQNumber: BigInteger;
         LineNo: Integer;
         UnitPriceValue: Decimal;
     begin
+        AlreadyCreated := false;
         AQNumber := NormalSales."Ref No./AQ Number";
-
-        // Prevent Duplicate Invoice Creation
-        if NormalSales."Sales Invoice Created" then
-            Error(
-                'Sales Invoice has already been created for AQ Number %1.',
-                AQNumber);
-
         if AQNumber = 0 then
             Error('AQ Number is required.');
+
+        // Acquire the same first source-row update lock for all workers for this AQ.
+        // This also serializes legacy duplicate source rows without changing import logic.
+        SameAQSales.LockTable();
+        SameAQSales.SetRange("Ref No./AQ Number", AQNumber);
+        if not SameAQSales.FindFirst() then
+            Error('No source record remains for AQ Number %1. Refresh the page and retry.', AQNumber);
+        NormalSales.Get(NormalSales."Serial No.");
+        if NormalSales."Ref No./AQ Number" <> AQNumber then
+            Error('AQ Number changed during selection. Refresh the page and retry.');
+
+        if NormalSales."Sales Invoice Created" then begin
+            AlreadyCreated := true;
+            exit;
+        end;
+
+        SameAQSales.SetRange("Sales Invoice Created", true);
+        SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Invoice);
+        SalesHeader.SetRange("Sales Type", SalesHeader."Sales Type"::"Own Sales");
+        SalesHeader.SetRange("AQ Number", AQNumber);
+        PostedInvoice.SetRange("Sales Type", PostedInvoice."Sales Type"::"Own Sales");
+        PostedInvoice.SetRange("AQ Number", AQNumber);
+        if not SameAQSales.IsEmpty() or not SalesHeader.IsEmpty() or not PostedInvoice.IsEmpty() then begin
+            AlreadyCreated := true;
+            exit;
+        end;
+        SalesHeader.Reset();
 
         // STEP 1: CUSTOMER MATCHING
         Customer.Reset();
@@ -137,6 +161,11 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
         NormalSales.Modify(true);
     end;
 
+    procedure WasAlreadyCreated(): Boolean
+    begin
+        exit(AlreadyCreated);
+    end;
+
     local procedure CreateSalesInvoiceLine(
         var SalesHeader: Record "Sales Header";
         var NormalSales: Record "Normal Sales";
@@ -215,4 +244,7 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
 
         SalesLine.Modify(true);
     end;
+
+    var
+        AlreadyCreated: Boolean;
 }

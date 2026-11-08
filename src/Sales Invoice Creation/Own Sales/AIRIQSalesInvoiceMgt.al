@@ -1,93 +1,72 @@
 codeunit 50427 "AIRIQ Sales Invoice Mgt"
 {
+    // Compatibility entry point: process exactly the supplied set, never infer checkbox mode.
+    // Caller must finish any write transaction before entering this batch boundary.
     procedure CreateOwnSalesInvoices(var NormalSales: Record "Normal Sales")
+    begin
+        CreateOwnSalesInvoicesForMode(NormalSales, 'Supplied record set');
+    end;
+
+    procedure CreateOwnSalesInvoicesForMode(var NormalSales: Record "Normal Sales"; SelectionMode: Text)
     var
-        SelectedSales: Record "Normal Sales";
+        Selection: Record "Normal Sales";
+        Snapshot: Record "Normal Sales" temporary;
         SalesToProcess: Record "Normal Sales";
         CreateSalesInvoice: Codeunit "AIRIQ Create Sales Invoice";
         CreatedCount: Integer;
+        SkippedCount: Integer;
         FailedCount: Integer;
-        FailedRecordsLogged: Integer;
+        SelectedCount: Integer;
+        ErrorText: Text;
         FailedDetails: TextBuilder;
-        SummaryMsg: TextBuilder;
-        CurrentSerialNo: Integer;
+        Summary: TextBuilder;
     begin
-        // Prefer records selected using the Select checkbox.
-        SelectedSales.Reset();
-        SelectedSales.SetRange("Select", true);
-
-        if not SelectedSales.IsEmpty() then
-            SalesToProcess.Copy(SelectedSales)
-        else begin
-            // Otherwise use the record filters passed from the page.
-            SalesToProcess.Copy(NormalSales);
-
-            if SalesToProcess.IsEmpty() then
-                Error('Please select at least one Sales record.');
-        end;
-
-        if SalesToProcess.FindSet() then
+        // Copy preserves filters AND marks. Never Get/Reset/modify this selection cursor.
+        Selection.Copy(NormalSales);
+        if Selection.FindSet() then
             repeat
-                CurrentSerialNo := SalesToProcess."Serial No.";
+                Snapshot := Selection;
+                if Snapshot.Insert() then
+                    SelectedCount += 1;
+            until Selection.Next() = 0;
 
-                // Re-read the actual record before processing.
-                if NormalSales.Get(CurrentSerialNo) then begin
-                    if NormalSales."Sales Invoice Created" then begin
-                        FailedCount += 1;
-
-                        if FailedRecordsLogged < 10 then begin
-                            FailedRecordsLogged += 1;
-                            FailedDetails.AppendLine(
-                                StrSubstNo(
-                                    '- AQ No. %1 (PNR: %2): Invoice already created.',
-                                    NormalSales."Ref No./AQ Number",
-                                    NormalSales.PNR));
-                        end;
-                    end else begin
-                        ClearLastError();
-
-                        if CreateSalesInvoice.Run(NormalSales) then
-                            CreatedCount += 1
-                        else begin
-                            FailedCount += 1;
-
-                            if FailedRecordsLogged < 10 then begin
-                                FailedRecordsLogged += 1;
-                                FailedDetails.AppendLine(
-                                    StrSubstNo(
-                                        '- AQ No. %1 (PNR: %2): %3',
-                                        NormalSales."Ref No./AQ Number",
-                                        NormalSales.PNR,
-                                        GetLastErrorText()));
-                            end;
-
-                            ClearLastError();
-                        end;
-                    end;
-                end;
-            until SalesToProcess.Next() = 0;
-
-        if FailedCount = 0 then
-            Message('%1 Sales Invoice(s) created successfully.', CreatedCount)
-        else begin
-            SummaryMsg.AppendLine(
-                StrSubstNo(
-                    '%1 Sales Invoice(s) created successfully.',
-                    CreatedCount));
-            SummaryMsg.AppendLine(
-                StrSubstNo(
-                    '%1 record(s) failed.',
-                    FailedCount));
-            SummaryMsg.AppendLine('');
-            SummaryMsg.Append(FailedDetails.ToText());
-
-            if FailedCount > FailedRecordsLogged then
-                SummaryMsg.AppendLine(
-                    StrSubstNo(
-                        '... and %1 more failure(s).',
-                        FailedCount - FailedRecordsLogged));
-
-            Message(SummaryMsg.ToText());
+        if SelectedCount = 0 then begin
+            Message('No records found for selection mode: %1.', SelectionMode);
+            exit;
         end;
+        if not Confirm('Selection mode: %1\Selected records: %2\Create invoices? Already-created invoices will be skipped.', false,
+             SelectionMode, SelectedCount) then
+            exit;
+
+        // Only temporary writes above. Each Boolean Run owns one atomic invoice transaction.
+        if Snapshot.FindSet() then
+            repeat
+                Clear(CreateSalesInvoice);
+                Clear(SalesToProcess);
+                SalesToProcess."Serial No." := Snapshot."Serial No.";
+                // Pass snapshot AQ for diagnostics; worker locks and reads the actual row.
+                SalesToProcess."Ref No./AQ Number" := Snapshot."Ref No./AQ Number";
+                ClearLastError();
+                if CreateSalesInvoice.Run(SalesToProcess) then begin
+                    if CreateSalesInvoice.WasAlreadyCreated() then
+                        SkippedCount += 1
+                    else
+                        CreatedCount += 1;
+                end else begin
+                    ErrorText := GetLastErrorText();
+                    FailedCount += 1;
+                    FailedDetails.AppendLine(StrSubstNo('Serial No. %1 - AQ No. %2 (PNR: %3): %4',
+                        Snapshot."Serial No.", Snapshot."Ref No./AQ Number", Snapshot.PNR, ErrorText));
+                    ClearLastError();
+                end;
+            until Snapshot.Next() = 0;
+
+        Summary.AppendLine(StrSubstNo('Selection mode: %1', SelectionMode));
+        Summary.AppendLine(StrSubstNo('Selected records: %1', SelectedCount));
+        Summary.AppendLine(StrSubstNo('Successfully created invoices: %1', CreatedCount));
+        Summary.AppendLine(StrSubstNo('Already-created invoices skipped: %1', SkippedCount));
+        Summary.AppendLine(StrSubstNo('Failed records: %1', FailedCount));
+        Summary.Append(FailedDetails.ToText());
+        Message(Summary.ToText());
     end;
 }
