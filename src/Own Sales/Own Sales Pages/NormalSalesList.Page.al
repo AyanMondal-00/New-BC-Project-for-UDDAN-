@@ -27,6 +27,7 @@ page 50410 "Normal Sales List"
                 }
 
                 field("Invoice Number"; Rec."Invoice Number")
+                field("Invoice Number"; Rec."Invoice Number")
                 {
                     ApplicationArea = All;
                 }
@@ -155,6 +156,7 @@ page 50410 "Normal Sales List"
         area(Processing)
         {
             action("Date to Date API Import")
+            action("Date to Date API Import")
             {
                 ApplicationArea = All;
                 Caption = 'Choose Date to Date';
@@ -192,6 +194,10 @@ page 50410 "Normal Sales List"
                 end;
             }
 
+            // =====================================================
+            // MAIN DUAL SELECTION INVOICE ACTION
+            // =====================================================
+
             action("Create Own Sales Invoice")
             {
                 ApplicationArea = All;
@@ -201,6 +207,7 @@ page 50410 "Normal Sales List"
 
                 trigger OnAction()
                 begin
+                    CreateInvoices();
                     CreateInvoices();
                 end;
             }
@@ -213,7 +220,8 @@ page 50410 "Normal Sales List"
 
                 trigger OnAction()
                 var
-                    OwnSalesExcelImportMgt: Codeunit "Own Sales Excel Import Mgt.";
+                    OwnSalesExcelImportMgt:
+                        Codeunit "Own Sales Excel Import Mgt.";
                 begin
                     OwnSalesExcelImportMgt.ImportFromExcel();
                     CurrPage.Update(false);
