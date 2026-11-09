@@ -26,7 +26,7 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                 }
 
-                field("Invoice Number"; Rec."Invoice Number")
+       
                 field("Invoice Number"; Rec."Invoice Number")
                 {
                     ApplicationArea = All;
@@ -155,7 +155,7 @@ page 50410 "Normal Sales List"
     {
         area(Processing)
         {
-            action("Date to Date API Import")
+   
             action("Date to Date API Import")
             {
                 ApplicationArea = All;
