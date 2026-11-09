@@ -1,4 +1,3 @@
-
 table 50400 "Normal Sales"
 {
     Caption = 'Normal Sales';
@@ -6,10 +5,11 @@ table 50400 "Normal Sales"
 
     fields
     {
-        field(1; "Serial No."; Integer)
+        field(1; "Serial No."; Code[20])
         {
             Caption = 'Serial No.';
             DataClassification = SystemMetadata;
+            Editable = false;
         }
 
         field(2; "Date"; DateTime)
@@ -86,6 +86,11 @@ table 50400 "Normal Sales"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
+            trigger OnValidate()
+            begin
+                if "API Calculation" then
+                    CalculateAmounts();
+            end;
         }
 
         field(8; Passenger; Text[100])
@@ -101,7 +106,8 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateAmounts();
+                if "API Calculation" then
+                    CalculateAmounts();
             end;
         }
 
@@ -140,7 +146,8 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateAmounts();
+                if "API Calculation" then
+                    CalculateAmounts();
             end;
         }
 
@@ -151,7 +158,8 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateAmounts();
+                if "API Calculation" then
+                    CalculateAmounts();
             end;
         }
 
@@ -162,16 +170,9 @@ table 50400 "Normal Sales"
 
             trigger OnValidate()
             begin
-                CalculateAmounts();
+                if "API Calculation" then
+                    CalculateAmounts();
             end;
-        }
-
-        // NEW RATE FIELD
-        field(25; "Rate"; Decimal)
-        {
-            Caption = 'Rate';
-            Editable = false;
-            DataClassification = CustomerContent;
         }
 
         field(15; "Taxable Basis"; Decimal)
@@ -204,12 +205,23 @@ table 50400 "Normal Sales"
             Editable = false;
             DataClassification = CustomerContent;
         }
+field(19; "Total Amount"; Decimal)
+{
+    Caption = 'Total Amount';
+    DataClassification = CustomerContent;
+    Editable = true;
 
-        field(19; "Total Amount"; Decimal)
+    trigger OnValidate()
+    begin
+        if "API Calculation" then
+            CalculateAmounts();
+    end;
+}
+        field(26; "API Calculation"; Boolean)
         {
-            Caption = 'Total Amount';
+            Caption = 'API Calculation';
+            DataClassification = SystemMetadata;
             Editable = false;
-            DataClassification = CustomerContent;
         }
     }
 
@@ -221,34 +233,50 @@ table 50400 "Normal Sales"
         }
     }
 
-    trigger OnInsert()
-    begin
-        if "Serial No." <= 0 then
-            "Serial No." := GetNextSerialNo();
+    // ==========================================
+    // INSERT - BC STANDARD NO. SERIES
+    // ==========================================
 
-        CalculateAmounts();
+    trigger OnInsert()
+    var
+        NoSeries: Codeunit "No. Series";
+    begin
+        if "Serial No." = '' then
+            "Serial No." :=
+                NoSeries.GetNextNo('AIR-IQ-OS');
+
+        if "API Calculation" then
+            CalculateAmounts();
     end;
 
     trigger OnModify()
     begin
-        CalculateAmounts();
+        if "API Calculation" then
+            CalculateAmounts();
     end;
 
     // ==========================================
-    // SERIAL NUMBER GENERATION
+    // DELETE MATCHING OWN SALES PASSENGERS
     // ==========================================
 
-    local procedure GetNextSerialNo(): Integer
+    trigger OnDelete()
     var
-        NormalSales: Record "Normal Sales";
+        OwnSalesPassenger: Record "Own Sales Passenger Name";
     begin
-        NormalSales.Reset();
-        NormalSales.SetCurrentKey("Serial No.");
+        if Rec."Ref No./AQ Number" = 0 then
+            exit;
 
-        if NormalSales.FindLast() then
-            exit(NormalSales."Serial No." + 1);
+        OwnSalesPassenger.Reset();
 
-        exit(1);
+        OwnSalesPassenger.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
+        OwnSalesPassenger.SetRange(
+            PNR,
+            Rec.PNR);
+
+        OwnSalesPassenger.DeleteAll(true);
     end;
 
     // ==========================================
@@ -257,45 +285,47 @@ table 50400 "Normal Sales"
 
     procedure CalculateAmounts()
     var
+        SamplePurchase: Record "Sample Purchase";
         TotalBaseFare: Decimal;
+        TotalGST: Decimal;
     begin
-        TotalBaseFare := "Base Fare" * Pax;
+        if not "API Calculation" then
+            exit;
 
-        // Rate Calculation
-        Rate := ("Base Fare" + "Other Charges") * Pax;
-
-        // Total Amount excludes separately calculated GST
-        "Total Amount" := Rate;
-
-        // Reset GST Values
+        "Base Fare" := 0;
         "Taxable Basis" := 0;
         CGST := 0;
         SGST := 0;
         IGST := 0;
+        "Other Charges" := 0;
+
+        if (PNR = '') or (Pax <= 0) then
+            exit;
+
+        SamplePurchase.Reset();
+        SamplePurchase.SetRange(PNR, PNR);
+        if not SamplePurchase.FindFirst() then
+            exit; // Pending: subscriber will recalculate when purchase arrives.
+
+        "Base Fare" := SamplePurchase."Base Fare";
+        TotalBaseFare := "Base Fare" * Pax;
 
         case UpperCase(DelChr(Type, '<>', ' ')) of
-
             'DOMESTIC':
                 begin
-                    // Taxable Basis = Base Fare * Pax * 5%
-                    "Taxable Basis" := TotalBaseFare * 5 / 100;
-
-                    // CGST = Taxable Basis * 9%
-                    CGST := "Taxable Basis" * 9 / 100;
-
-                    // SGST = Taxable Basis * 9%
-                    SGST := "Taxable Basis" * 9 / 100;
+                    "Taxable Basis" := Round(TotalBaseFare * 0.05, 0.01);
+                    CGST := Round("Taxable Basis" * 0.09, 0.01);
+                    SGST := Round("Taxable Basis" * 0.09, 0.01);
                 end;
-
             'INTERNATIONAL':
                 begin
-                    // Taxable Basis = Base Fare * Pax * 10%
-                    "Taxable Basis" := TotalBaseFare * 10 / 100;
-
-                    // IGST = Taxable Basis * 18%
-                    IGST := "Taxable Basis" * 18 / 100;
+                    "Taxable Basis" := Round(TotalBaseFare * 0.10, 0.01);
+                    IGST := Round("Taxable Basis" * 0.18, 0.01);
                 end;
         end;
+
+        TotalGST := CGST + SGST + IGST;
+        "Other Charges" := Round("Total Amount" - TotalBaseFare - TotalGST, 0.01);
     end;
 
     // ==========================================
@@ -315,7 +345,7 @@ table 50400 "Normal Sales"
         NormalSales.Reset();
         NormalSales.SetRange(PNR, Rec.PNR);
 
-        if Rec."Serial No." <> 0 then
+        if Rec."Serial No." <> '' then
             NormalSales.SetFilter(
                 "Serial No.",
                 '<>%1',
@@ -369,7 +399,7 @@ table 50400 "Normal Sales"
             "Ref No./AQ Number",
             Rec."Ref No./AQ Number");
 
-        if Rec."Serial No." <> 0 then
+        if Rec."Serial No." <> '' then
             NormalSales.SetFilter(
                 "Serial No.",
                 '<>%1',

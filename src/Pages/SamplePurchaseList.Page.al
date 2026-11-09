@@ -1,4 +1,5 @@
-﻿page 50310 "Sample Purchase List"
+﻿
+page 50310 "Sample Purchase List"
 {
     Caption = 'Sample Purchase Format';
     PageType = List;
@@ -8,7 +9,6 @@
 
     layout
     {
-
         area(content)
         {
             repeater(General)
@@ -37,7 +37,11 @@
                     var
                         Selection: Integer;
                     begin
-                        Selection := StrMenu('Air India,IndiGo,SpiceJet', 1, 'Select Airline:');
+                        Selection := StrMenu(
+                            'Air India,IndiGo,SpiceJet',
+                            1,
+                            'Select Airline:');
+
                         if Selection <> 0 then begin
                             case Selection of
                                 1:
@@ -47,6 +51,7 @@
                                 3:
                                     Text := 'SpiceJet';
                             end;
+
                             exit(true);
                         end;
                     end;
@@ -56,28 +61,33 @@
                 {
                     ApplicationArea = All;
                 }
+
                 field("Select"; Rec."Select")
                 {
                     ApplicationArea = All;
                 }
+
                 field("Invoice Created"; InvoiceCreatedText)
                 {
                     ApplicationArea = All;
                     Caption = 'Invoice Created';
                     Editable = false;
                 }
+
                 field("Invoice Posted"; InvoicePostedText)
                 {
                     ApplicationArea = All;
                     Caption = 'Invoice Posted';
                     Editable = false;
                 }
+
                 field("Item Created"; ItemCreatedText)
                 {
                     ApplicationArea = All;
                     Caption = 'Item Created';
                     Editable = false;
                 }
+
                 field(PNR; Rec.PNR)
                 {
                     ApplicationArea = All;
@@ -98,8 +108,6 @@
                     ApplicationArea = All;
                 }
 
-
-
                 field("Base Fare"; Rec."Base Fare")
                 {
                     ApplicationArea = All;
@@ -109,6 +117,7 @@
                 {
                     ApplicationArea = All;
                 }
+
                 field(Rate; Rec.Rate)
                 {
                     ApplicationArea = All;
@@ -123,10 +132,10 @@
                 {
                     ApplicationArea = All;
                 }
-
             }
         }
     }
+
     actions
     {
         area(Processing)
@@ -154,28 +163,23 @@
 
                 trigger OnAction()
                 var
-                    SamplePurchaseItemManagement: Codeunit "Sample Purchase Item Mngt";
-                    SelectedSamplePurchase: Record "Sample Purchase";
+                    SamplePurchaseItemManagement:
+                        Codeunit "Sample Purchase Item Mngt";
+                    SelectedSamplePurchase:
+                        Record "Sample Purchase";
                 begin
-                    SelectedSamplePurchase.Reset();
-                    SelectedSamplePurchase.SetRange("Select", true);
-
-                    if SelectedSamplePurchase.IsEmpty() then begin
-                        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
-
-                        if SelectedSamplePurchase.IsEmpty() then begin
-                            Message('Please select at least one Sample Purchase record.');
-                            exit;
-                        end;
-                    end;
+                    if not GetSelectedSamplePurchases(
+                        SelectedSamplePurchase)
+                    then
+                        exit;
 
                     SamplePurchaseItemManagement.CreateItems(
                         SelectedSamplePurchase);
 
-
                     CurrPage.Update(false);
                 end;
             }
+
             action("Create Purchase Invoice action")
             {
                 ApplicationArea = All;
@@ -184,20 +188,15 @@
 
                 trigger OnAction()
                 var
-                    SamplePurchaseInvoiceMgt: Codeunit "Sample Purchase Invoice Mngt";
-                    SelectedSamplePurchase: Record "Sample Purchase";
+                    SamplePurchaseInvoiceMgt:
+                        Codeunit "Sample Purchase Invoice Mngt";
+                    SelectedSamplePurchase:
+                        Record "Sample Purchase";
                 begin
-                    SelectedSamplePurchase.Reset();
-                    SelectedSamplePurchase.SetRange("Select", true);
-
-                    if SelectedSamplePurchase.IsEmpty() then begin
-                        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
-
-                        if SelectedSamplePurchase.IsEmpty() then begin
-                            Message('Please select at least one Sample Purchase record.');
-                            exit;
-                        end;
-                    end;
+                    if not GetSelectedSamplePurchases(
+                        SelectedSamplePurchase)
+                    then
+                        exit;
 
                     SamplePurchaseInvoiceMgt.CreatePurchaseInvoices(
                         SelectedSamplePurchase);
@@ -205,6 +204,7 @@
                     CurrPage.Update(false);
                 end;
             }
+
             action("Create & Post Purchase Invoices")
             {
                 ApplicationArea = All;
@@ -213,20 +213,15 @@
 
                 trigger OnAction()
                 var
-                    SamplePurchaseInvoiceMgt: Codeunit "Sample Purchase Invoice Mngt";
-                    SelectedSamplePurchase: Record "Sample Purchase";
+                    SamplePurchaseInvoiceMgt:
+                        Codeunit "Sample Purchase Invoice Mngt";
+                    SelectedSamplePurchase:
+                        Record "Sample Purchase";
                 begin
-                    SelectedSamplePurchase.Reset();
-                    SelectedSamplePurchase.SetRange("Select", true);
-
-                    if SelectedSamplePurchase.IsEmpty() then begin
-                        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
-
-                        if SelectedSamplePurchase.IsEmpty() then begin
-                            Message('Please select at least one Sample Purchase record.');
-                            exit;
-                        end;
-                    end;
+                    if not GetSelectedSamplePurchases(
+                        SelectedSamplePurchase)
+                    then
+                        exit;
 
                     SamplePurchaseInvoiceMgt.CreateAndPostPurchaseInvoices(
                         SelectedSamplePurchase);
@@ -243,7 +238,8 @@
 
                 trigger OnAction()
                 var
-                    SamplePurchaseExcelImport: Codeunit "Sample Purchase Excel Import";
+                    SamplePurchaseExcelImport:
+                        Codeunit "Sample Purchase Excel Import";
                 begin
                     SamplePurchaseExcelImport.ImportFromExcel();
                     CurrPage.Update(false);
@@ -254,7 +250,8 @@
             {
                 ApplicationArea = All;
                 Caption = 'Select by Entry Date';
-                ToolTip = 'Select Sample Purchase records within a specified Entry Date range.';
+                ToolTip =
+                    'Select Sample Purchase records within a specified Entry Date range.';
                 Image = SelectField;
 
                 trigger OnAction()
@@ -267,9 +264,10 @@
             // {
             //     ApplicationArea = All;
             //     Caption = 'Unselect by Entry Date';
-            //     ToolTip = 'Unselect Sample Purchase records within a specified Entry Date range.';
+            //     ToolTip =
+            //         'Unselect Sample Purchase records within a specified Entry Date range.';
             //     Image = ClearFilter;
-
+            //
             //     trigger OnAction()
             //     begin
             //         SetSelectionByEntryDate(false);
@@ -280,19 +278,22 @@
             {
                 ApplicationArea = All;
                 Caption = 'Deselect All';
-                ToolTip = 'Deselect all selected Sample Purchase records.';
+                ToolTip =
+                    'Deselect all selected Sample Purchase records.';
                 Image = CancelAllLines;
 
                 trigger OnAction()
                 var
-                    SamplePurchaseRec: Record "Sample Purchase";
+                    SamplePurchaseRec:
+                        Record "Sample Purchase";
                     UpdatedCount: Integer;
                 begin
                     SamplePurchaseRec.Reset();
                     SamplePurchaseRec.SetRange("Select", true);
 
                     if SamplePurchaseRec.IsEmpty() then begin
-                        Message('No records are currently selected.');
+                        Message(
+                            'No records are currently selected.');
                         exit;
                     end;
 
@@ -304,28 +305,33 @@
                         until SamplePurchaseRec.Next() = 0;
 
                     CurrPage.Update(false);
-                    Message('%1 record(s) were deselected.', UpdatedCount);
+
+                    Message(
+                        '%1 record(s) were deselected.',
+                        UpdatedCount);
                 end;
             }
+
             action("Import For Cost Reversion")
             {
                 ApplicationArea = All;
                 Caption = 'Import For Cost Reversion';
                 Image = ImportExcel;
-                ToolTip = 'Import fare values from Excel and update existing Sample Purchase records by PNR.';
+                ToolTip =
+                    'Import fare values from Excel and update existing Sample Purchase records by PNR.';
 
                 trigger OnAction()
                 var
-                    FareAlterationImport: Codeunit "Fare Alteration Import";
+                    FareAlterationImport:
+                        Codeunit "Fare Alteration Import";
                 begin
                     FareAlterationImport.ImportFareAlteration();
                     CurrPage.Update(false);
                 end;
             }
-
         }
-
     }
+
     var
         InvoiceCreatedText: Text[3];
         InvoicePostedText: Text[3];
@@ -338,9 +344,57 @@
 
     trigger OnNewRecord(BelowxRec: Boolean)
     begin
-        // Serial No. is assigned safely by Table 50300 OnInsert trigger using persistent counter with LockTable.
+        // Serial No. is assigned by Table 50300 OnInsert.
         SetCreatedStatusText();
     end;
+
+    // =========================================================
+    // COMMON BULK SELECTION HANDLER
+    // =========================================================
+    // Priority 1: Existing Select Checkbox
+    // Priority 2: BC Row Selection (Ctrl+A / Ctrl+Click)
+    //
+    // IMPORTANT:
+    // Reset() must be called before SetSelectionFilter()
+    // to remove the previous Select=true filter.
+    // =========================================================
+
+    local procedure GetSelectedSamplePurchases(
+        var SelectedSamplePurchase: Record "Sample Purchase"
+    ): Boolean
+    begin
+        // STEP 1: Check existing checkbox selection.
+
+        SelectedSamplePurchase.Reset();
+        SelectedSamplePurchase.SetRange("Select", true);
+
+        if not SelectedSamplePurchase.IsEmpty() then
+            exit(true);
+
+        // STEP 2: No checkbox selection exists.
+        // Clear all filters before capturing BC row selection.
+
+        SelectedSamplePurchase.Reset();
+
+        // STEP 3: Capture Ctrl+A, Ctrl+Click,
+        // Shift+Click or current row selection.
+
+        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
+
+        // STEP 4: Validate resulting selection.
+
+        if SelectedSamplePurchase.IsEmpty() then begin
+            Message(
+                'Please select at least one Sample Purchase record.');
+            exit(false);
+        end;
+
+        exit(true);
+    end;
+
+    // =========================================================
+    // EXISTING STATUS DISPLAY LOGIC
+    // =========================================================
 
     local procedure SetCreatedStatusText()
     begin
@@ -360,6 +414,10 @@
             ItemCreatedText := 'No';
     end;
 
+    // =========================================================
+    // EXISTING DATE-BASED CHECKBOX SELECTION
+    // =========================================================
+
     local procedure SetSelectionByEntryDate(NewSelect: Boolean)
     var
         DateDialog: Page "Sample Purchase Date Dialog";
@@ -373,22 +431,36 @@
         DateDialog.SetDates(Today, Today);
 
         if DateDialog.RunModal() = Action::OK then begin
-            DateDialog.GetDates(FromEntryDate, ToEntryDate);
+            DateDialog.GetDates(
+                FromEntryDate,
+                ToEntryDate);
 
-            if (FromEntryDate = 0D) or (ToEntryDate = 0D) then
-                Error('Please select both From Entry Date and To Entry Date.');
+            if (FromEntryDate = 0D) or
+               (ToEntryDate = 0D)
+            then
+                Error(
+                    'Please select both From Entry Date and To Entry Date.');
 
             if FromEntryDate > ToEntryDate then
-                Error('From Entry Date cannot be later than To Entry Date.');
+                Error(
+                    'From Entry Date cannot be later than To Entry Date.');
 
-            StartDateTime := CreateDateTime(FromEntryDate, 0T);
-            EndDateTime := CreateDateTime(ToEntryDate, 235959.999T);
+            StartDateTime :=
+                CreateDateTime(FromEntryDate, 0T);
+
+            EndDateTime :=
+                CreateDateTime(ToEntryDate, 235959.999T);
 
             SamplePurchaseRec.Reset();
-            SamplePurchaseRec.SetRange("Entry Date", StartDateTime, EndDateTime);
+
+            SamplePurchaseRec.SetRange(
+                "Entry Date",
+                StartDateTime,
+                EndDateTime);
 
             if SamplePurchaseRec.IsEmpty() then begin
-                Message('No Sample Purchase records found for the specified Entry Date range.');
+                Message(
+                    'No Sample Purchase records found for the specified Entry Date range.');
                 exit;
             end;
 
@@ -402,9 +474,13 @@
             CurrPage.Update(false);
 
             if NewSelect then
-                Message('%1 record(s) were selected.', UpdatedCount)
+                Message(
+                    '%1 record(s) were selected.',
+                    UpdatedCount)
             else
-                Message('%1 record(s) were unselected.', UpdatedCount);
+                Message(
+                    '%1 record(s) were unselected.',
+                    UpdatedCount);
         end;
     end;
 }

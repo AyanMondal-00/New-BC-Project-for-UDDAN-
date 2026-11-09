@@ -40,6 +40,7 @@ codeunit 50420 "Own Sales API Mgt."
         // Format dates for API
         FromDateText :=
             Format(FromDate, 0, '<Year4>-<Month,2>-<Day,2>');
+
         ToDateText :=
             Format(ToDate, 0, '<Year4>-<Month,2>-<Day,2>');
 
@@ -51,6 +52,7 @@ codeunit 50420 "Own Sales API Mgt."
         );
 
         // API credentials
+        // Keep your existing working credentials here.
         Username := 'om namah shivay';
         Password := 'prince';
         AuthString := Username + ':' + Password;
@@ -91,6 +93,8 @@ codeunit 50420 "Own Sales API Mgt."
             Error('The "data" field was not found in API response.');
 
         DataArray := Token.AsArray();
+
+        // Process ALL records returned by API
         RecordCount := DataArray.Count();
 
         if RecordCount = 0 then begin
@@ -102,11 +106,8 @@ codeunit 50420 "Own Sales API Mgt."
             exit;
         end;
 
-        // Limit to first 5 records
-        if RecordCount > 5 then
-            RecordCount := 5;
-
-        // Process first 5 API records
+        // NO FIRST-5 LIMIT
+        // Process every record in the API response
         for i := 0 to RecordCount - 1 do begin
             DataArray.Get(i, Token);
             RowObject := Token.AsObject();
@@ -133,18 +134,30 @@ codeunit 50420 "Own Sales API Mgt."
 
                 SkippedRefNos += Format(RefNoValue);
 
-                // Ensure passengers are imported if missing for existing record
+                // Ensure passengers are imported if missing
                 PnrText := ExistingNormalSales.PNR;
+
                 if PnrText = '' then
                     if RowObject.Get('PNR', Token) then
-                        PnrText := CopyStr(Token.AsValue().AsText(), 1, MaxStrLen(PnrText));
+                        PnrText := CopyStr(
+                            Token.AsValue().AsText(),
+                            1,
+                            MaxStrLen(PnrText)
+                        );
 
-                TempPassengerMgt.ImportPassengersFromRow(RowObject, RefNoValue, PnrText);
+                TempPassengerMgt.ImportPassengersFromRow(
+                    RowObject,
+                    RefNoValue,
+                    PnrText
+                );
             end else begin
                 // Clear previous record state
                 Clear(NormalSales);
                 NormalSales.Reset();
                 NormalSales.Init();
+
+                // Enable API-specific calculation
+                NormalSales."API Calculation" := true;
 
                 // Ref No.
                 NormalSales.Validate(
@@ -224,7 +237,7 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsDateTime()
                 );
 
-                // Type - Text field
+                // Type
                 if not RowObject.Get('Type', Token) then
                     Error('Type was not found in API response.');
 
@@ -233,12 +246,25 @@ codeunit 50420 "Own Sales API Mgt."
                     Token.AsValue().AsText()
                 );
 
+                // SoldValue is the API total amount
+                if not RowObject.Get('SoldValue', Token) then
+                    Error('SoldValue was not found in API response.');
+
+                NormalSales.Validate(
+                    "Total Amount",
+                    Token.AsValue().AsDecimal()
+                );
+
                 // Insert new record
                 NormalSales.Insert(true);
                 ImportedCount += 1;
 
-                // Import passengers from API response for newly inserted record
-                TempPassengerMgt.ImportPassengersFromRow(RowObject, RefNoValue, NormalSales.PNR);
+                // Import passengers for new record
+                TempPassengerMgt.ImportPassengersFromRow(
+                    RowObject,
+                    RefNoValue,
+                    NormalSales.PNR
+                );
             end;
         end;
 

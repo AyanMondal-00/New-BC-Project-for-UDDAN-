@@ -1,4 +1,3 @@
-
 page 50410 "Normal Sales List"
 {
     Caption = 'Normal Sales';
@@ -6,6 +5,8 @@ page 50410 "Normal Sales List"
     SourceTable = "Normal Sales";
     ApplicationArea = All;
     UsageCategory = Lists;
+
+    DelayedInsert = true;
 
     layout
     {
@@ -17,6 +18,7 @@ page 50410 "Normal Sales List"
                 {
                     ApplicationArea = All;
                     Editable = false;
+                    ToolTip = 'Displays the serial number assigned by the AIRIQ Own Sales No. Series when the record is inserted.';
                 }
 
                 field("Date"; Rec."Date")
@@ -24,7 +26,7 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                 }
 
-                field("Invoice Number"; Rec."Invoice Number")   
+                field("Invoice Number"; Rec."Invoice Number")
                 {
                     ApplicationArea = All;
                 }
@@ -142,7 +144,7 @@ page 50410 "Normal Sales List"
                 field("Total Amount"; Rec."Total Amount")
                 {
                     ApplicationArea = All;
-                    Editable = false;
+                    Editable = true;
                 }
             }
         }
@@ -152,7 +154,7 @@ page 50410 "Normal Sales List"
     {
         area(Processing)
         {
-            action("Choose Date to Date")
+            action("Date to Date API Import")
             {
                 ApplicationArea = All;
                 Caption = 'Choose Date to Date';
@@ -194,19 +196,12 @@ page 50410 "Normal Sales List"
             {
                 ApplicationArea = All;
                 Caption = 'Create Own Sales Invoice';
+                ToolTip = 'Create invoices for native selected rows (or the current row). This action ignores checkbox values.';
                 Image = CreateDocument;
 
                 trigger OnAction()
-                var
-                    SelectedNormalSales: Record "Normal Sales";
-                    SalesInvoiceMgt: Codeunit "AIRIQ Sales Invoice Mgt";
                 begin
-                    CurrPage.SetSelectionFilter(SelectedNormalSales);
-
-                    SalesInvoiceMgt.CreateOwnSalesInvoices(
-                        SelectedNormalSales);
-
-                    CurrPage.Update(false);
+                    CreateInvoices();
                 end;
             }
 
@@ -227,6 +222,24 @@ page 50410 "Normal Sales List"
         }
     }
 
+    local procedure CreateInvoices()
+    var
+        SelectedNormalSales: Record "Normal Sales";
+        SalesInvoiceMgt: Codeunit "AIRIQ Sales Invoice Mgt";
+    begin
+        CurrPage.SaveRecord();
+        SelectedNormalSales.Copy(Rec);
+        CurrPage.SetSelectionFilter(SelectedNormalSales);
+        if SelectedNormalSales.IsEmpty() then begin
+            Message('Please select at least one Own Sales record.');
+            exit;
+        end;
+        Commit();
+        SalesInvoiceMgt.CreateOwnSalesInvoicesForMode(
+            SelectedNormalSales, 'Native selected rows');
+        CurrPage.Update(false);
+    end;
+
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';
@@ -235,6 +248,16 @@ page 50410 "Normal Sales List"
             SalesInvoiceCreatedText := 'Yes'
         else
             SalesInvoiceCreatedText := 'No';
+    end;
+
+    trigger OnNewRecord(BelowxRec: Boolean)
+    begin
+        // Do not allocate a No. Series number here.
+        // The table OnInsert trigger handles allocation.
+        // This avoids assigning a primary key to an
+        // otherwise empty row during New/Refresh.
+        ViewPassengerText := 'View Passenger';
+        SalesInvoiceCreatedText := 'No';
     end;
 
     var

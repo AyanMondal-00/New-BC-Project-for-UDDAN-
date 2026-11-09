@@ -219,10 +219,17 @@ codeunit 50430 "Own Sales Excel Import Mgt."
                             RowNo,
                             'Other Charges'));
 
-                    // UPDATED:
-                    // Calculate Rate, Taxable Basis,
-                    // CGST, SGST, IGST and Total Amount
-                    NormalSales.CalculateAmounts();
+                    // Excel financial fields are authoritative: never calculate.
+                    NormalSales.Validate("Taxable Basis", GetDecimalValue(
+                        GetCellValue(TempExcelBuffer, RowNo, 19), RowNo, 'Taxable Basis'));
+                    NormalSales.Validate(CGST, GetDecimalValue(
+                        GetCellValue(TempExcelBuffer, RowNo, 20), RowNo, 'CGST'));
+                    NormalSales.Validate(SGST, GetDecimalValue(
+                        GetCellValue(TempExcelBuffer, RowNo, 21), RowNo, 'SGST'));
+                    NormalSales.Validate(IGST, GetDecimalValue(
+                        GetCellValue(TempExcelBuffer, RowNo, 22), RowNo, 'IGST'));
+                    NormalSales.Validate("Total Amount", GetDecimalValue(
+                        GetCellValue(TempExcelBuffer, RowNo, 23), RowNo, 'Total Amount'));
 
                     // Insert main Normal Sales record
                     NormalSales.Insert(true);
