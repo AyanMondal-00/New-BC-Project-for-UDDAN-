@@ -116,6 +116,7 @@ page 50310 "Sample Purchase List"
                 field("Other Charges"; Rec."Other Charges")
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
 
                 field(Rate; Rec.Rate)
@@ -140,20 +141,47 @@ page 50310 "Sample Purchase List"
     {
         area(Processing)
         {
-            action("Import from API")
+
+            action(ImportFromAPIByDateRange)
             {
                 ApplicationArea = All;
-                Caption = 'Import from API';
+                Caption = 'Import From API by Date Range';
                 Image = Import;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'Import Sample Purchase records from the original AIRIQ API using an Entry Date range. Duplicate PNRs will be skipped.';
 
                 trigger OnAction()
                 var
-                    APIManagement: Codeunit "Sample Purchase API Management";
+                    SamplePurchaseAPIMgt:
+            Codeunit "Sample Purchase API Management";
+                    DateDialog:
+            Page "Sample Purchase Date Dialog";
+                    FromDate: Date;
+                    ToDate: Date;
                 begin
-                    APIManagement.ImportFromAPI();
+                    DateDialog.SetDates(Today, Today);
+
+                    if DateDialog.RunModal() <> Action::OK then
+                        exit;
+
+                    DateDialog.GetDates(FromDate, ToDate);
+
+                    if (FromDate = 0D) or (ToDate = 0D) then
+                        Error('Please select both From Date and To Date.');
+
+                    if FromDate > ToDate then
+                        Error('From Date cannot be later than To Date.');
+
+                    SamplePurchaseAPIMgt.ImportSamplePurchaseByDate(
+                        FromDate,
+                        ToDate
+                    );
+
                     CurrPage.Update(false);
                 end;
             }
+
 
             action("Create Items")
             {
@@ -246,72 +274,7 @@ page 50310 "Sample Purchase List"
                 end;
             }
 
-            action("Select by Entry Date")
-            {
-                ApplicationArea = All;
-                Caption = 'Select by Entry Date';
-                ToolTip =
-                    'Select Sample Purchase records within a specified Entry Date range.';
-                Image = SelectField;
-
-                trigger OnAction()
-                begin
-                    SetSelectionByEntryDate(true);
-                end;
-            }
-
-            // action("Unselect by Entry Date")
-            // {
-            //     ApplicationArea = All;
-            //     Caption = 'Unselect by Entry Date';
-            //     ToolTip =
-            //         'Unselect Sample Purchase records within a specified Entry Date range.';
-            //     Image = ClearFilter;
-            //
-            //     trigger OnAction()
-            //     begin
-            //         SetSelectionByEntryDate(false);
-            //     end;
-            // }
-
-            action("Deselect All")
-            {
-                ApplicationArea = All;
-                Caption = 'Deselect All';
-                ToolTip =
-                    'Deselect all selected Sample Purchase records.';
-                Image = CancelAllLines;
-
-                trigger OnAction()
-                var
-                    SamplePurchaseRec:
-                        Record "Sample Purchase";
-                    UpdatedCount: Integer;
-                begin
-                    SamplePurchaseRec.Reset();
-                    SamplePurchaseRec.SetRange("Select", true);
-
-                    if SamplePurchaseRec.IsEmpty() then begin
-                        Message(
-                            'No records are currently selected.');
-                        exit;
-                    end;
-
-                    if SamplePurchaseRec.FindSet(true) then
-                        repeat
-                            SamplePurchaseRec."Select" := false;
-                            SamplePurchaseRec.Modify();
-                            UpdatedCount += 1;
-                        until SamplePurchaseRec.Next() = 0;
-
-                    CurrPage.Update(false);
-
-                    Message(
-                        '%1 record(s) were deselected.',
-                        UpdatedCount);
-                end;
-            }
-
+        
             action("Import For Cost Reversion")
             {
                 ApplicationArea = All;

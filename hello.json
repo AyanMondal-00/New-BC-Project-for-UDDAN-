@@ -1,0 +1,76 @@
+{
+    "status": true,
+    "message": "Success",
+    "count": 30,
+    "data": [
+        {
+            "PurchaseDate": null,
+            "EntryDate": "2026-09-24T10:35:00",
+            "Airline": "Akasa Air",
+            "Supplier": "QPIXB3502B Akasa",
+            "Sector": "Navi Mumbai // Lucknow",
+            "Type": "Domestic",
+            "PNR": "XYKEFT",
+            "Pax": 15,
+            "Price": 6692.00,
+            "Amount": 100380.00,
+            "BaseFare": 0.00,
+            "TravelDate": "2027-03-19T11:50:00",
+            "DepTime": "11:50AM",
+            "ArrTime": "2:05PM",
+            "FlightNo": "2019"
+        },
+        {
+            "PurchaseDate": null,
+            "EntryDate": "2026-09-24T10:35:00",
+            "Airline": "Akasa Air",
+            "Supplier": "QPIXB3502B Akasa",
+            "Sector": "Bagdogra // Ahmedabad",
+            "Type": "Domestic",
+            "PNR": "S9PBWW",
+            "Pax": 10,
+            "Price": 12239.00,
+            "Amount": 122390.00,
+            "BaseFare": 0.00,
+            "TravelDate": "2027-05-06T14:45:00",
+            "DepTime": "2:45PM",
+            "ArrTime": "5:30PM",
+            "FlightNo": "1904"
+        },
+        {
+            "PurchaseDate": null,
+            "EntryDate": "2026-09-24T10:35:00",
+            "Airline": "Akasa Air",
+            "Supplier": "QPIXB3502B Akasa",
+            "Sector": "Bagdogra // Ahmedabad",
+            "Type": "Domestic",
+            "PNR": "S1W3XR",
+            "Pax": 10,
+            "Price": 12239.00,
+            "Amount": 122390.00,
+            "BaseFare": 0.00,
+            "TravelDate": "2027-05-09T14:45:00",
+            "DepTime": "2:45PM",
+            "ArrTime": "5:30PM",
+            "FlightNo": "1904"
+        },
+        {
+            "PurchaseDate": null,
+            "EntryDate": "2026-09-24T10:52:00",
+            "Airline": "SpiceJet",
+            "Supplier": "IXBAI25000",
+            "Sector": "Bangalore // Mumbai",
+            "Type": "Domestic",
+            "PNR": "O9DCXY",
+            "Pax": 40,
+            "Price": 4750.00,
+            "Amount": 190000.00,
+            "BaseFare": 0.00,
+            "TravelDate": "2027-01-17T07:30:00",
+            "DepTime": "7:30AM",
+            "ArrTime": "9:30AM",
+            "FlightNo": "115"
+        }
+ 
+    ]
+}

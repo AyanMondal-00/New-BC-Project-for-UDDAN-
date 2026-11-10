@@ -6,7 +6,7 @@ table 50300 "Sample Purchase"
 
     fields
     {
-        field(1; "Serial No."; Integer)
+        field(1; "Serial No."; Code[20])
         {
             Caption = 'Serial No.';
             DataClassification = SystemMetadata;
@@ -22,6 +22,9 @@ table 50300 "Sample Purchase"
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
+                if Rec."Purchase Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Purchase Date");
 
                 if DT2Time(Rec."Purchase Date") = 000000T then
@@ -44,6 +47,9 @@ table 50300 "Sample Purchase"
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
+                if Rec."Entry Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Entry Date");
 
                 if DT2Time(Rec."Entry Date") = 000000T then
@@ -109,7 +115,7 @@ table 50300 "Sample Purchase"
 
             trigger OnValidate()
             begin
-                Rec.PNR := UpperCase(Rec.PNR);
+                Rec.PNR := UpperCase(DelChr(Rec.PNR, '<>', ' '));
                 CheckDuplicatePNR();
             end;
         }
@@ -118,7 +124,6 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Total Pax';
             DataClassification = CustomerContent;
-
             trigger OnValidate()
             begin
                 CalculatePurchaseAmount();
@@ -135,6 +140,9 @@ table 50300 "Sample Purchase"
                 SelectedDate: Date;
                 CurrentTime: Time;
             begin
+                if Rec."Travel Date" = 0DT then
+                    exit;
+
                 SelectedDate := DT2Date(Rec."Travel Date");
 
                 if DT2Time(Rec."Travel Date") = 000000T then
@@ -157,7 +165,7 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
-            Editable = false;
+            Editable = True;
         }
 
         field(11; "Base Fare"; Decimal)
@@ -175,6 +183,14 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Other Charges';
             DataClassification = CustomerContent;
+        }
+
+
+        field(13; "Total Amount"; Decimal)
+        {
+            Caption = 'Total Amount';
+            DataClassification = CustomerContent;
+            Editable = true;
 
             trigger OnValidate()
             begin
@@ -182,12 +198,6 @@ table 50300 "Sample Purchase"
             end;
         }
 
-        field(13; "Total Amount"; Decimal)
-        {
-            Caption = 'Total Amount';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
 
         field(14; Type; Text[50])
         {
@@ -209,69 +219,35 @@ table 50300 "Sample Purchase"
     }
 
     trigger OnInsert()
+    var
+        NoSeries: Codeunit "No. Series";
     begin
-        // Generate serial number
-        "Serial No." := GetNextSerialNo();
+        // Allocate the serial from the standard Business Central number series.
+        if "Serial No." = '' then
+            "Serial No." := NoSeries.GetNextNo('AIR-IQ-SP');
 
         // Normalize and check PNR
-        Rec.PNR := UpperCase(Rec.PNR);
+        Rec.PNR := UpperCase(DelChr(Rec.PNR, '<>', ' '));
         CheckDuplicatePNR();
-
-        // Calculate purchase amounts
-        CalculatePurchaseAmount();
     end;
 
     trigger OnModify()
     begin
         // Prevent duplicate PNR even when modified by code
-        Rec.PNR := UpperCase(Rec.PNR);
+        Rec.PNR := UpperCase(DelChr(Rec.PNR, '<>', ' '));
         CheckDuplicatePNR();
     end;
 
+
+
     local procedure CalculatePurchaseAmount()
     begin
-        // Base Fare + Other Charges = Rate
-        Rec.Rate := Rec."Base Fare" + Rec."Other Charges";
-
-        // Rate * Total Pax = Total Amount
-        Rec."Total Amount" := Rec.Rate * Rec."Total Pax";
+        Rec."Other Charges" :=
+            Rec."Total Amount" -
+            (Rec."Base Fare" * Rec."Total Pax");
     end;
 
-    local procedure GetNextSerialNo(): Integer
-    var
-        SerialCounter: Record "Sample Purchase Serial Cnt.";
-        SamplePurchase: Record "Sample Purchase";
-        HighestExistingNo: Integer;
-    begin
-        // Lock both tables while generating the number.
-        SamplePurchase.LockTable();
-        SerialCounter.LockTable();
 
-        // Find the highest serial currently in use.
-        SamplePurchase.Reset();
-        SamplePurchase.SetCurrentKey("Serial No.");
-
-        if SamplePurchase.FindLast() then
-            HighestExistingNo := SamplePurchase."Serial No.";
-
-        // Initialize the persistent counter on first use.
-        if not SerialCounter.Get('SAMPLEPUR') then begin
-            SerialCounter.Init();
-            SerialCounter."Counter Code" := 'SAMPLEPUR';
-            SerialCounter."Last Serial No." := HighestExistingNo;
-            SerialCounter.Insert(true);
-        end;
-
-        // Never allow the counter to go below an existing serial.
-        if SerialCounter."Last Serial No." < HighestExistingNo then
-            SerialCounter."Last Serial No." := HighestExistingNo;
-
-        // Allocate a new number and persist it.
-        SerialCounter."Last Serial No." += 1;
-        SerialCounter.Modify(true);
-
-        exit(SerialCounter."Last Serial No.");
-    end;
 
     local procedure CheckDuplicatePNR()
     var
@@ -287,7 +263,7 @@ table 50300 "Sample Purchase"
         SamplePurchase.SetRange(PNR, Rec.PNR);
 
         // Exclude the current record
-        if Rec."Serial No." <> 0 then
+        if Rec."Serial No." <> '' then
             SamplePurchase.SetFilter(
                 "Serial No.", '<>%1', Rec."Serial No.");
 

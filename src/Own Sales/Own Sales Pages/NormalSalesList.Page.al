@@ -1,3 +1,4 @@
+
 page 50410 "Normal Sales List"
 {
     Caption = 'Normal Sales';
@@ -26,7 +27,6 @@ page 50410 "Normal Sales List"
                     ApplicationArea = All;
                 }
 
-       
                 field("Invoice Number"; Rec."Invoice Number")
                 {
                     ApplicationArea = All;
@@ -155,11 +155,14 @@ page 50410 "Normal Sales List"
     {
         area(Processing)
         {
-   
+            // ==========================================
+            // API IMPORT - DATE RANGE
+            // ==========================================
+
             action("Date to Date API Import")
             {
                 ApplicationArea = All;
-                Caption = 'Choose Date to Date';
+                Caption = 'API Import by Date Range';
                 ToolTip = 'Import Own Sales data from API for a selected date range.';
                 Image = DateRange;
 
@@ -180,10 +183,12 @@ page 50410 "Normal Sales List"
                         if (SelectedFromDate = 0D) or
                            (SelectedToDate = 0D)
                         then
-                            Error('Please select both From Date and To Date.');
+                            Error(
+                                'Please select both From Date and To Date.');
 
                         if SelectedFromDate > SelectedToDate then
-                            Error('From Date cannot be later than To Date.');
+                            Error(
+                                'From Date cannot be later than To Date.');
 
                         OwnSalesAPIMgt.ImportOwnSalesByDate(
                             SelectedFromDate,
@@ -194,28 +199,33 @@ page 50410 "Normal Sales List"
                 end;
             }
 
-            // =====================================================
-            // MAIN DUAL SELECTION INVOICE ACTION
-            // =====================================================
+            // ==========================================
+            // CREATE OWN SALES INVOICE
+            // ==========================================
 
             action("Create Own Sales Invoice")
             {
                 ApplicationArea = All;
                 Caption = 'Create Own Sales Invoice';
-                ToolTip = 'Create invoices for native selected rows (or the current row). This action ignores checkbox values.';
+                ToolTip = 'Create invoices for native selected rows or the current row. Checkbox values are ignored.';
                 Image = CreateDocument;
 
                 trigger OnAction()
                 begin
-                    CreateInvoices();
+                    // FIX: Execute only once.
                     CreateInvoices();
                 end;
             }
+
+            // ==========================================
+            // EXCEL IMPORT
+            // ==========================================
 
             action("Import from Excel")
             {
                 ApplicationArea = All;
                 Caption = 'Import from Excel';
+                ToolTip = 'Import Own Sales records from an Excel file.';
                 Image = ImportExcel;
 
                 trigger OnAction()
@@ -224,29 +234,76 @@ page 50410 "Normal Sales List"
                         Codeunit "Own Sales Excel Import Mgt.";
                 begin
                     OwnSalesExcelImportMgt.ImportFromExcel();
+
                     CurrPage.Update(false);
                 end;
             }
+
+            action("Export to Excel")
+            {
+                ApplicationArea = All;
+                Caption = 'Export to Excel';
+                ToolTip =
+        'Export Own Sales with passenger names, IDs and types in the original 23-column Excel format.';
+                Image = ExportToExcel;
+
+                trigger OnAction()
+                var
+                    OwnSalesExcelExport:
+            Codeunit "Own Sales Excel Export Mgt.";
+                    SelectedSales: Record "Normal Sales";
+                begin
+                    CurrPage.SaveRecord();
+
+                    SelectedSales.Copy(Rec);
+
+                    CurrPage.SetSelectionFilter(SelectedSales);
+
+                    OwnSalesExcelExport.ExportToExcel(
+                        SelectedSales);
+                end;
+            }
+
         }
     }
+
+    // ==========================================
+    // CREATE INVOICES FOR NATIVE SELECTED ROWS
+    // ==========================================
 
     local procedure CreateInvoices()
     var
         SelectedNormalSales: Record "Normal Sales";
         SalesInvoiceMgt: Codeunit "AIRIQ Sales Invoice Mgt";
     begin
+        // Save current record before processing.
         CurrPage.SaveRecord();
+
+        // Preserve current page filters.
         SelectedNormalSales.Copy(Rec);
+
+        // Capture native selected rows.
         CurrPage.SetSelectionFilter(SelectedNormalSales);
+
         if SelectedNormalSales.IsEmpty() then begin
-            Message('Please select at least one Own Sales record.');
+            Message(
+                'Please select at least one Own Sales record.');
             exit;
         end;
+
+        // Complete pending writes before batch processing.
         Commit();
+
         SalesInvoiceMgt.CreateOwnSalesInvoicesForMode(
-            SelectedNormalSales, 'Native selected rows');
+            SelectedNormalSales,
+            'Native selected rows');
+
         CurrPage.Update(false);
     end;
+
+    // ==========================================
+    // DISPLAY STATUS
+    // ==========================================
 
     trigger OnAfterGetRecord()
     begin
@@ -258,12 +315,16 @@ page 50410 "Normal Sales List"
             SalesInvoiceCreatedText := 'No';
     end;
 
+    // ==========================================
+    // NEW RECORD - NO SERIES HANDLED BY TABLE
+    // ==========================================
+
     trigger OnNewRecord(BelowxRec: Boolean)
     begin
-        // Do not allocate a No. Series number here.
-        // The table OnInsert trigger handles allocation.
-        // This avoids assigning a primary key to an
-        // otherwise empty row during New/Refresh.
+        // No. Series number is assigned only by
+        // Normal Sales Table OnInsert trigger.
+        // Do not allocate a number during page refresh.
+
         ViewPassengerText := 'View Passenger';
         SalesInvoiceCreatedText := 'No';
     end;

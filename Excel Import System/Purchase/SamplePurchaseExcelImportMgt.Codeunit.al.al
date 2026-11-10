@@ -5,6 +5,7 @@ codeunit 50330 "Sample Purchase Excel Import"
     var
         TempExcelBuffer: Record "Excel Buffer" temporary;
         SamplePurchase: Record "Sample Purchase";
+        ExistingPurchase: Record "Sample Purchase";
         UploadInStream: InStream;
         FileName: Text;
         SheetName: Text;
@@ -12,6 +13,8 @@ codeunit 50330 "Sample Purchase Excel Import"
         LastRowNo: Integer;
         ImportedCount: Integer;
         SkippedCount: Integer;
+        BlankPNRCount: Integer;
+        DuplicatePNRCount: Integer;
         PurchaseDateColumn: Integer;
         EntryDateColumn: Integer;
         AirlineColumn: Integer;
@@ -66,12 +69,31 @@ codeunit 50330 "Sample Purchase Excel Import"
         TypeColumn := GetHeaderColumn(TempExcelBuffer, 'Type');
 
         for RowNo := 2 to LastRowNo do begin
-            PNRValue := DelChr(
+            PNRValue := UpperCase(DelChr(
                 GetCellValue(TempExcelBuffer, RowNo, PNRColumn),
-                '<>', ' ');
+                '<>', ' '));
 
-            if PNRValue <> '' then begin
+            ExistingPurchase.Reset();
+            ExistingPurchase.SetRange(PNR, PNRValue);
+
+            if PNRValue = '' then begin
+                BlankPNRCount += 1;
+                SkippedCount += 1;
+            end else
+                if not ExistingPurchase.IsEmpty() then begin
+                    DuplicatePNRCount += 1;
+                    SkippedCount += 1;
+                end else begin
+
+                // IMPORTANT:
+                // Reset the record completely for each Excel row.
+                // Init() alone does not clear the primary key.
+                Clear(SamplePurchase);
                 SamplePurchase.Init();
+
+                // Excel Sl. No. is intentionally ignored.
+                // BC will generate Serial No. automatically.
+                SamplePurchase."Serial No." := '';
 
                 SamplePurchase.Validate(
                     "Purchase Date",
@@ -85,13 +107,19 @@ codeunit 50330 "Sample Purchase Excel Import"
 
                 SamplePurchase.Validate(
                     Airline,
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, AirlineColumn), 1, 100));
+                    CopyStr(
+                        GetCellValue(TempExcelBuffer, RowNo, AirlineColumn),
+                        1, 100));
 
                 SamplePurchase.Validate(
                     "Supplier ID",
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, SupplierIDColumn), 1, 20));
+                    CopyStr(
+                        GetCellValue(TempExcelBuffer, RowNo, SupplierIDColumn),
+                        1, 20));
 
-                SamplePurchase.Validate(PNR, CopyStr(PNRValue, 1, 10));
+                SamplePurchase.Validate(
+                    PNR,
+                    CopyStr(UpperCase(PNRValue), 1, 10));
 
                 SamplePurchase.Validate(
                     "Total Pax",
@@ -105,42 +133,40 @@ codeunit 50330 "Sample Purchase Excel Import"
 
                 SamplePurchase.Validate(
                     Sector,
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, SectorColumn), 1, 200));
+                    CopyStr(
+                        GetCellValue(TempExcelBuffer, RowNo, SectorColumn),
+                        1, 200));
 
-                SamplePurchase.Validate(
-                    Rate,
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, RateColumn)));
-
-                SamplePurchase.Validate(
-                    "Base Fare",
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, BaseFareColumn)));
-
-                SamplePurchase.Validate(
-                    "Other Charges",
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, OtherChargesColumn)));
-
-                SamplePurchase.Validate(
-                    "Total Amount",
-                    GetDecimalValue(
-                        GetCellValue(TempExcelBuffer, RowNo, TotalAmountColumn)));
+                // Excel values are copied as-is: NO financial recalculation.
+                SamplePurchase.Rate :=
+                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, RateColumn));
+                SamplePurchase."Base Fare" :=
+                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, BaseFareColumn));
+                SamplePurchase."Other Charges" :=
+                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, OtherChargesColumn));
+                SamplePurchase."Total Amount" :=
+                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, TotalAmountColumn));
 
                 SamplePurchase.Validate(
                     Type,
-                    CopyStr(GetCellValue(TempExcelBuffer, RowNo, TypeColumn), 1, 50));
+                    CopyStr(
+                        GetCellValue(TempExcelBuffer, RowNo, TypeColumn),
+                        1, 50));
 
+                // Runs Sample Purchase OnInsert trigger.
+                // Generates Serial No. using AIR-IQ-SP.
                 SamplePurchase.Insert(true);
+
                 ImportedCount += 1;
-            end else
-                SkippedCount += 1;
+                end;
         end;
 
         Message(
-            'Sample Purchase Excel import completed.\Imported: %1\Skipped (blank PNR): %2',
+            'Sample Purchase Excel import completed.\Imported: %1\Skipped: %2\Blank PNR: %3\Duplicate PNR: %4',
             ImportedCount,
-            SkippedCount);
+            SkippedCount,
+            BlankPNRCount,
+            DuplicatePNRCount);
     end;
 
     local procedure GetHeaderColumn(
@@ -156,14 +182,18 @@ codeunit 50330 "Sample Purchase Excel Import"
         if TempExcelBuffer.FindSet() then
             repeat
                 HeaderValue := UpperCase(
-                    DelChr(TempExcelBuffer."Cell Value as Text", '<>', ' '));
+                    DelChr(
+                        TempExcelBuffer."Cell Value as Text",
+                        '<>', ' '));
 
                 if HeaderValue = UpperCase(HeaderName) then
                     ColumnNo := TempExcelBuffer."Column No.";
             until TempExcelBuffer.Next() = 0;
 
         if ColumnNo = 0 then
-            Error('Excel header "%1" was not found in row 1.', HeaderName);
+            Error(
+                'Excel header "%1" was not found in row 1.',
+                HeaderName);
 
         exit(ColumnNo);
     end;
@@ -248,15 +278,15 @@ codeunit 50330 "Sample Purchase Excel Import"
         if CleanText = '' then
             exit(0DT);
 
-        // 1. Standard DateTime value.
+        // Standard DateTime value.
         if Evaluate(DateTimeValue, CleanText) then
             exit(DateTimeValue);
 
-        // 2. Date-only value.
+        // Date-only value.
         if Evaluate(DateValue, CleanText) then
             exit(CreateDateTime(DateValue, 0T));
 
-        // 3. Excel serial date/time value.
+        // Excel serial date/time value.
         if Evaluate(ExcelSerial, CleanText) then begin
             if ExcelSerial < 1 then
                 Error(
@@ -269,18 +299,19 @@ codeunit 50330 "Sample Purchase Excel Import"
 
             Milliseconds := Round(
                 (ExcelSerial - WholeDays) * 86400000,
-                1,
-                '=');
+                1, '=');
 
             exit(CreateDateTime(DateValue, 0T) + Milliseconds);
         end;
 
-        // 4. Text date/time: 28-09-2026 19:30
+        // Text date/time: 28-09-2026 19:30
         SeparatorPosition := StrPos(CleanText, ' ');
 
         if SeparatorPosition > 0 then begin
-            DatePart := CopyStr(CleanText, 1, SeparatorPosition - 1);
-            TimePart := CopyStr(CleanText, SeparatorPosition + 1);
+            DatePart := CopyStr(
+                CleanText, 1, SeparatorPosition - 1);
+            TimePart := CopyStr(
+                CleanText, SeparatorPosition + 1);
 
             DatePart := DatePart.Replace('/', '-');
             DateParts := DatePart.Split('-');
@@ -316,13 +347,19 @@ codeunit 50330 "Sample Purchase Excel Import"
                 then
                     Error('Invalid date "%1".', DatePart);
 
-                if not TryCreateDate(DayNo, MonthNo, YearNo, DateValue) then
+                if not TryCreateDate(
+                    DayNo, MonthNo, YearNo, DateValue)
+                then
                     Error('Invalid calendar date "%1".', DatePart);
 
                 TimeParts := TimePart.Split(':');
 
-                if (TimeParts.Count < 2) or (TimeParts.Count > 3) then
-                    Error('Invalid time "%1". Use HH:MM or HH:MM:SS.', TimePart);
+                if (TimeParts.Count < 2) or
+                   (TimeParts.Count > 3)
+                then
+                    Error(
+                        'Invalid time "%1". Use HH:MM or HH:MM:SS.',
+                        TimePart);
 
                 if not Evaluate(HourNo, TimeParts.Get(1)) then
                     Error('Invalid hour in time "%1".', TimePart);
@@ -331,6 +368,7 @@ codeunit 50330 "Sample Purchase Excel Import"
                     Error('Invalid minute in time "%1".', TimePart);
 
                 Clear(SecondNo);
+
                 if TimeParts.Count = 3 then
                     if not Evaluate(SecondNo, TimeParts.Get(3)) then
                         Error('Invalid second in time "%1".', TimePart);
@@ -339,7 +377,9 @@ codeunit 50330 "Sample Purchase Excel Import"
                    (MinuteNo < 0) or (MinuteNo > 59) or
                    (SecondNo < 0) or (SecondNo > 59)
                 then
-                    Error('Invalid time "%1". Use 24-hour time.', TimePart);
+                    Error(
+                        'Invalid time "%1". Use 24-hour time.',
+                        TimePart);
 
                 TimeValue :=
                     000000T +
@@ -362,7 +402,10 @@ codeunit 50330 "Sample Purchase Excel Import"
         YearNo: Integer;
         var DateValue: Date): Boolean
     begin
-        if not Evaluate(DateValue, Format(DMY2Date(DayNo, MonthNo, YearNo))) then
+        if not Evaluate(
+            DateValue,
+            Format(DMY2Date(DayNo, MonthNo, YearNo)))
+        then
             exit(false);
 
         exit(true);
