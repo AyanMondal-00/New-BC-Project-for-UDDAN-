@@ -1,3 +1,4 @@
+
 page 50411 "API Sales Format List"
 {
     Caption = 'API Sales Format';
@@ -42,6 +43,7 @@ page 50411 "API Sales Format List"
                 {
                     ApplicationArea = All;
                 }
+
                 field("Select"; Rec."Select")
                 {
                     ApplicationArea = All;
@@ -67,9 +69,13 @@ page 50411 "API Sales Format List"
 
                     trigger OnDrillDown()
                     var
-                        PassengerList: Page "API Sales Passenger Name List";
+                        PassengerList:
+                            Page "API Sales Passenger Name List";
                     begin
-                        PassengerList.SetRefNoAQNumber(Rec."Ref No./AQ Number", Rec.PNR);
+                        PassengerList.SetRefNoAQNumber(
+                            Rec."Ref No./AQ Number",
+                            Rec.PNR);
+
                         PassengerList.RunModal();
                     end;
                 }
@@ -94,7 +100,7 @@ page 50411 "API Sales Format List"
                     ApplicationArea = All;
                 }
 
-                field("Rate"; Rec."Rate")
+                field(Rate; Rec.Rate)
                 {
                     ApplicationArea = All;
                 }
@@ -120,56 +126,79 @@ page 50411 "API Sales Format List"
 
                 trigger OnAction()
                 var
-                    SelectedAPISales: Record "API Sales Format";
-                    SalesInvoiceMgt: Codeunit "AIRIQ API Sales Invoice Mgt";
+                    SelectedAPISales:
+                        Record "API Sales Format";
+                    SalesInvoiceMgt:
+                        Codeunit "AIRIQ API Sales Invoice Mgt";
                 begin
-                    CurrPage.SetSelectionFilter(SelectedAPISales);
+                    CurrPage.SetSelectionFilter(
+                        SelectedAPISales);
 
-                    SalesInvoiceMgt.CreateAPISalesInvoices(SelectedAPISales);
+                    SalesInvoiceMgt.CreateAPISalesInvoices(
+                        SelectedAPISales);
 
                     CurrPage.Update(false);
                 end;
             }
+
             action(ImportSalesExcel)
             {
                 ApplicationArea = All;
                 Caption = 'Import from Excel';
                 Image = ImportExcel;
-                ToolTip = 'Import API Sales records from an Excel file.';
+                ToolTip =
+                    'Import API Sales records from an Excel file.';
 
                 trigger OnAction()
                 var
-                    SalesExcelImportMgt: Codeunit "API Sales Excel Import Mgt.";
+                    SalesExcelImportMgt:
+                        Codeunit "API Sales Excel Import Mgt.";
                 begin
                     SalesExcelImportMgt.ImportFromExcel();
+
                     CurrPage.Update(false);
                 end;
             }
-        }
 
+            // ====================================
+            // NEW CUSTOM EXCEL EXPORT
+            // ====================================
+
+            action(ExportSalesExcel)
+            {
+                ApplicationArea = All;
+                Caption = 'Export to Excel';
+                Image = ExportToExcel;
+                ToolTip =
+                    'Export API Sales with passenger names, IDs and types.';
+
+                trigger OnAction()
+                var
+                    SelectedSales:
+                        Record "API Sales Format";
+                    ExcelExportMgt:
+                        Codeunit "API Sales Excel Export Mgt.";
+                begin
+                    CurrPage.SaveRecord();
+
+                    CurrPage.SetSelectionFilter(
+                        SelectedSales);
+
+                    ExcelExportMgt.ExportToExcel(
+                        SelectedSales);
+                end;
+            }
+        }
     }
 
     trigger OnAfterGetRecord()
     begin
         ViewPassengerText := 'View Passenger';
+
         if Rec."Sales Invoice Created" then
             SalesInvoiceCreatedText := 'Yes'
         else
             SalesInvoiceCreatedText := 'No';
-    end;
-
-    trigger OnNewRecord(BelowxRec: Boolean)
-    var
-        APISalesFormat: Record "API Sales Format";
-    begin
-        APISalesFormat.Reset();
-        if APISalesFormat.FindLast() then
-            if APISalesFormat."Serial No." >= 1 then
-                Rec."Serial No." := APISalesFormat."Serial No." + 1
-            else
-                Rec."Serial No." := 1
-        else
-            Rec."Serial No." := 1;
     end;
 
     var

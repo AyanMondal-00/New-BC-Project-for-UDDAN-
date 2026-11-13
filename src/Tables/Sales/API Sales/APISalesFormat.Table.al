@@ -6,7 +6,7 @@ table 50401 "API Sales Format"
 
     fields
     {
-        field(1; "Serial No."; Integer)
+        field(1; "Serial No."; Code[20])
         {
             Caption = 'Serial No.';
             DataClassification = SystemMetadata;
@@ -161,55 +161,52 @@ table 50401 "API Sales Format"
         }
     }
 
+    // ==========================================
+    // BC STANDARD NO. SERIES - API-SALES
+    // ==========================================
+
     trigger OnInsert()
-    begin
-        // Generate a unique Serial No. for every new record.
-        "Serial No." := GetNextSerialNo();
-    end;
-
-    local procedure GetNextSerialNo(): Integer
     var
-        SerialCounter: Record "API Sales Serial Cnt.";
-        APISalesFormat: Record "API Sales Format";
-        LastUsedNo: Integer;
+        NoSeries: Codeunit "No. Series";
     begin
-        SerialCounter.LockTable();
-        APISalesFormat.LockTable();
-
-        APISalesFormat.Reset();
-        APISalesFormat.SetCurrentKey("Serial No.");
-
-        if not SerialCounter.Get('DEFAULT') then begin
-            SerialCounter.Init();
-            SerialCounter."Counter Code" := 'DEFAULT';
-            SerialCounter."Last Serial No." := 0;
-            SerialCounter.Insert();
-        end;
-
-        if APISalesFormat.FindLast() then
-            if APISalesFormat."Serial No." >
-               SerialCounter."Last Serial No."
-            then
-                SerialCounter."Last Serial No." :=
-                    APISalesFormat."Serial No.";
-
-        LastUsedNo := SerialCounter."Last Serial No.";
-
-        if LastUsedNo >= 2147483647 then
-            Error('API Sales Serial No. limit reached.');
-
-        SerialCounter."Last Serial No." := LastUsedNo + 1;
-        SerialCounter.Modify();
-
-        exit(LastUsedNo + 1);
+        if "Serial No." = '' then
+            "Serial No." :=
+                NoSeries.GetNextNo('API-SALES');
     end;
+
+    // ==========================================
+    // AUTOMATIC PASSENGER DELETE
+    // ==========================================
+
+    trigger OnDelete()
+    var
+        APISalesPassenger: Record "API Sales Passenger Name";
+    begin
+        if Rec."Ref No./AQ Number" = 0 then
+            exit;
+
+        APISalesPassenger.Reset();
+
+        APISalesPassenger.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
+        APISalesPassenger.SetRange(PNR, Rec.PNR);
+
+        APISalesPassenger.DeleteAll(true);
+    end;
+
+    // ==========================================
+    // EXISTING DUPLICATE PNR CHECK
+    // ==========================================
 
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";
         NormalSales: Record "Normal Sales";
         APISalesFormat: Record "API Sales Format";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        ThirdPartySupplierSales:
+            Record "Third-Party Supplier Sales";
     begin
         if PNR = '' then
             exit;
@@ -217,9 +214,11 @@ table 50401 "API Sales Format"
         APISalesFormat.Reset();
         APISalesFormat.SetRange(PNR, Rec.PNR);
 
-        if Rec."Serial No." <> 0 then
+        if Rec."Serial No." <> '' then
             APISalesFormat.SetFilter(
-                "Serial No.", '<>%1', Rec."Serial No.");
+                "Serial No.",
+                '<>%1',
+                Rec."Serial No.");
 
         if not APISalesFormat.IsEmpty() then
             Error(
@@ -251,22 +250,30 @@ table 50401 "API Sales Format"
                 Rec.PNR);
     end;
 
+    // ==========================================
+    // EXISTING DUPLICATE AQ NUMBER CHECK
+    // ==========================================
+
     local procedure CheckDuplicateRefNoAQNumber()
     var
         NormalSales: Record "Normal Sales";
         APISalesFormat: Record "API Sales Format";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        ThirdPartySupplierSales:
+            Record "Third-Party Supplier Sales";
     begin
         if "Ref No./AQ Number" = 0 then
             exit;
 
         APISalesFormat.Reset();
         APISalesFormat.SetRange(
-            "Ref No./AQ Number", Rec."Ref No./AQ Number");
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
 
-        if Rec."Serial No." <> 0 then
+        if Rec."Serial No." <> '' then
             APISalesFormat.SetFilter(
-                "Serial No.", '<>%1', Rec."Serial No.");
+                "Serial No.",
+                '<>%1',
+                Rec."Serial No.");
 
         if not APISalesFormat.IsEmpty() then
             Error(
@@ -275,7 +282,8 @@ table 50401 "API Sales Format"
 
         NormalSales.Reset();
         NormalSales.SetRange(
-            "Ref No./AQ Number", Rec."Ref No./AQ Number");
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
 
         if not NormalSales.IsEmpty() then
             Error(
@@ -284,7 +292,8 @@ table 50401 "API Sales Format"
 
         ThirdPartySupplierSales.Reset();
         ThirdPartySupplierSales.SetRange(
-            "Ref No./AQ Number", Rec."Ref No./AQ Number");
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
 
         if not ThirdPartySupplierSales.IsEmpty() then
             Error(
