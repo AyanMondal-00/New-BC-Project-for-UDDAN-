@@ -1,0 +1,624 @@
+
+(function () {
+  "use strict";
+
+  var host = null;
+  var payload = null;
+  var expanded = new Set();
+  var busy = false;
+
+  // ==============================================
+  // NEW: ZERO VALUE TRANSACTION TOGGLE
+  // Default = OFF
+  // ==============================================
+
+  var showZeroValueTransactions = false;
+
+  var money = new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  function el(tag, cls, text) {
+    var element = document.createElement(tag);
+
+    if (cls) {
+      element.className = cls;
+    }
+
+    if (text !== undefined) {
+      element.textContent = String(text);
+    }
+
+    return element;
+  }
+
+  function value(amount) {
+    return money.format(Number(amount || 0));
+  }
+
+  // ==============================================
+  // ZERO BALANCE IDENTIFICATION
+  // ==============================================
+
+  function isZeroAmount(amount) {
+    return Number(amount || 0) === 0;
+  }
+
+  // ==============================================
+  // NEW: CHECK WHETHER NODE SHOULD BE VISIBLE
+  // ==============================================
+
+  function shouldShowNode(node) {
+
+    // Groups always remain visible.
+    if (node.isGroup) {
+      return true;
+    }
+
+    // Current Year Profit/Loss always remains visible.
+    if (node.isProfit) {
+      return true;
+    }
+
+    // When toggle is ON, show every posting ledger.
+    if (showZeroValueTransactions) {
+      return true;
+    }
+
+    // When toggle is OFF, hide zero balance ledgers.
+    if (isZeroAmount(node.amount)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // ==============================================
+  // OPEN G/L ENTRIES
+  // ==============================================
+
+  function activateLedger(id) {
+    if (busy || !Number.isInteger(id)) {
+      return;
+    }
+
+    busy = true;
+
+    Microsoft.Dynamics.NAV.InvokeExtensibilityMethod(
+      "NodeActivated",
+      [id],
+      false,
+
+      function () {
+        busy = false;
+      },
+
+      function () {
+        busy = false;
+      }
+    );
+  }
+
+  // ==============================================
+  // BUILD ASSET / LIABILITY TREE
+  // ==============================================
+
+  function buildTree(side, nodes) {
+
+    var panel = el("section", "airiq-panel");
+
+    panel.setAttribute(
+      "aria-label",
+      side === 1 ? "Liabilities and equity" : "Assets"
+    );
+
+    var heading = el("div", "airiq-head");
+
+    heading.appendChild(
+      el(
+        "span",
+        "",
+        side === 1 ? "LIABILITIES & EQUITY" : "ASSETS"
+      )
+    );
+
+    heading.appendChild(
+      el("span", "", "Amount")
+    );
+
+    panel.appendChild(heading);
+
+    var body = el("div", "airiq-body");
+
+    var children = new Map();
+
+    // ============================================
+    // BUILD PARENT / CHILD MAPPING
+    // ============================================
+
+    nodes
+      .filter(function (n) {
+        return n.side === side;
+      })
+      .forEach(function (n) {
+
+        var parent = n.parentId || 0;
+
+        if (!children.has(parent)) {
+          children.set(parent, []);
+        }
+
+        children.get(parent).push(n);
+      });
+
+    // ============================================
+    // RENDER INDIVIDUAL NODE
+    // ============================================
+
+    function renderNode(node, depth) {
+
+      // NEW:
+      // Skip zero-value Posting G/L Accounts
+      // when toggle is OFF.
+      if (!shouldShowNode(node)) {
+        return;
+      }
+
+      var isGroup = !!node.isGroup;
+      var isProfit = !!node.isProfit;
+
+      var isExpanded = expanded.has(node.id);
+
+      var row = el(
+        "div",
+        "airiq-row" +
+          (isGroup ? " airiq-group" : " airiq-ledger") +
+          (isProfit ? " airiq-profit" : "")
+      );
+
+      var labelCell = el("div", "airiq-label");
+
+      labelCell.style.paddingLeft =
+        (10 + Math.min(depth, 12) * 19) + "px";
+
+      // ==========================================
+      // GROUP NODE
+      // ==========================================
+
+      if (isGroup) {
+
+        var btn = el(
+          "button",
+          "airiq-toggle",
+          isExpanded ? "−" : "+"
+        );
+
+        btn.type = "button";
+
+        btn.setAttribute(
+          "aria-expanded",
+          String(isExpanded)
+        );
+
+        btn.setAttribute(
+          "aria-label",
+          (isExpanded ? "Collapse " : "Expand ") + node.name
+        );
+
+        btn.addEventListener("click", function (e) {
+
+          e.stopPropagation();
+
+          if (expanded.has(node.id)) {
+            expanded.delete(node.id);
+          } else {
+            expanded.add(node.id);
+          }
+
+          render();
+        });
+
+        labelCell.appendChild(btn);
+
+        var titleButton = el(
+          "button",
+          "airiq-name-button",
+          node.name
+        );
+
+        titleButton.type = "button";
+
+        titleButton.addEventListener("click", function () {
+
+          if (expanded.has(node.id)) {
+            expanded.delete(node.id);
+          } else {
+            expanded.add(node.id);
+          }
+
+          render();
+        });
+
+        labelCell.appendChild(titleButton);
+
+      } else {
+
+        // ========================================
+        // POSTING G/L ACCOUNT
+        // ========================================
+
+        labelCell.appendChild(
+          el("span", "airiq-leaf-spacer")
+        );
+
+        var ledgerBtn = el(
+          "button",
+          "airiq-ledger-button",
+          (node.accountNo ? node.accountNo + " - " : "") +
+            node.name
+        );
+
+        ledgerBtn.type = "button";
+
+        ledgerBtn.title = isProfit
+          ? "Open Income Statement accounts"
+          : "Open G/L entries";
+
+        ledgerBtn.addEventListener("click", function () {
+          activateLedger(node.id);
+        });
+
+        labelCell.appendChild(ledgerBtn);
+      }
+
+      row.appendChild(labelCell);
+
+      row.appendChild(
+        el(
+          "div",
+          "airiq-amount",
+          value(node.amount)
+        )
+      );
+
+      body.appendChild(row);
+
+      // ==========================================
+      // EXPAND CHILDREN
+      // ==========================================
+
+      if (isGroup && isExpanded) {
+
+        (children.get(node.id) || []).forEach(
+          function (ch) {
+            renderNode(ch, depth + 1);
+          }
+        );
+      }
+    }
+
+    // ============================================
+    // RENDER ROOT NODES
+    // ============================================
+
+    (children.get(0) || []).forEach(function (n) {
+      renderNode(n, 0);
+    });
+
+    panel.appendChild(body);
+
+    // ============================================
+    // GRAND TOTAL
+    // ============================================
+
+    var total = el("div", "airiq-total");
+
+    total.appendChild(
+      el(
+        "span",
+        "",
+        side === 1
+          ? "TOTAL LIABILITIES & EQUITY"
+          : "TOTAL ASSETS"
+      )
+    );
+
+    total.appendChild(
+      el(
+        "span",
+        "",
+        value(
+          side === 1
+            ? payload.liabilities
+            : payload.assets
+        )
+      )
+    );
+
+    panel.appendChild(total);
+
+    return panel;
+  }
+
+  // ==============================================
+  // NEW: CREATE ZERO VALUE TRANSACTION BUTTON
+  // ==============================================
+
+  function createZeroValueToggle() {
+
+    var toggle = el(
+      "button",
+      "airiq-zero-toggle" +
+        (showZeroValueTransactions ? " airiq-zero-on" : " airiq-zero-off")
+    );
+
+    toggle.type = "button";
+
+    toggle.setAttribute(
+      "aria-pressed",
+      String(showZeroValueTransactions)
+    );
+
+    toggle.title = showZeroValueTransactions
+      ? "Click to hide zero balance posting accounts"
+      : "Click to show zero balance posting accounts";
+
+    // Toggle Button Label
+    var label = el(
+      "span",
+      "airiq-zero-label",
+      "Zero Value Transaction"
+    );
+
+    toggle.appendChild(label);
+
+    // ON / OFF Status
+    var status = el(
+      "span",
+      "airiq-zero-status",
+      showZeroValueTransactions ? "ON" : "OFF"
+    );
+
+    toggle.appendChild(status);
+
+    // ============================================
+    // TOGGLE CLICK EVENT
+    // ============================================
+
+    toggle.addEventListener("click", function () {
+
+      showZeroValueTransactions =
+        !showZeroValueTransactions;
+
+      // Only refresh UI.
+      // No AL server call.
+      // No balance sheet recalculation.
+      // Expanded group states remain unchanged.
+      render();
+    });
+
+    return toggle;
+  }
+
+  // ==============================================
+  // MAIN RENDER FUNCTION
+  // ==============================================
+
+  function render() {
+
+    if (!host) {
+      return;
+    }
+
+    host.replaceChildren();
+
+    var wrapper = el(
+      "div",
+      "airiq-container"
+    );
+
+    if (!payload) {
+
+      wrapper.appendChild(
+        el(
+          "div",
+          "airiq-placeholder",
+          "Balance Sheet loading…"
+        )
+      );
+
+      host.appendChild(wrapper);
+
+      return;
+    }
+
+    // ============================================
+    // TOOLBAR
+    // ============================================
+
+    var tools = el(
+      "div",
+      "airiq-tools"
+    );
+
+    tools.appendChild(
+      el(
+        "span",
+        "airiq-description",
+        "Click + / − to expand groups. Click a ledger to open its entries."
+      )
+    );
+
+    // ============================================
+    // NEW TOGGLE BUTTON
+    // Positioned before Expand all / Collapse all.
+    // ============================================
+
+    tools.appendChild(
+      createZeroValueToggle()
+    );
+
+    // ============================================
+    // EXPAND ALL
+    // ============================================
+
+    var expand = el(
+      "button",
+      "airiq-text-action",
+      "Expand all"
+    );
+
+    expand.type = "button";
+
+    expand.onclick = function () {
+
+      payload.nodes.forEach(function (n) {
+
+        if (n.isGroup) {
+          expanded.add(n.id);
+        }
+      });
+
+      render();
+    };
+
+    tools.appendChild(expand);
+
+    // ============================================
+    // COLLAPSE ALL
+    // ============================================
+
+    var collapse = el(
+      "button",
+      "airiq-text-action",
+      "Collapse all"
+    );
+
+    collapse.type = "button";
+
+    collapse.onclick = function () {
+
+      expanded.clear();
+
+      render();
+    };
+
+    tools.appendChild(collapse);
+
+    wrapper.appendChild(tools);
+
+    // ============================================
+    // TWO-SIDED T-SHAPE BALANCE SHEET
+    // ============================================
+
+    var columns = el(
+      "div",
+      "airiq-columns"
+    );
+
+    columns.appendChild(
+      buildTree(1, payload.nodes)
+    );
+
+    columns.appendChild(
+      buildTree(2, payload.nodes)
+    );
+
+    wrapper.appendChild(columns);
+
+    // ============================================
+    // FOOTNOTE
+    // ============================================
+
+    var bottom = el(
+      "div",
+      "airiq-footnote"
+    );
+
+    var diff = el(
+      "span",
+      "airiq-difference" +
+        (
+          Math.abs(Number(payload.difference)) > 0.005
+            ? " airiq-warning"
+            : ""
+        ),
+      "Difference: " + value(payload.difference)
+    );
+
+    bottom.appendChild(diff);
+
+    bottom.appendChild(
+      el(
+        "span",
+        "",
+        "Account validation issues: " +
+          (payload.validationIssues || 0)
+      )
+    );
+
+    wrapper.appendChild(bottom);
+
+    host.appendChild(wrapper);
+  }
+
+  // ==============================================
+  // CONTROL ADD-IN MOUNT
+  // ==============================================
+
+  window.AIRIQBalanceTreeMount = function (element) {
+
+    host =
+      element ||
+      document.getElementById("controlAddIn");
+
+    if (host) {
+      render();
+    }
+  };
+
+  // ==============================================
+  // RECEIVE DATA FROM BUSINESS CENTRAL
+  // ==============================================
+
+  window.SetBalanceSheetData = function (json) {
+
+    try {
+
+      var next = JSON.parse(json);
+
+      if (!next || !Array.isArray(next.nodes)) {
+        throw new Error("Invalid payload");
+      }
+
+      payload = next;
+
+      // Keep the existing behavior:
+      // On fresh data / recalculation,
+      // hierarchy starts collapsed.
+      expanded.clear();
+
+      // Zero Value Transaction toggle state
+      // remains unchanged during recalculation.
+
+      render();
+
+    } catch (e) {
+
+      if (host) {
+
+        host.replaceChildren(
+          el(
+            "div",
+            "airiq-error",
+            "Could not display Balance Sheet data."
+          )
+        );
+      }
+
+      console.error(e);
+    }
+  };
+
+}());
