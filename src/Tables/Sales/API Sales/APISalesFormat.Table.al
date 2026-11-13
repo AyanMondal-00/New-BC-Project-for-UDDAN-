@@ -19,21 +19,8 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
 
             trigger OnValidate()
-            var
-                SelectedDate: Date;
-                SelectedTime: Time;
             begin
-                if Rec."Date" = 0DT then
-                    exit;
-
-                SelectedDate := DT2Date(Rec."Date");
-                SelectedTime := DT2Time(Rec."Date");
-
-                if SelectedTime = 0T then
-                    SelectedTime := DT2Time(CurrentDateTime());
-
-                Rec."Date" :=
-                    CreateDateTime(SelectedDate, SelectedTime);
+                SetCurrentTimeForDate(Rec."Date");
             end;
         }
 
@@ -101,6 +88,11 @@ table 50401 "API Sales Format"
         {
             Caption = 'Pax';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateTotalAmount();
+            end;
         }
 
         field(10; "Travel Date"; DateTime)
@@ -109,21 +101,8 @@ table 50401 "API Sales Format"
             DataClassification = CustomerContent;
 
             trigger OnValidate()
-            var
-                SelectedDate: Date;
-                SelectedTime: Time;
             begin
-                if Rec."Travel Date" = 0DT then
-                    exit;
-
-                SelectedDate := DT2Date(Rec."Travel Date");
-                SelectedTime := DT2Time(Rec."Travel Date");
-
-                if SelectedTime = 0T then
-                    SelectedTime := DT2Time(CurrentDateTime());
-
-                Rec."Travel Date" :=
-                    CreateDateTime(SelectedDate, SelectedTime);
+                SetCurrentTimeForDate(Rec."Travel Date");
             end;
         }
 
@@ -143,6 +122,11 @@ table 50401 "API Sales Format"
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                CalculateTotalAmount();
+            end;
         }
 
         field(19; "Total Amount"; Decimal)
@@ -172,6 +156,8 @@ table 50401 "API Sales Format"
         if "Serial No." = '' then
             "Serial No." :=
                 NoSeries.GetNextNo('API-SALES');
+
+        CalculateTotalAmount();
     end;
 
     // ==========================================
@@ -194,6 +180,41 @@ table 50401 "API Sales Format"
         APISalesPassenger.SetRange(PNR, Rec.PNR);
 
         APISalesPassenger.DeleteAll(true);
+    end;
+
+    // ==========================================
+    // CURRENT TIME FOR MANUAL DATE ENTRY
+    // ==========================================
+
+    local procedure SetCurrentTimeForDate(var DateTimeValue: DateTime)
+    var
+        SelectedDate: Date;
+        SelectedTime: Time;
+    begin
+        if DateTimeValue = 0DT then
+            exit;
+
+        SelectedDate := DT2Date(DateTimeValue);
+        SelectedTime := DT2Time(DateTimeValue);
+
+        // When date is selected without a time,
+        // Business Central supplies midnight.
+        // Replace midnight with the current time.
+        if SelectedTime = 000000T then
+            SelectedTime := DT2Time(CurrentDateTime());
+
+        DateTimeValue :=
+            CreateDateTime(SelectedDate, SelectedTime);
+    end;
+
+    // ==========================================
+    // TOTAL AMOUNT = PAX * RATE
+    // ==========================================
+
+    local procedure CalculateTotalAmount()
+    begin
+        Rec."Total Amount" :=
+            Rec.Pax * Rec.Rate;
     end;
 
     // ==========================================

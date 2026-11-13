@@ -6,10 +6,11 @@ table 50402 "Third-Party Supplier Sales"
 
     fields
     {
-        field(1; "Serial No."; Integer)
+        field(1; "Serial No."; Code[20])
         {
             Caption = 'Serial No.';
             DataClassification = SystemMetadata;
+            Editable = false;
         }
 
         field(2; "Date"; DateTime)
@@ -18,18 +19,8 @@ table 50402 "Third-Party Supplier Sales"
             DataClassification = CustomerContent;
 
             trigger OnValidate()
-            var
-                SelectedDate: Date;
-                CurrentTime: Time;
             begin
-                SelectedDate := DT2Date(Rec."Date");
-
-                if DT2Time(Rec."Date") = 000000T then
-                    CurrentTime := DT2Time(CurrentDateTime())
-                else
-                    CurrentTime := DT2Time(Rec."Date");
-
-                Rec."Date" := CreateDateTime(SelectedDate, CurrentTime);
+                SetCurrentTimeForDate(Rec."Date");
             end;
         }
 
@@ -110,18 +101,8 @@ table 50402 "Third-Party Supplier Sales"
             DataClassification = CustomerContent;
 
             trigger OnValidate()
-            var
-                SelectedDate: Date;
-                CurrentTime: Time;
             begin
-                SelectedDate := DT2Date(Rec."Travel Date");
-
-                if DT2Time(Rec."Travel Date") = 000000T then
-                    CurrentTime := DT2Time(CurrentDateTime())
-                else
-                    CurrentTime := DT2Time(Rec."Travel Date");
-
-                Rec."Travel Date" := CreateDateTime(SelectedDate, CurrentTime);
+                SetCurrentTimeForDate(Rec."Travel Date");
             end;
         }
 
@@ -137,7 +118,7 @@ table 50402 "Third-Party Supplier Sales"
             DataClassification = CustomerContent;
         }
 
-        field(13; "Rate"; Decimal)
+        field(13; Rate; Decimal)
         {
             Caption = 'Rate';
             DataClassification = CustomerContent;
@@ -164,77 +145,103 @@ table 50402 "Third-Party Supplier Sales"
         }
     }
 
-    trigger OnInsert()
-    begin
-        // Calculate total before inserting the record.
-        CalculateTotalAmount();
+    // ==========================================
+    // BC STANDARD NO. SERIES - TP-SALES
+    // ==========================================
 
-        // Existing Serial No. generation.
-        if "Serial No." <= 0 then
-            "Serial No." := GetNextSerialNo();
+    trigger OnInsert()
+    var
+        NoSeries: Codeunit "No. Series";
+    begin
+        if "Serial No." = '' then
+            "Serial No." :=
+                NoSeries.GetNextNo('TP-SALES');
+
+        CalculateTotalAmount();
     end;
 
-    // New calculation procedure.
+    // ==========================================
+    // AUTOMATIC PASSENGER DELETE
+    // ==========================================
+
+    trigger OnDelete()
+    var
+        ThirdPartyPassenger:
+            Record "Third Party Passenger Name";
+    begin
+        if Rec."Ref No./AQ Number" = 0 then
+            exit;
+
+        ThirdPartyPassenger.Reset();
+
+        ThirdPartyPassenger.SetRange(
+            "Ref No./AQ Number",
+            Rec."Ref No./AQ Number");
+
+        ThirdPartyPassenger.SetRange(
+            PNR,
+            Rec.PNR);
+
+        ThirdPartyPassenger.DeleteAll(true);
+    end;
+
+    // ==========================================
+    // CURRENT TIME FOR DATE / TRAVEL DATE
+    // ==========================================
+
+    local procedure SetCurrentTimeForDate(
+        var DateTimeValue: DateTime)
+    var
+        SelectedDate: Date;
+        SelectedTime: Time;
+    begin
+        if DateTimeValue = 0DT then
+            exit;
+
+        SelectedDate := DT2Date(DateTimeValue);
+        SelectedTime := DT2Time(DateTimeValue);
+
+        if SelectedTime = 000000T then
+            SelectedTime := DT2Time(CurrentDateTime());
+
+        DateTimeValue :=
+            CreateDateTime(
+                SelectedDate,
+                SelectedTime);
+    end;
+
+    // ==========================================
+    // TOTAL AMOUNT = PAX * RATE
+    // ==========================================
+
     local procedure CalculateTotalAmount()
     begin
-        Rec."Total Amount" := Rec.Rate * Rec.Pax;
+        Rec."Total Amount" :=
+            Rec.Pax * Rec.Rate;
     end;
 
-    local procedure GetNextSerialNo(): Integer
-    var
-        SerialCounter: Record "Third Party Sales Serial Cnt.";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
-        LastUsedNo: Integer;
-    begin
-        // Lock both tables to protect serial generation.
-        SerialCounter.LockTable();
-        ThirdPartySupplierSales.LockTable();
-
-        // Always find the actual highest existing Serial No.
-        ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetCurrentKey("Serial No.");
-
-        if not SerialCounter.Get('DEFAULT') then begin
-            SerialCounter.Init();
-            SerialCounter."Counter Code" := 'DEFAULT';
-            SerialCounter."Last Serial No." := 0;
-            SerialCounter.Insert();
-        end;
-
-        // Synchronize counter with existing records.
-        if ThirdPartySupplierSales.FindLast() then
-            if ThirdPartySupplierSales."Serial No." >
-               SerialCounter."Last Serial No."
-            then
-                SerialCounter."Last Serial No." :=
-                    ThirdPartySupplierSales."Serial No.";
-
-        LastUsedNo := SerialCounter."Last Serial No.";
-
-        if LastUsedNo >= 2147483647 then
-            Error('Third-Party Sales Serial No. limit reached.');
-
-        // Save the next number permanently.
-        SerialCounter."Last Serial No." := LastUsedNo + 1;
-        SerialCounter.Modify();
-
-        exit(LastUsedNo + 1);
-    end;
+    // ==========================================
+    // EXISTING DUPLICATE PNR CHECK
+    // ==========================================
 
     local procedure CheckDuplicatePNR()
     var
         SamplePurchase: Record "Sample Purchase";
         NormalSales: Record "Normal Sales";
         APISalesFormat: Record "API Sales Format";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        ThirdPartySupplierSales:
+            Record "Third-Party Supplier Sales";
     begin
         if PNR = '' then
             exit;
 
         ThirdPartySupplierSales.Reset();
-        ThirdPartySupplierSales.SetRange(PNR, Rec.PNR);
 
-        if Rec."Serial No." <> 0 then
+        ThirdPartySupplierSales.SetRange(
+            PNR,
+            Rec.PNR);
+
+        if Rec."Serial No." <> '' then
             ThirdPartySupplierSales.SetFilter(
                 "Serial No.",
                 '<>%1',
@@ -270,21 +277,27 @@ table 50402 "Third-Party Supplier Sales"
                 Rec.PNR);
     end;
 
+    // ==========================================
+    // EXISTING DUPLICATE AQ NUMBER CHECK
+    // ==========================================
+
     local procedure CheckDuplicateRefNoAQNumber()
     var
         NormalSales: Record "Normal Sales";
         APISalesFormat: Record "API Sales Format";
-        ThirdPartySupplierSales: Record "Third-Party Supplier Sales";
+        ThirdPartySupplierSales:
+            Record "Third-Party Supplier Sales";
     begin
         if "Ref No./AQ Number" = 0 then
             exit;
 
         ThirdPartySupplierSales.Reset();
+
         ThirdPartySupplierSales.SetRange(
             "Ref No./AQ Number",
             Rec."Ref No./AQ Number");
 
-        if Rec."Serial No." <> 0 then
+        if Rec."Serial No." <> '' then
             ThirdPartySupplierSales.SetFilter(
                 "Serial No.",
                 '<>%1',
@@ -296,6 +309,7 @@ table 50402 "Third-Party Supplier Sales"
                 Rec."Ref No./AQ Number");
 
         NormalSales.Reset();
+
         NormalSales.SetRange(
             "Ref No./AQ Number",
             Rec."Ref No./AQ Number");
@@ -306,6 +320,7 @@ table 50402 "Third-Party Supplier Sales"
                 Rec."Ref No./AQ Number");
 
         APISalesFormat.Reset();
+
         APISalesFormat.SetRange(
             "Ref No./AQ Number",
             Rec."Ref No./AQ Number");

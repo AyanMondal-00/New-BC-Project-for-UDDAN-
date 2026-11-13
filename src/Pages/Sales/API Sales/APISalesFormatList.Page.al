@@ -22,6 +22,11 @@ page 50411 "API Sales Format List"
                 field("Date"; Rec."Date")
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
 
                 field("Invoice Number"; Rec."Invoice Number")
@@ -83,11 +88,21 @@ page 50411 "API Sales Format List"
                 field(Pax; Rec.Pax)
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
 
                 field("Travel Date"; Rec."Travel Date")
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
 
                 field(Sector; Rec.Sector)
@@ -103,6 +118,11 @@ page 50411 "API Sales Format List"
                 field(Rate; Rec.Rate)
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        CurrPage.Update(true);
+                    end;
                 }
 
                 field("Total Amount"; Rec."Total Amount")
@@ -161,7 +181,7 @@ page 50411 "API Sales Format List"
             }
 
             // ====================================
-            // NEW CUSTOM EXCEL EXPORT
+            // CUSTOM EXCEL EXPORT
             // ====================================
 
             action(ExportSalesExcel)
