@@ -271,6 +271,18 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         if Node."Node G/L Account No." = '' then
             exit;
 
+        // Only posting accounts under the named Sundry Debtors/Creditors
+        // COA branches use the party-wise subledger drill-down.
+        if IsUnderNamedGroup(Node, 'SUNDRY DEBTORS') then begin
+            OpenPartyBalances(Node."Node G/L Account No.", false);
+            exit;
+        end;
+
+        if IsUnderNamedGroup(Node, 'SUNDRY CREDITORS') then begin
+            OpenPartyBalances(Node."Node G/L Account No.", true);
+            exit;
+        end;
+
         GLEntry.Reset();
 
         GLEntry.SetRange(
@@ -283,6 +295,34 @@ page 50461 "AIRIQ Vertical Balance Sheet"
             AsOfDate);
 
         Page.Run(Page::"General Ledger Entries", GLEntry);
+    end;
+
+    // Check the complete COA ancestor chain, not merely the Assets/Liabilities side.
+    local procedure IsUnderNamedGroup(SelectedNode: Record "AIRIQ Vertical Balance Sheet" temporary; GroupName: Text): Boolean
+    var
+        ParentNode: Record "AIRIQ Vertical Balance Sheet" temporary;
+        ParentID: Integer;
+    begin
+        ParentNode.Copy(TempNodes, true);
+        ParentID := SelectedNode."Node Parent ID";
+        while ParentID <> 0 do begin
+            if not ParentNode.Get(ParentID) then
+                exit(false);
+            if ParentNode."Node Is Group" and
+               (UpperCase(DelChr(ParentNode."Node Name", '<>', ' ')) = GroupName) then
+                exit(true);
+            ParentID := ParentNode."Node Parent ID";
+        end;
+        exit(false);
+    end;
+
+    local procedure OpenPartyBalances(AccountNo: Code[20]; IsVendor: Boolean)
+    var
+        PartyPage: Page "AIRIQ BS Party Balances";
+    begin
+        Clear(PartyPage);
+        PartyPage.LoadBalances(AccountNo, AsOfDate, IsVendor);
+        PartyPage.RunModal();
     end;
 
     // =====================================================
