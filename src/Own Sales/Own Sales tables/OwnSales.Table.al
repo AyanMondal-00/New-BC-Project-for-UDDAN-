@@ -87,6 +87,7 @@ table 50400 "Normal Sales"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             begin
                 if "API Calculation" then
@@ -212,6 +213,7 @@ table 50400 "Normal Sales"
             Editable = false;
             DataClassification = CustomerContent;
         }
+
         field(19; "Total Amount"; Decimal)
         {
             Caption = 'Total Amount';
@@ -226,6 +228,7 @@ table 50400 "Normal Sales"
                     CalculateManualAmounts();
             end;
         }
+
         field(26; "API Calculation"; Boolean)
         {
             Caption = 'API Calculation';
@@ -289,7 +292,7 @@ table 50400 "Normal Sales"
     end;
 
     // ==========================================
-    // RATE AND GST CALCULATION
+    // API RATE AND GST CALCULATION
     // ==========================================
 
     procedure CalculateAmounts()
@@ -313,33 +316,48 @@ table 50400 "Normal Sales"
 
         SamplePurchase.Reset();
         SamplePurchase.SetRange(PNR, PNR);
+
         if not SamplePurchase.FindFirst() then
-            exit; // Pending: subscriber will recalculate when purchase arrives.
+            exit;
 
         "Base Fare" := SamplePurchase."Base Fare";
+
         TotalBaseFare := "Base Fare" * Pax;
 
         case UpperCase(DelChr(Type, '<>', ' ')) of
             'DOMESTIC':
                 begin
-                    "Taxable Basis" := Round(TotalBaseFare * 0.05, 0.01);
-                    CGST := Round("Taxable Basis" * 0.09, 0.01);
-                    SGST := Round("Taxable Basis" * 0.09, 0.01);
+                    "Taxable Basis" :=
+                        Round(TotalBaseFare * 0.05, 0.01);
+
+                    CGST :=
+                        Round("Taxable Basis" * 0.09, 0.01);
+
+                    SGST :=
+                        Round("Taxable Basis" * 0.09, 0.01);
                 end;
+
             'INTERNATIONAL':
                 begin
-                    "Taxable Basis" := Round(TotalBaseFare * 0.10, 0.01);
-                    IGST := Round("Taxable Basis" * 0.18, 0.01);
+                    "Taxable Basis" :=
+                        Round(TotalBaseFare * 0.10, 0.01);
+
+                    IGST :=
+                        Round("Taxable Basis" * 0.18, 0.01);
                 end;
         end;
 
         TotalGST := CGST + SGST + IGST;
-        "Other Charges" := Round("Total Amount" - TotalBaseFare - TotalGST, 0.01);
+
+        // NEW: OTHER CHARGES PER PASSENGER
+        "Other Charges" :=
+            Round(
+                ("Total Amount" - TotalBaseFare - TotalGST) / Pax,
+                0.01);
     end;
 
     // ==========================================
     // MANUAL ENTRY CALCULATION
-    // API CALCULATION LOGIC ABOVE IS UNCHANGED
     // ==========================================
 
     local procedure CalculateManualAmounts()
@@ -364,19 +382,33 @@ table 50400 "Normal Sales"
         case UpperCase(DelChr(Type, '<>', ' ')) of
             'DOMESTIC':
                 begin
-                    "Taxable Basis" := Round(TotalBaseFare * 0.05, 0.01);
-                    CGST := Round("Taxable Basis" * 0.09, 0.01);
-                    SGST := Round("Taxable Basis" * 0.09, 0.01);
+                    "Taxable Basis" :=
+                        Round(TotalBaseFare * 0.05, 0.01);
+
+                    CGST :=
+                        Round("Taxable Basis" * 0.09, 0.01);
+
+                    SGST :=
+                        Round("Taxable Basis" * 0.09, 0.01);
                 end;
+
             'INTERNATIONAL':
                 begin
-                    "Taxable Basis" := Round(TotalBaseFare * 0.10, 0.01);
-                    IGST := Round("Taxable Basis" * 0.18, 0.01);
+                    "Taxable Basis" :=
+                        Round(TotalBaseFare * 0.10, 0.01);
+
+                    IGST :=
+                        Round("Taxable Basis" * 0.18, 0.01);
                 end;
         end;
 
         TotalGST := CGST + SGST + IGST;
-        "Other Charges" := Round("Total Amount" - TotalBaseFare - TotalGST, 0.01);
+
+        // NEW: OTHER CHARGES PER PASSENGER
+        "Other Charges" :=
+            Round(
+                ("Total Amount" - TotalBaseFare - TotalGST) / Pax,
+                0.01);
     end;
 
     // ==========================================
