@@ -1,3 +1,4 @@
+
 controladdin "AIRIQ Balance Tree AddIn"
 {
     Scripts = 'ControlAddIn/main.js';
@@ -12,6 +13,14 @@ controladdin "AIRIQ Balance Tree AddIn"
 
     procedure SetBalanceSheetData(Payload: Text);
 
+    // NEW: Ask JavaScript for currently visible rows
+    procedure RequestExcelExportState();
+
     event AddInReady();
+
+    // Existing ledger drill-down
     event NodeActivated(NodeId: Integer);
+
+    // NEW: JavaScript returns the visible row IDs
+    event ExcelExportStateReady(StateJson: Text);
 }

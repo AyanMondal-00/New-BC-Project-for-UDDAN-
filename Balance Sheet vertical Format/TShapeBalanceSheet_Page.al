@@ -49,6 +49,15 @@ page 50461 "AIRIQ Vertical Balance Sheet"
                 begin
                     OpenNodeDetails(NodeId);
                 end;
+
+                trigger ExcelExportStateReady(StateJson: Text)
+                begin
+                    if not ExcelExportPending then
+                        exit;
+
+                    ExcelExportPending := false;
+                    ExportBalanceSheetToExcel(StateJson);
+                end;
             }
 
             group(Summary)
@@ -122,11 +131,21 @@ page 50461 "AIRIQ Vertical Balance Sheet"
                 Image = ExportToExcel;
                 Promoted = true;
                 PromotedCategory = Process;
-                ToolTip = 'Export the complete T-shaped Balance Sheet hierarchy for the selected Balance As On Date.';
+                ToolTip = 'Export the currently visible Balance Sheet hierarchy, respecting expanded groups and zero-value visibility.';
 
                 trigger OnAction()
                 begin
-                    ExportBalanceSheetToExcel();
+                    if AsOfDate = 0D then
+                        Error('Please enter a valid Balance As On Date.');
+
+                    if not AddInIsReady then
+                        Error('Balance Sheet is still loading. Please try again.');
+
+                    if ExcelExportPending then
+                        exit;
+
+                    ExcelExportPending := true;
+                    CurrPage.BalanceTree.RequestExcelExportState();
                 end;
             }
 
@@ -169,6 +188,7 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         ValidationStyle: Text;
         NextNodeID: Integer;
         AddInIsReady: Boolean;
+        ExcelExportPending: Boolean;
 
     // =====================================================
     // CONTROL ADD-IN DATA
@@ -178,10 +198,10 @@ page 50461 "AIRIQ Vertical Balance Sheet"
 
     local procedure PushBalanceSheet()
     var
+        ScanNode: Record "AIRIQ Vertical Balance Sheet" temporary;
         Payload: JsonObject;
         Nodes: JsonArray;
         Node: JsonObject;
-        ScanNode: Record "AIRIQ Vertical Balance Sheet" temporary;
         PayloadText: Text;
     begin
         if not AddInIsReady then
@@ -217,7 +237,6 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         Payload.Add('fiscalYearStart', Format(FiscalYearStartDate));
 
         Payload.WriteTo(PayloadText);
-
         CurrPage.BalanceTree.SetBalanceSheetData(PayloadText);
     end;
 
@@ -271,18 +290,6 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         if Node."Node G/L Account No." = '' then
             exit;
 
-        // Only posting accounts under the named Sundry Debtors/Creditors
-        // COA branches use the party-wise subledger drill-down.
-        if IsUnderNamedGroup(Node, 'SUNDRY DEBTORS') then begin
-            OpenPartyBalances(Node."Node G/L Account No.", false);
-            exit;
-        end;
-
-        if IsUnderNamedGroup(Node, 'SUNDRY CREDITORS') then begin
-            OpenPartyBalances(Node."Node G/L Account No.", true);
-            exit;
-        end;
-
         GLEntry.Reset();
 
         GLEntry.SetRange(
@@ -297,44 +304,14 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         Page.Run(Page::"General Ledger Entries", GLEntry);
     end;
 
-    // Check the complete COA ancestor chain, not merely the Assets/Liabilities side.
-    local procedure IsUnderNamedGroup(SelectedNode: Record "AIRIQ Vertical Balance Sheet" temporary; GroupName: Text): Boolean
-    var
-        ParentNode: Record "AIRIQ Vertical Balance Sheet" temporary;
-        ParentID: Integer;
-    begin
-        ParentNode.Copy(TempNodes, true);
-        ParentID := SelectedNode."Node Parent ID";
-        while ParentID <> 0 do begin
-            if not ParentNode.Get(ParentID) then
-                exit(false);
-            if ParentNode."Node Is Group" and
-               (UpperCase(DelChr(ParentNode."Node Name", '<>', ' ')) = GroupName) then
-                exit(true);
-            ParentID := ParentNode."Node Parent ID";
-        end;
-        exit(false);
-    end;
-
-    local procedure OpenPartyBalances(AccountNo: Code[20]; IsVendor: Boolean)
-    var
-        PartyPage: Page "AIRIQ BS Party Balances";
-    begin
-        Clear(PartyPage);
-        PartyPage.LoadBalances(AccountNo, AsOfDate, IsVendor);
-        PartyPage.RunModal();
-    end;
-
     // =====================================================
     // EXCEL EXPORT
-    // Preserves previous export behavior:
-    // zero-balance posting accounts are excluded.
+    // Uses current JavaScript visibility state.
     // =====================================================
 
-    local procedure ExportBalanceSheetToExcel()
+    local procedure ExportBalanceSheetToExcel(StateJson: Text)
     var
         ExcelBuffer: Record "Excel Buffer" temporary;
-        ScanNode: Record "AIRIQ Vertical Balance Sheet" temporary;
         LookupNode: Record "AIRIQ Vertical Balance Sheet" temporary;
         LiabilityNodeIDs: List of [Integer];
         AssetNodeIDs: List of [Integer];
@@ -347,35 +324,17 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         if AsOfDate = 0D then
             Error('Please enter a valid Balance As On Date.');
 
-        ScanNode.Copy(TempNodes, true);
         LookupNode.Copy(TempNodes, true);
-        ScanNode.Reset();
 
-        if ScanNode.FindSet() then
-            repeat
-                // Important:
-                // Excel export stays the same as the old version.
-                // Groups and Profit are always included.
-                // Zero-value posting ledgers are excluded.
-                if ScanNode."Node Is Group" or
-                   ScanNode."Node Is Profit" or
-                   (ScanNode."Node Amount" <> 0)
-                then
-                    case ScanNode."Node Side" of
-                        1:
-                            LiabilityNodeIDs.Add(
-                                ScanNode."Entry No.");
-
-                        2:
-                            AssetNodeIDs.Add(
-                                ScanNode."Entry No.");
-                    end;
-            until ScanNode.Next() = 0;
+        ReadVisibleExportState(
+            StateJson,
+            LookupNode,
+            LiabilityNodeIDs,
+            AssetNodeIDs);
 
         if (LiabilityNodeIDs.Count() = 0) and
            (AssetNodeIDs.Count() = 0) then
-            Error(
-                'There is no Balance Sheet data to export. Please recalculate first.');
+            Error('No visible Balance Sheet rows were returned for export.');
 
         ExcelBuffer.Reset();
         ExcelBuffer.DeleteAll();
@@ -472,7 +431,8 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         if AssetNodeIDs.Count() > RowCount then
             RowCount := AssetNodeIDs.Count();
 
-        // Export Groups and Non-Zero Ledgers
+        // Export only currently rendered rows.
+        // No additional zero filtering is performed.
         for RowNo := 1 to RowCount do begin
             ExcelBuffer.NewRow();
 
@@ -605,8 +565,85 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         ExcelBuffer.CloseBook();
 
         ExcelBuffer.SetFriendlyFilename(FileName);
-
         ExcelBuffer.OpenExcel();
+    end;
+
+    // =====================================================
+    // READ CURRENT SCREEN VISIBILITY
+    // =====================================================
+
+    local procedure ReadVisibleExportState(
+        StateJson: Text;
+        var LookupNode: Record "AIRIQ Vertical Balance Sheet" temporary;
+        var LiabilityNodeIDs: List of [Integer];
+        var AssetNodeIDs: List of [Integer])
+    var
+        State: JsonObject;
+        NodeListToken: JsonToken;
+    begin
+        if not State.ReadFrom(StateJson) then
+            Error('Invalid Balance Sheet visibility data received.');
+
+        if not State.Get('liabilities', NodeListToken) then
+            Error('Liabilities visibility data is missing.');
+
+        if not NodeListToken.IsArray() then
+            Error('Liabilities visibility data is not an array.');
+
+        ReadVisibleSide(
+            NodeListToken.AsArray(),
+            1,
+            LookupNode,
+            LiabilityNodeIDs);
+
+        if not State.Get('assets', NodeListToken) then
+            Error('Assets visibility data is missing.');
+
+        if not NodeListToken.IsArray() then
+            Error('Assets visibility data is not an array.');
+
+        ReadVisibleSide(
+            NodeListToken.AsArray(),
+            2,
+            LookupNode,
+            AssetNodeIDs);
+    end;
+
+    local procedure ReadVisibleSide(
+        VisibleNodes: JsonArray;
+        ExpectedSide: Integer;
+        var LookupNode: Record "AIRIQ Vertical Balance Sheet" temporary;
+        var VisibleNodeIDs: List of [Integer])
+    var
+        NodeToken: JsonToken;
+        NodeID: Integer;
+        IndexNo: Integer;
+    begin
+        for IndexNo := 0 to VisibleNodes.Count() - 1 do begin
+            VisibleNodes.Get(IndexNo, NodeToken);
+
+            if not NodeToken.IsValue() then
+                Error('Invalid node in the Balance Sheet export selection.');
+
+            NodeID := NodeToken.AsValue().AsInteger();
+
+            if not LookupNode.Get(NodeID) then
+                Error(
+                    'Balance Sheet node %1 no longer exists. Recalculate and try again.',
+                    NodeID);
+
+            if LookupNode."Node Side" <> ExpectedSide then
+                Error(
+                    'Balance Sheet node %1 belongs to a different side.',
+                    NodeID);
+
+            if VisibleNodeIDs.Contains(NodeID) then
+                Error(
+                    'Duplicate visible Balance Sheet node %1 received.',
+                    NodeID);
+
+            VisibleNodeIDs.Add(NodeID);
+        end;
     end;
 
     // =====================================================
@@ -741,10 +778,8 @@ page 50461 "AIRIQ Vertical Balance Sheet"
 
     // =====================================================
     // BUILD BALANCE SHEET
-    // MODIFIED:
-    // All valid Posting G/L Accounts are now added.
-    // Zero Balance ledgers are included in TempNodes.
-    // UI decides whether to display zero ledgers.
+    // All valid Posting G/L Accounts are added,
+    // including zero balance accounts.
     // =====================================================
 
     local procedure BuildBalanceSheet()
@@ -865,18 +900,13 @@ page 50461 "AIRIQ Vertical Balance Sheet"
                                             GLAccount.Name,
                                             AccountBalance));
                             end else begin
-
-                                // =========================================
-                                // NEW ZERO BALANCE POSTING ACCOUNT LOGIC
-                                // =========================================
-
                                 DisplayAmount := AccountBalance;
 
                                 if Side = 1 then
                                     DisplayAmount := -DisplayAmount;
 
-                                // Always add the Posting G/L Account.
-                                // This includes amount = 0.
+                                // Always add Posting G/L Account,
+                                // even when balance is zero.
                                 AddNode(
                                     GLAccount."No.",
                                     GLAccount.Name,
@@ -887,10 +917,7 @@ page 50461 "AIRIQ Vertical Balance Sheet"
                                     DisplayAmount,
                                     false);
 
-                                // Only non-zero amounts need to
-                                // update Group and Grand Totals.
                                 if DisplayAmount <> 0 then begin
-
                                     AddToParents(
                                         ParentID,
                                         DisplayAmount);
@@ -912,7 +939,6 @@ page 50461 "AIRIQ Vertical Balance Sheet"
                     GroupStack.Count()));
 
         ValidateRootTotals();
-
         CalculateCurrentProfitLoss();
 
         AddNode(
@@ -954,7 +980,6 @@ page 50461 "AIRIQ Vertical Balance Sheet"
         NewNode.Copy(TempNodes, true);
 
         NextNodeID += 1;
-
         NewNode.Init();
 
         NewNode."Entry No." := NextNodeID;
@@ -1105,7 +1130,6 @@ page 50461 "AIRIQ Vertical Balance Sheet"
             exit;
 
         RangeText := GLAccount.Totaling;
-
         SeparatorPos := StrPos(RangeText, '..');
 
         if SeparatorPos <= 1 then begin

@@ -124,6 +124,7 @@ table 50300 "Sample Purchase"
         {
             Caption = 'Total Pax';
             DataClassification = CustomerContent;
+
             trigger OnValidate()
             begin
                 CalculatePurchaseAmount();
@@ -185,7 +186,6 @@ table 50300 "Sample Purchase"
             DataClassification = CustomerContent;
         }
 
-
         field(13; "Total Amount"; Decimal)
         {
             Caption = 'Total Amount';
@@ -197,7 +197,6 @@ table 50300 "Sample Purchase"
                 CalculatePurchaseAmount();
             end;
         }
-
 
         field(14; Type; Text[50])
         {
@@ -238,16 +237,20 @@ table 50300 "Sample Purchase"
         CheckDuplicatePNR();
     end;
 
-
-
     local procedure CalculatePurchaseAmount()
     begin
+        // Other Charges calculated per passenger.
+        // Avoid division by zero when Total Pax is zero.
+        if Rec."Total Pax" = 0 then begin
+            Rec."Other Charges" := 0;
+            exit;
+        end;
+
         Rec."Other Charges" :=
-            Rec."Total Amount" -
-            (Rec."Base Fare" * Rec."Total Pax");
+            (Rec."Total Amount" -
+            (Rec."Base Fare" * Rec."Total Pax")) /
+            Rec."Total Pax";
     end;
-
-
 
     local procedure CheckDuplicatePNR()
     var
