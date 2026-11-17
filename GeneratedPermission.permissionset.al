@@ -206,5 +206,16 @@ permissionset 50300 GeneratedPermission
         codeunit "API Sales Excel Export Mgt." = X,
         codeunit "Own Sales Excel Export Mgt." = X,
         codeunit "Third Party Sales Excel Export" = X,
-        codeunit "AIRIQ Own Sales Fare Sync" = X;
+        codeunit "AIRIQ Own Sales Fare Sync" = X,
+        page "AIRIQ GST Posting Diagnostic" = X,
+        tabledata "AIRIQ Cost Revision History" = RIMD,
+        table "AIRIQ Cost Revision History" = X,
+        tabledata "AIRIQ Cost Revision Pending" = RIMD,
+        table "AIRIQ Cost Revision Pending" = X,
+        tabledata "AIRIQ Cost Rev User Setup" = RIMD,
+        table "AIRIQ Cost Rev User Setup" = X,
+        codeunit "AIRIQ Cost Revision Export" = X,
+        codeunit "AIRIQ Cost Revision Tracking" = X,
+        page "AIRIQ Cost Revision Editor" = X,
+        page "AIRIQ Cost Revision Statement" = X;
 }

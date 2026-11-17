@@ -17,7 +17,10 @@ codeunit 50342 "Fare Alteration Import"
         UpdatedCount: Integer;
         SkippedCount: Integer;
         SamplePurchase: Record "Sample Purchase";
+        PreviousPurchase: Record "Sample Purchase";
         PNRValue: Text;
+        SeenPNRs: Dictionary of [Text, Boolean];
+        RevisionTracking: Codeunit "AIRIQ Cost Revision Tracking";
     begin
         if not UploadIntoStream(
             'Select Fare Alteration Excel File',
@@ -59,10 +62,18 @@ codeunit 50342 "Fare Alteration Import"
                 GetCellValue(TempExcelBuffer, RowNo, PNRColumnNo));
 
             if PNRValue <> '' then begin
+                if SeenPNRs.ContainsKey(PNRValue) then
+                    Error('Duplicate PNR %1 in Excel row %2. Each PNR must occur only once per import.', PNRValue, RowNo);
+                SeenPNRs.Add(PNRValue, true);
                 SamplePurchase.Reset();
                 SamplePurchase.SetRange(PNR, PNRValue);
 
                 if SamplePurchase.FindFirst() then begin
+                    // Prevent ambiguous updates when the same PNR exists on multiple purchase rows.
+                    if SamplePurchase.Next() <> 0 then
+                        Error('PNR %1 matches multiple Sample Purchase records. Import cannot choose one safely.', PNRValue);
+                    SamplePurchase.FindFirst();
+                    PreviousPurchase := SamplePurchase;
                     SamplePurchase.Validate(
                         Rate,
                         GetDecimalValue(
@@ -84,6 +95,7 @@ codeunit 50342 "Fare Alteration Import"
                             TempExcelBuffer, RowNo, TotalAmountColumnNo));
 
                     SamplePurchase.Modify(true);
+                    RevisionTracking.RecordExcelRevision(PreviousPurchase, SamplePurchase);
                     UpdatedCount += 1;
                 end else
                     SkippedCount += 1;

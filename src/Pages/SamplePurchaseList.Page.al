@@ -96,6 +96,11 @@ page 50310 "Sample Purchase List"
                 field("Total Pax"; Rec."Total Pax")
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        AssertNoDirectTrackedCostEdit();
+                    end;
                 }
 
                 field("Travel Date"; Rec."Travel Date")
@@ -111,6 +116,11 @@ page 50310 "Sample Purchase List"
                 field("Base Fare"; Rec."Base Fare")
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        AssertNoDirectTrackedCostEdit();
+                    end;
                 }
 
                 field("Other Charges"; Rec."Other Charges")
@@ -122,11 +132,21 @@ page 50310 "Sample Purchase List"
                 field(Rate; Rec.Rate)
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        AssertNoDirectTrackedCostEdit();
+                    end;
                 }
 
                 field("Total Amount"; Rec."Total Amount")
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        AssertNoDirectTrackedCostEdit();
+                    end;
                 }
 
                 field(Type; Rec.Type)
@@ -141,6 +161,149 @@ page 50310 "Sample Purchase List"
     {
         area(Processing)
         {
+            // ============================================
+            // COST REVISION - TURN ON
+            // ============================================
+
+            action(EnableCostRevisionTracking)
+            {
+                Caption = 'Cost Revision: OFF - Turn ON';
+                ApplicationArea = All;
+                Image = Check;
+                Promoted = true;
+                PromotedCategory = Process;
+                Visible = not CostRevisionEnabled;
+                ToolTip = 'Enable cost revision tracking for the current user.';
+
+                trigger OnAction()
+                var
+                    Tracking: Codeunit "AIRIQ Cost Revision Tracking";
+                begin
+                    Tracking.SetEnabled(true);
+                    CostRevisionEnabled := Tracking.GetEnabled();
+                    CurrPage.Update(false);
+                end;
+            }
+
+            // ============================================
+            // COST REVISION - TURN OFF
+            // ============================================
+
+            action(DisableCostRevisionTracking)
+            {
+                Caption = 'Cost Revision: ON - Turn OFF';
+                ApplicationArea = All;
+                Image = Cancel;
+                Promoted = true;
+                PromotedCategory = Process;
+                Visible = CostRevisionEnabled;
+                ToolTip = 'Disable cost revision tracking for the current user.';
+
+                trigger OnAction()
+                var
+                    Tracking: Codeunit "AIRIQ Cost Revision Tracking";
+                begin
+                    Tracking.SetEnabled(false);
+                    CostRevisionEnabled := Tracking.GetEnabled();
+                    CurrPage.Update(false);
+                end;
+            }
+
+            // ============================================
+            // DEDICATED COST REVISION EDITOR
+            // ============================================
+
+            action(EditCostRevision)
+            {
+                Caption = 'Edit Cost Revision';
+                ApplicationArea = All;
+                Image = Edit;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'Edit financial values in a temporary window. Only Save & Complete Revision writes to Sample Purchase and its history.';
+
+                trigger OnAction()
+                var
+                    Tracking: Codeunit "AIRIQ Cost Revision Tracking";
+                    Editor: Page "AIRIQ Cost Revision Editor";
+                    Original: Record "Sample Purchase";
+                    Edited: Record "Sample Purchase";
+                begin
+                    CurrPage.SaveRecord();
+
+                    if not Tracking.GetEnabled() then
+                        Error(
+                            'Turn on Cost Revision Enable before editing a cost revision.');
+
+                    Rec.TestField("Serial No.");
+
+                    Original.Get(Rec."Serial No.");
+
+                    Editor.LoadPurchase(Original);
+
+                    Commit();
+
+                    Editor.RunModal();
+
+                    if Editor.GetCompletedPurchase(Edited) then begin
+                        Tracking.SaveDedicatedRevision(
+                            Original,
+                            Edited);
+
+                        CurrPage.Update(false);
+                    end;
+                end;
+            }
+
+            // ============================================
+            // RECORD OPENING COST
+            // ============================================
+
+            action(RecordOpeningCostRevision)
+            {
+                Caption = 'Record Opening Cost';
+                ApplicationArea = All;
+                Image = New;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'After completing a normal new purchase, record its initial full financial values as Opening once.';
+
+                trigger OnAction()
+                var
+                    Tracking: Codeunit "AIRIQ Cost Revision Tracking";
+                begin
+                    CurrPage.SaveRecord();
+
+                    Rec.TestField("Serial No.");
+
+                    Tracking.RecordInitialOpening(
+                        Rec."Serial No.");
+                end;
+            }
+
+            // ============================================
+            // COST REVISION STATEMENT
+            // ============================================
+
+            action(ViewCostRevisionStatement)
+            {
+                Caption = 'Purchase Cost Revision Statement';
+                ApplicationArea = All;
+                Image = History;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'Open the PNR-wise grouped cost revision history and export it to Excel.';
+
+                trigger OnAction()
+                begin
+                    Page.Run(
+                        Page::"AIRIQ Cost Revision Statement");
+                end;
+            }
+
+            // ============================================
+            // API IMPORT BY DATE RANGE
+            // ============================================
 
             action(ImportFromAPIByDateRange)
             {
@@ -154,9 +317,9 @@ page 50310 "Sample Purchase List"
                 trigger OnAction()
                 var
                     SamplePurchaseAPIMgt:
-            Codeunit "Sample Purchase API Management";
+                        Codeunit "Sample Purchase API Management";
                     DateDialog:
-            Page "Sample Purchase Date Dialog";
+                        Page "Sample Purchase Date Dialog";
                     FromDate: Date;
                     ToDate: Date;
                 begin
@@ -165,23 +328,29 @@ page 50310 "Sample Purchase List"
                     if DateDialog.RunModal() <> Action::OK then
                         exit;
 
-                    DateDialog.GetDates(FromDate, ToDate);
+                    DateDialog.GetDates(
+                        FromDate,
+                        ToDate);
 
                     if (FromDate = 0D) or (ToDate = 0D) then
-                        Error('Please select both From Date and To Date.');
+                        Error(
+                            'Please select both From Date and To Date.');
 
                     if FromDate > ToDate then
-                        Error('From Date cannot be later than To Date.');
+                        Error(
+                            'From Date cannot be later than To Date.');
 
                     SamplePurchaseAPIMgt.ImportSamplePurchaseByDate(
                         FromDate,
-                        ToDate
-                    );
+                        ToDate);
 
                     CurrPage.Update(false);
                 end;
             }
 
+            // ============================================
+            // CREATE ITEMS
+            // ============================================
 
             action("Create Items")
             {
@@ -208,6 +377,10 @@ page 50310 "Sample Purchase List"
                 end;
             }
 
+            // ============================================
+            // CREATE PURCHASE INVOICE
+            // ============================================
+
             action("Create Purchase Invoice action")
             {
                 ApplicationArea = All;
@@ -232,6 +405,10 @@ page 50310 "Sample Purchase List"
                     CurrPage.Update(false);
                 end;
             }
+
+            // ============================================
+            // CREATE AND POST PURCHASE INVOICES
+            // ============================================
 
             action("Create & Post Purchase Invoices")
             {
@@ -258,6 +435,10 @@ page 50310 "Sample Purchase List"
                 end;
             }
 
+            // ============================================
+            // NORMAL EXCEL IMPORT
+            // ============================================
+
             action("Import from Excel")
             {
                 ApplicationArea = All;
@@ -270,11 +451,15 @@ page 50310 "Sample Purchase List"
                         Codeunit "Sample Purchase Excel Import";
                 begin
                     SamplePurchaseExcelImport.ImportFromExcel();
+
                     CurrPage.Update(false);
                 end;
             }
 
-        
+            // ============================================
+            // COST REVISION EXCEL IMPORT
+            // ============================================
+
             action("Import For Cost Reversion")
             {
                 ApplicationArea = All;
@@ -289,16 +474,33 @@ page 50310 "Sample Purchase List"
                         Codeunit "Fare Alteration Import";
                 begin
                     FareAlterationImport.ImportFareAlteration();
+
                     CurrPage.Update(false);
                 end;
             }
         }
     }
 
+    // ============================================
+    // GLOBAL VARIABLES
+    // ============================================
+
     var
         InvoiceCreatedText: Text[3];
         InvoicePostedText: Text[3];
         ItemCreatedText: Text[3];
+        CostRevisionEnabled: Boolean;
+
+    // ============================================
+    // PAGE TRIGGERS
+    // ============================================
+
+    trigger OnOpenPage()
+    var
+        Tracking: Codeunit "AIRIQ Cost Revision Tracking";
+    begin
+        CostRevisionEnabled := Tracking.GetEnabled();
+    end;
 
     trigger OnAfterGetRecord()
     begin
@@ -307,26 +509,18 @@ page 50310 "Sample Purchase List"
 
     trigger OnNewRecord(BelowxRec: Boolean)
     begin
-        // Serial No. is assigned by Table 50300 OnInsert.
         SetCreatedStatusText();
     end;
 
-    // =========================================================
+    // ============================================
     // COMMON BULK SELECTION HANDLER
-    // =========================================================
-    // Priority 1: Existing Select Checkbox
-    // Priority 2: BC Row Selection (Ctrl+A / Ctrl+Click)
-    //
-    // IMPORTANT:
-    // Reset() must be called before SetSelectionFilter()
-    // to remove the previous Select=true filter.
-    // =========================================================
+    // ============================================
 
     local procedure GetSelectedSamplePurchases(
         var SelectedSamplePurchase: Record "Sample Purchase"
     ): Boolean
     begin
-        // STEP 1: Check existing checkbox selection.
+        // Priority 1: Existing Select checkbox.
 
         SelectedSamplePurchase.Reset();
         SelectedSamplePurchase.SetRange("Select", true);
@@ -334,30 +528,26 @@ page 50310 "Sample Purchase List"
         if not SelectedSamplePurchase.IsEmpty() then
             exit(true);
 
-        // STEP 2: No checkbox selection exists.
-        // Clear all filters before capturing BC row selection.
+        // Priority 2: BC row selection.
 
         SelectedSamplePurchase.Reset();
 
-        // STEP 3: Capture Ctrl+A, Ctrl+Click,
-        // Shift+Click or current row selection.
-
-        CurrPage.SetSelectionFilter(SelectedSamplePurchase);
-
-        // STEP 4: Validate resulting selection.
+        CurrPage.SetSelectionFilter(
+            SelectedSamplePurchase);
 
         if SelectedSamplePurchase.IsEmpty() then begin
             Message(
                 'Please select at least one Sample Purchase record.');
+
             exit(false);
         end;
 
         exit(true);
     end;
 
-    // =========================================================
-    // EXISTING STATUS DISPLAY LOGIC
-    // =========================================================
+    // ============================================
+    // STATUS DISPLAY
+    // ============================================
 
     local procedure SetCreatedStatusText()
     begin
@@ -377,11 +567,12 @@ page 50310 "Sample Purchase List"
             ItemCreatedText := 'No';
     end;
 
-    // =========================================================
-    // EXISTING DATE-BASED CHECKBOX SELECTION
-    // =========================================================
+    // ============================================
+    // DATE-BASED CHECKBOX SELECTION
+    // ============================================
 
-    local procedure SetSelectionByEntryDate(NewSelect: Boolean)
+    local procedure SetSelectionByEntryDate(
+        NewSelect: Boolean)
     var
         DateDialog: Page "Sample Purchase Date Dialog";
         SamplePurchaseRec: Record "Sample Purchase";
@@ -409,10 +600,14 @@ page 50310 "Sample Purchase List"
                     'From Entry Date cannot be later than To Entry Date.');
 
             StartDateTime :=
-                CreateDateTime(FromEntryDate, 0T);
+                CreateDateTime(
+                    FromEntryDate,
+                    0T);
 
             EndDateTime :=
-                CreateDateTime(ToEntryDate, 235959.999T);
+                CreateDateTime(
+                    ToEntryDate,
+                    235959.999T);
 
             SamplePurchaseRec.Reset();
 
@@ -424,13 +619,17 @@ page 50310 "Sample Purchase List"
             if SamplePurchaseRec.IsEmpty() then begin
                 Message(
                     'No Sample Purchase records found for the specified Entry Date range.');
+
                 exit;
             end;
 
             if SamplePurchaseRec.FindSet(true) then
                 repeat
-                    SamplePurchaseRec."Select" := NewSelect;
+                    SamplePurchaseRec."Select" :=
+                        NewSelect;
+
                     SamplePurchaseRec.Modify();
+
                     UpdatedCount += 1;
                 until SamplePurchaseRec.Next() = 0;
 
@@ -445,5 +644,27 @@ page 50310 "Sample Purchase List"
                     '%1 record(s) were unselected.',
                     UpdatedCount);
         end;
+    end;
+
+    // ============================================
+    // PREVENT DIRECT FINANCIAL EDIT
+    // AFTER HISTORY EXISTS
+    // ============================================
+
+    local procedure AssertNoDirectTrackedCostEdit()
+    var
+        RevisionHistory:
+            Record "AIRIQ Cost Revision History";
+    begin
+        if Rec."Serial No." = '' then
+            exit;
+
+        RevisionHistory.SetRange(
+            "Purchase Serial No.",
+            Rec."Serial No.");
+
+        if not RevisionHistory.IsEmpty() then
+            Error(
+                'This purchase already has cost revision history. Use Edit Cost Revision instead of directly changing financial fields.');
     end;
 }

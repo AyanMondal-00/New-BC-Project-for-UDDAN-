@@ -7,10 +7,68 @@
   },
   "issues": [
     {
+      "ruleId": "AL0468",
+      "locations": [
+        {
+          "analysisTarget": [
+            {
+              "uri": "C:\\Users\\admin\\OneDrive - SILICON SYSTEMS\\Desktop\\My Project\\BC new project AIR IQ\\src\\API Purchase Return\\APIPurchaseReturn.Table.al",
+              "region": {
+                "startLine": 181,
+                "startColumn": 19,
+                "endLine": 181,
+                "endColumn": 60
+              }
+            }
+          ]
+        }
+      ],
+      "fullMessage": "Length of the table field name 'Third Party Purchase Return Inv Created' must not exceed 30 characters. Longer field names are prone to cause SQL errors. This warning will become an error in a future release.",
+      "properties": {
+        "severity": "Warning",
+        "warningLevel": "4",
+        "defaultSeverity": "Warning",
+        "category": "Compiler",
+        "helpLink": "https://learn.microsoft.com/dynamics365/business-central/dev-itpro/developer/diagnostics/diagnostic-al468?wt.mc_id=d365bc_inproduct_alextension",
+        "isEnabledByDefault": "True",
+        "isSuppressedInSource": "False",
+        "customTags": "Compiler;Telemetry"
+      }
+    },
+    {
+      "ruleId": "AL0468",
+      "locations": [
+        {
+          "analysisTarget": [
+            {
+              "uri": "C:\\Users\\admin\\OneDrive - SILICON SYSTEMS\\Desktop\\My Project\\BC new project AIR IQ\\src\\Third Party Purchase Return\\ThirdPartyPurchaseReturn.Table.al",
+              "region": {
+                "startLine": 181,
+                "startColumn": 19,
+                "endLine": 181,
+                "endColumn": 60
+              }
+            }
+          ]
+        }
+      ],
+      "fullMessage": "Length of the table field name 'Third Party Purchase Return Inv Created' must not exceed 30 characters. Longer field names are prone to cause SQL errors. This warning will become an error in a future release.",
+      "properties": {
+        "severity": "Warning",
+        "warningLevel": "4",
+        "defaultSeverity": "Warning",
+        "category": "Compiler",
+        "helpLink": "https://learn.microsoft.com/dynamics365/business-central/dev-itpro/developer/diagnostics/diagnostic-al468?wt.mc_id=d365bc_inproduct_alextension",
+        "isEnabledByDefault": "True",
+        "isSuppressedInSource": "False",
+        "customTags": "Compiler;Telemetry"
+      }
+    },
+    {
       "ruleId": "AL1025",
       "locations": [
       ],
-      "fullMessage": "The file at location 'C:\\Users\\admin\\OneDrive - SILICON SYSTEMS\\Desktop\\My Project\\BC new project AIR IQ\\Unbelive\\Info.txt' does not match any definition.",
+      "fullMessage": "The file at location 'C:\\Users\\admin\\OneDrive - SILICON SYSTEMS\\Desktop\\My Project\\BC new project AIR IQ\\P&L Vertical Format\\README.txt' does not match any definition.",
       "properties": {
         "severity": "Warning",
         "warningLevel": "4",
