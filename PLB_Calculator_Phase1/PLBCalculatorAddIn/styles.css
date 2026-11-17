@@ -1,0 +1,87 @@
+.airiq-plb{--blue:#1076bb;--ink:#172b45;--muted:#5c6c80;--line:#e8ebed;--light:#e7f2f8;--coral:#ef6269;--rule:#ecf0f3;box-sizing:border-box;color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.5;padding:16px 18px 30px;background:radial-gradient(540px 280px at 0 0,#e1edf7,transparent 72%),#fff;min-height:100%}
+.airiq-plb *{box-sizing:border-box}.airiq-plb .plb-title{margin-bottom:16px}.airiq-plb .eyebrow{font-size:11px;color:var(--blue);letter-spacing:1.2px;font-weight:800}.airiq-plb h1{font-size:25px;margin:2px 0 5px}.airiq-plb h2{font-size:20px;margin:0}.airiq-plb .hint{font-size:12px;color:var(--muted)}.airiq-plb .hub{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,.7fr) minmax(0,1fr);grid-template-areas:'rule center period' 'amounts center result';gap:16px;align-items:stretch}.airiq-plb .card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 32px rgba(23,43,69,.06);min-width:0}.airiq-plb .rule{grid-area:rule}.airiq-plb .period{grid-area:period}.airiq-plb .amounts{grid-area:amounts}.airiq-plb .result{grid-area:result}.airiq-plb .card-head{display:flex;gap:12px;align-items:center;padding:20px 20px 0}.airiq-plb .head-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--light);font-size:20px;color:var(--blue)}.airiq-plb .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;padding:18px 20px 22px}.airiq-plb .field{display:flex;flex-direction:column;gap:5px;min-width:0}.airiq-plb label{font-size:12px;color:var(--muted);font-weight:600}.airiq-plb input,.airiq-plb select{width:100%;min-width:0;min-height:42px;padding:8px 10px;border:1px solid #d5dee7;border-radius:10px;background:#fff;color:var(--ink);font:inherit}.airiq-plb input[readonly]{background:#f4f7fa}.airiq-plb input:focus,.airiq-plb select:focus{outline:2px solid var(--blue);outline-offset:0}.airiq-plb .wide{grid-column:1/-1}.airiq-plb .group{grid-column:1/-1;padding:13px 14px;border:1px solid var(--line);border-radius:14px}.airiq-plb .group h3{margin:0 0 10px;color:var(--blue);font-size:11px;letter-spacing:1.2px}.airiq-plb .group-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.airiq-plb .center{grid-area:center;align-self:center;justify-self:stretch;aspect-ratio:1;border-radius:50%;border:1px dotted #cfe1f0;background:radial-gradient(circle,#fff 38%,#eaf4fb 100%);display:flex;align-items:center;justify-content:center;text-align:center;padding:22px}.airiq-plb .core{width:100%;border-radius:50%;padding:15px 0}.airiq-plb .core strong{display:block;font-size:clamp(20px,2.5vw,32px);overflow-wrap:anywhere}.airiq-plb .core .sub{font-size:12px;color:var(--muted)}.airiq-plb .breakdown{padding:18px 20px 22px}.airiq-plb .pill{display:inline-block;padding:4px 12px;background:var(--light);color:var(--blue);border-radius:30px;font-size:12px;font-weight:700;margin-bottom:10px}.airiq-plb .line{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--rule);padding:7px 0}.airiq-plb .line span:last-child{text-align:right;font-variant-numeric:tabular-nums}.airiq-plb .line.strong{font-weight:750}.airiq-plb .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.airiq-plb button{font:inherit;border-radius:10px;min-height:41px;padding:8px 14px;cursor:pointer;font-weight:650;border:1px solid var(--blue);background:#fff;color:var(--blue)}.airiq-plb button.primary{background:var(--coral);border-color:var(--coral);color:#fff}.airiq-plb button:disabled{opacity:.55;cursor:not-allowed}.airiq-plb .notice{padding:10px 14px;margin:0 0 15px;border:1px solid #d5dee7;border-radius:12px;background:#f4f7fa;color:var(--muted);font-size:12px}.airiq-plb .statement{margin-top:18px;overflow:hidden}.airiq-plb .statement-head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:16px 20px;flex-wrap:wrap}.airiq-plb .statement-buttons{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.airiq-plb .table-scroll{overflow:auto}.airiq-plb table{border-collapse:collapse;width:100%;min-width:1550px;font-size:12px}.airiq-plb th{background:#f4f7fa;color:#315574;font-size:11px;white-space:nowrap;text-align:left;letter-spacing:.25px}.airiq-plb th,.airiq-plb td{border-bottom:1px solid var(--rule);padding:11px 12px;white-space:nowrap}.airiq-plb .number{text-align:right;font-variant-numeric:tabular-nums}.airiq-plb tfoot{background:#e7f2f8;font-weight:750}.airiq-plb .empty{padding:20px;color:var(--muted)}.airiq-plb .status{font-size:12px;color:var(--muted)}.airiq-plb .danger{color:#a33245;border-color:#c9a7ad}.airiq-plb .small-btn{min-height:28px;padding:3px 8px}.airiq-plb .checks{margin:8px 0;color:var(--muted);font-size:12px}.airiq-plb [hidden]{display:none!important}
+@media(max-width:1050px){.airiq-plb .hub{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:'rule period' 'center center' 'amounts result'}.airiq-plb .center{width:250px;justify-self:center}}
+@media(max-width:700px){.airiq-plb{padding:12px 9px}.airiq-plb .hub{grid-template-columns:1fr;grid-template-areas:'center' 'rule' 'period' 'amounts' 'result'}.airiq-plb .center{width:220px}.airiq-plb .fields{grid-template-columns:1fr}.airiq-plb .group-grid{grid-template-columns:1fr}.airiq-plb h1{font-size:21px}}
+
+/* Phase 1 layout fix: keep all sections reachable inside the BC page. */
+html, body { margin: 0; padding: 0; }
+#controlAddIn { width: 100%; min-height: 100%; overflow: visible; }
+.airiq-plb { width: 100%; height: auto; min-height: 0; overflow: visible; padding-bottom: 72px; }
+.airiq-plb .hub { align-items: start; }
+.airiq-plb .center { align-self: center; }
+.airiq-plb .card { overflow: visible; }
+.airiq-plb .table-scroll { overflow-x: auto; overflow-y: hidden; }
+@media (max-width: 1150px) {
+  .airiq-plb .hub {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas: "rule period" "amounts result" "center center";
+    align-items: start;
+  }
+  .airiq-plb .center { width: 220px; max-width: 100%; justify-self: center; }
+}
+@media (max-width: 700px) {
+  .airiq-plb .hub { grid-template-columns: minmax(0,1fr); grid-template-areas: "rule" "period" "amounts" "result" "center"; }
+  .airiq-plb .center { width: 200px; }
+}
+
+
+/* Layout update: keep Breakdown immediately below Rule period,
+   independently of the height of the PLB rule card. */
+.airiq-plb .hub {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(195px,.7fr) minmax(0,1fr);
+  grid-template-areas: "left center right";
+  gap: 16px;
+  align-items: start;
+}
+.airiq-plb .plb-left-column,
+.airiq-plb .plb-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.airiq-plb .plb-left-column { grid-area: left; }
+.airiq-plb .plb-right-column { grid-area: right; }
+.airiq-plb .hub > .center { grid-area: center; align-self: center; }
+@media(max-width:1150px) {
+  .airiq-plb .hub {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas: "left right" "center center";
+  }
+  .airiq-plb .hub > .center { justify-self: center; }
+}
+@media(max-width:700px) {
+  .airiq-plb .hub {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "left" "right" "center";
+  }
+}
+
+/* Statement stays compact: scroll table rows after a reasonable height. */
+.airiq-plb .statement .table-scroll {
+  max-height: 380px;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.airiq-plb .statement .table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f4f7fa;
+}
+.airiq-plb .statement .table-scroll tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: #e7f2f8;
+}
+/* Remove unnecessary room under the statement. */
+.airiq-plb { padding-bottom: 16px; }
+.airiq-plb .statement { margin-bottom: 0; }
+/* The add-in has a fixed requested height; allow internal vertical scrolling
+   instead of clipping when the calculator exceeds that height. */
+html, body { height: 100%; overflow: auto; }
+#controlAddIn { height: 100%; overflow-y: auto; overflow-x: hidden; }

@@ -1,10 +1,13 @@
+
 page 50460 "PLB"
 {
+    Caption = 'PLB Statement';
     PageType = List;
+    SourceTable = "PLB";
     ApplicationArea = All;
     UsageCategory = Lists;
-    SourceTable = "PLB";
-    Caption = 'PLB';
+    Editable = true;
+    InsertAllowed = false;
 
     layout
     {
@@ -16,165 +19,161 @@ page 50460 "PLB"
                 {
                     ApplicationArea = All;
                     Editable = false;
-                    ToolTip = 'Specifies the Serial No. (auto-incremented).';
+                    ToolTip = 'Automatically generated PLB serial number.';
                 }
 
-                field("AirLine"; Rec."AirLine")
+                field("PNR"; Rec."PNR")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Airline.';
+                    ToolTip = 'Specifies the PNR reference.';
                 }
 
-                field("AirLine ID"; Rec."AirLine ID")
+                field("Airline"; Rec."Airline")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Airline ID.';
+                    ToolTip = 'Specifies the airline.';
                 }
 
-                field("Commission Basis"; Rec."Commission Basis")
+                field("Airline ID's"; Rec."Airline ID's")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Commission Basis (Booking Date / Travel Date).';
+                    ToolTip = 'Specifies the airline IDs.';
                 }
 
-                field("Calculation Base"; Rec."Calculation Base")
+                field("Type"; Rec."Type")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Calculation Base.';
+                    ToolTip = 'Specifies the transaction type.';
+                }
+
+                field("Basis"; Rec."Basis")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the commission calculation basis.';
+                }
+
+                field("Period"; Rec."Period")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the commission period.';
+                }
+
+                field("Commission Base"; Rec."Commission Base")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                    ToolTip = 'Specifies the commission calculation base.';
                 }
 
                 field("Commission %"; Rec."Commission %")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Commission Percentage.';
+                    Editable = false;
+                    ToolTip = 'Specifies the commission percentage.';
                 }
 
-                field("TDS % on Commission"; Rec."TDS % on Commission")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the TDS % on Commission.';
-                }
-
-                field("GST %"; Rec."GST %")
+                field("Commission Amount"; Rec."Commission Amount")
                 {
                     ApplicationArea = All;
                     Editable = false;
-                    ToolTip = 'Specifies the GST % (Fixed at 18%, not editable).';
+                    ToolTip = 'Specifies the calculated commission amount.';
                 }
 
-                field("Our State"; Rec."Our State")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies Our State.';
-                }
-
-                field("AirLine State"; Rec."AirLine State")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies Airline State.';
-                }
-
-                field("GST Type"; Rec."GST Type")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies GST Type.';
-                }
-                field("Rule Period Booking date From"; Rec."Rule Period Booking date From")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies Rule Period Booking date From.';
-                }
-                field("Rule Period Booking date To"; Rec."Rule Period Booking date To")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies Rule Period Booking date To.';
-                }
-
-                field("Amount From"; Rec."Amount From")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies Amount From.';
-                }
-
-                field("Transaction"; Rec."Transaction")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the Transaction type.';
-                }
-
-                field("PNR / Ticket"; Rec."PNR / Ticket")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the PNR or Ticket number.';
-                }
-
-                field("Purchase Base Fare"; Rec."Purchase Base Fare")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the Purchase Base Fare.';
-                }
-
-                field("Purchase Other Charges"; Rec."Purchase Other Charges")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the Purchase Other Charges.';
-                }
-
-                field("Purchase Total"; Rec."Purchase Total")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the Purchase Total.';
-                }
-
-                field("Purchase Commission"; Rec."Purchase Commission")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the Purchase Commission.';
-                }
-
-                field("Total Commission"; Rec."Total Commission")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the Total Commission.';
-                }
-
-                field("GST Percentage"; Rec."GST Percentage")
+                field("GST"; Rec."GST")
                 {
                     ApplicationArea = All;
                     Editable = false;
-                    ToolTip = 'Specifies the GST Percentage (Fixed at 18%).';
+                    ToolTip = 'Specifies the GST amount.';
                 }
 
-                field("Invoice Incl. GST"; Rec."Invoice Incl. GST")
+                field("Invoice Amount"; Rec."Invoice Amount")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Invoice Amount Including GST.';
+                    Editable = false;
+                    ToolTip = 'Specifies the commission invoice amount including GST.';
                 }
 
-                field("TDS (2.00%) on Commission"; Rec."TDS (2.00%) on Commission")
+                field("TDS"; Rec."TDS")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies TDS on Commission.';
+                    Editable = false;
+                    ToolTip = 'Specifies the TDS amount.';
                 }
 
                 field("Net Receivable"; Rec."Net Receivable")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies Net Receivable amount.';
+                    Editable = false;
+                    Style = Strong;
+                    ToolTip = 'Specifies the net receivable amount.';
                 }
 
                 field("Received On"; Rec."Received On")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies the Date and Time received.';
+                    ToolTip = 'Specifies the date when payment was received.';
                 }
 
-                field("Received In (Bank/ID)"; Rec."Received In (Bank/ID)")
+                field("Received In"; Rec."Received In")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Specifies Bank or Account ID where received.';
+                    ToolTip = 'Specifies the bank or account where payment was received.';
+                }
+
+                field("Status"; Rec."Status")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                    StyleExpr = StatusStyle;
+                    ToolTip = 'Specifies whether payment is Received or Pending.';
                 }
             }
         }
     }
+
+    actions
+    {
+        area(Processing)
+        {
+            action(OpenPLBCalculator)
+            {
+                Caption = 'PLB Calculator';
+                ApplicationArea = All;
+                Image = Calculate;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'Opens the PLB Commission Calculator.';
+
+                trigger OnAction()
+                begin
+                    Page.Run(Page::"AIRIQ PLB Calculator");
+                end;
+            }
+        }
+    }
+
+    trigger OnAfterGetRecord()
+    begin
+        UpdateStatusStyle();
+    end;
+
+    trigger OnAfterGetCurrRecord()
+    begin
+        UpdateStatusStyle();
+    end;
+
+    var
+        StatusStyle: Text;
+
+    local procedure UpdateStatusStyle()
+    begin
+        case Rec."Status" of
+            'Received':
+                StatusStyle := 'Favorable';
+            'Pending':
+                StatusStyle := 'Unfavorable';
+            else
+                StatusStyle := 'Standard';
+        end;
+    end;
 }

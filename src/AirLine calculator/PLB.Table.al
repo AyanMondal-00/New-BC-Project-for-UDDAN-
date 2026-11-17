@@ -2,218 +2,125 @@ table 50460 "PLB"
 {
     Caption = 'PLB';
     DataClassification = CustomerContent;
+    DrillDownPageId = "PLB";
+    LookupPageId = "PLB";
 
     fields
     {
-        field(1; "Serial No."; Integer)
+        field(1; "Serial No."; Code[20])
         {
             Caption = 'Serial No.';
-            AutoIncrement = true;
             DataClassification = SystemMetadata;
             Editable = false;
         }
 
-        field(2; "AirLine"; Text[50])
+        field(2; "PNR"; Text[10])
         {
-            Caption = 'AirLine';
+            Caption = 'PNR';
             DataClassification = CustomerContent;
         }
 
-        field(3; "AirLine ID"; Code[20])
+        field(3; "Airline"; Text[100])
         {
-            Caption = 'AirLine ID';
+            Caption = 'Airline';
             DataClassification = CustomerContent;
         }
 
-        field(4; "Commission Basis"; Text[50])
+        field(4; "Airline ID's"; Text[250])
         {
-            Caption = 'Commission Basis';
+            Caption = 'Airline ID''s';
             DataClassification = CustomerContent;
         }
 
-        field(5; "Calculation Base"; Text[50])
+        field(5; "Type"; Text[100])
         {
-            Caption = 'Calculation Base';
+            Caption = 'Type';
             DataClassification = CustomerContent;
         }
 
-        field(6; "Commission %"; Decimal)
+        field(6; "Basis"; Text[100])
+        {
+            Caption = 'Basis';
+            DataClassification = CustomerContent;
+        }
+
+        field(7; "Period"; Text[250])
+        {
+            Caption = 'Period';
+            DataClassification = CustomerContent;
+        }
+
+        field(8; "Commission Base"; Decimal)
+        {
+            Caption = 'Commission Base';
+            DecimalPlaces = 2 : 2;
+            DataClassification = CustomerContent;
+        }
+
+        field(9; "Commission %"; Decimal)
         {
             Caption = 'Commission %';
             DecimalPlaces = 0 : 4;
             DataClassification = CustomerContent;
         }
 
-        field(7; "TDS % on Commission"; Decimal)
+        field(10; "Commission Amount"; Decimal)
         {
-            Caption = 'TDS % on Commission';
-            DecimalPlaces = 0 : 4;
-            InitValue = 2.0;
-            DataClassification = CustomerContent;
-        }
-
-        field(8; "GST %"; Decimal)
-        {
-            Caption = 'GST %';
-            DecimalPlaces = 0 : 2;
-            InitValue = 18.0;
-            Editable = false;
-            DataClassification = CustomerContent;
-        }
-
-        field(9; "Our State"; Text[50])
-        {
-            Caption = 'Our State';
-            DataClassification = CustomerContent;
-        }
-
-        field(10; "AirLine State"; Text[50])
-        {
-            Caption = 'AirLine State';
-            DataClassification = CustomerContent;
-        }
-
-        field(11; "GST Type"; Text[50])
-        {
-            Caption = 'GST Type';
-            DataClassification = CustomerContent;
-        }
-
-        field(26; "Rule Period Booking date From"; DateTime)
-        {
-            Caption = 'Rule Period Booking date From';
-            DataClassification = CustomerContent;
-            trigger OnValidate()
-            var
-                SelectedDate: Date;
-                CurrentTime: Time;
-            begin
-                SelectedDate := DT2Date(Rec."Rule Period Booking date From");
-                CurrentTime := DT2Time(CurrentDateTime());
-
-                Rec."Rule Period Booking date From" := CreateDateTime(SelectedDate, CurrentTime);
-            end;
-        }
-
-        field(27; "Rule Period Booking date To"; DateTime)
-        {
-            Caption = 'Rule Period Booking date To';
-            DataClassification = CustomerContent;
-            trigger OnValidate()
-            var
-                SelectedDate: Date;
-                CurrentTime: Time;
-            begin
-                SelectedDate := DT2Date(Rec."Rule Period Booking date To");
-                CurrentTime := DT2Time(CurrentDateTime());
-
-                Rec."Rule Period Booking date To" := CreateDateTime(SelectedDate, CurrentTime);
-            end;
-        }
-
-        field(12; "Amount From"; Text[50])
-        {
-            Caption = 'Amount From';
-            DataClassification = CustomerContent;
-        }
-
-        field(13; "Transaction"; Text[50])
-        {
-            Caption = 'Transaction';
-            DataClassification = CustomerContent;
-        }
-
-        field(14; "PNR / Ticket"; Text[100])
-        {
-            Caption = 'PNR / Ticket';
-            DataClassification = CustomerContent;
-        }
-
-        field(15; "Purchase Base Fare"; Decimal)
-        {
-            Caption = 'Purchase Base Fare';
+            Caption = 'Commission Amount';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
         }
 
-        field(16; "Purchase Other Charges"; Decimal)
+        field(11; "GST"; Decimal)
         {
-            Caption = 'Purchase Other Charges';
+            Caption = 'GST';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
         }
 
-        field(17; "Purchase Total"; Decimal)
+        field(12; "Invoice Amount"; Decimal)
         {
-            Caption = 'Purchase Total';
+            Caption = 'Invoice Amount';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
         }
 
-        field(18; "Purchase Commission"; Decimal)
+        field(13; "TDS"; Decimal)
         {
-            Caption = 'Purchase Commission';
+            Caption = 'TDS';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
         }
 
-        field(19; "Total Commission"; Decimal)
-        {
-            Caption = 'Total Commission';
-            DecimalPlaces = 2 : 2;
-            DataClassification = CustomerContent;
-        }
-
-        field(20; "GST Percentage"; Decimal)
-        {
-            Caption = 'GST Percentage';
-            DecimalPlaces = 0 : 2;
-            InitValue = 18.0;
-            Editable = false;
-            DataClassification = CustomerContent;
-        }
-
-        field(21; "Invoice Incl. GST"; Decimal)
-        {
-            Caption = 'Invoice Incl. GST';
-            DecimalPlaces = 2 : 2;
-            DataClassification = CustomerContent;
-        }
-
-        field(22; "TDS (2.00%) on Commission"; Decimal)
-        {
-            Caption = 'TDS (2.00%) on Commission';
-            DecimalPlaces = 2 : 2;
-            DataClassification = CustomerContent;
-        }
-
-        field(23; "Net Receivable"; Decimal)
+        field(14; "Net Receivable"; Decimal)
         {
             Caption = 'Net Receivable';
             DecimalPlaces = 2 : 2;
             DataClassification = CustomerContent;
         }
 
-        field(24; "Received On"; DateTime)
+        field(15; "Received On"; Date)
         {
             Caption = 'Received On';
             DataClassification = CustomerContent;
-            trigger OnValidate()
-            var
-                SelectedDate: Date;
-                CurrentTime: Time;
-            begin
-                SelectedDate := DT2Date(Rec."Received On");
-                CurrentTime := DT2Time(CurrentDateTime());
 
-                Rec."Received On" := CreateDateTime(SelectedDate, CurrentTime);
+            trigger OnValidate()
+            begin
+                UpdateStatus();
             end;
         }
 
-        field(25; "Received In (Bank/ID)"; Text[100])
+        field(16; "Received In"; Text[100])
         {
-            Caption = 'Received In (Bank/ID)';
+            Caption = 'Received In';
             DataClassification = CustomerContent;
+        }
+
+        field(17; "Status"; Text[100])
+        {
+            Caption = 'Status';
+            DataClassification = CustomerContent;
+            Editable = false;
         }
     }
 
@@ -223,5 +130,51 @@ table 50460 "PLB"
         {
             Clustered = true;
         }
+
+        key(PNRKey; "PNR")
+        {
+        }
+
+        key(AirlineKey; "Airline")
+        {
+        }
     }
+
+    trigger OnInsert()
+    begin
+        if "Serial No." = '' then
+            GenerateSerialNo();
+
+        UpdateStatus();
+    end;
+
+    procedure UpdateStatus()
+    begin
+        if "Received On" <> 0D then
+            "Status" := 'Received'
+        else
+            "Status" := 'Pending';
+    end;
+
+    local procedure GenerateSerialNo()
+    var
+        PLBRecord: Record "PLB";
+        LastSerialNo: Code[20];
+    begin
+        PLBRecord.LockTable();
+
+        PLBRecord.SetCurrentKey("Serial No.");
+        PLBRecord.SetFilter("Serial No.", 'PLB*');
+
+        if PLBRecord.FindLast() then begin
+            LastSerialNo := PLBRecord."Serial No.";
+            "Serial No." := IncStr(LastSerialNo);
+
+            if "Serial No." = '' then
+                Error(
+                    'Unable to generate the next PLB Serial No. after %1.',
+                    LastSerialNo);
+        end else
+            "Serial No." := 'PLB000001';
+    end;
 }
