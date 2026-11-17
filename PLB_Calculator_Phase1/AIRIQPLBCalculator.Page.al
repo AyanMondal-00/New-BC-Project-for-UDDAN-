@@ -4,7 +4,6 @@ page 50740 "AIRIQ PLB Calculator"
     PageType = Card;
     ApplicationArea = All;
     UsageCategory = Tasks;
-    Editable = true;
 
     layout
     {
@@ -20,12 +19,14 @@ page 50740 "AIRIQ PLB Calculator"
                 end;
 
                 trigger PostedDataRequested(FilterJson: Text)
+                var
+                    Mapper: Codeunit "AIRIQ PLB Posted Mapping";
+                    ResponseJson: Text;
                 begin
-                    // Phase 2: use the submitted filters to read posted documents.
-                    // This acknowledgement deliberately does not fabricate amounts.
+                    // Read-only test: no PLB record insertion.
+                    ResponseJson := Mapper.Fetch(FilterJson);
                     if AddInIsReady then
-                        CurrPage.PLBCalculator.SetPostedData(
-                          '{"ok":false,"message":"Posted Purchase Invoice / Credit Memo mapping is not yet enabled. Use Manual totals in Phase 1."}');
+                        CurrPage.PLBCalculator.SetPostedData(ResponseJson);
                 end;
             }
         }
