@@ -6,6 +6,7 @@ codeunit 50543 "AIRIQ Cost Revision Export"
     var
         ExcelBuffer: Record "Excel Buffer" temporary;
         History: Record "AIRIQ Cost Revision History";
+        IsOpening: Boolean;
     begin
         History.Copy(FilteredHistory);
         History.SetCurrentKey(PNR, "Revision No.");
@@ -21,84 +22,120 @@ codeunit 50543 "AIRIQ Cost Revision Export"
 
         if History.FindSet() then
             repeat
+                IsOpening := History."Revision No." = 0;
+
                 ExcelBuffer.NewRow();
 
-                AddText(ExcelBuffer, History."Cost Revision No.");
-                AddDateTime(ExcelBuffer, History."Revision Date & Time");
-                AddText(ExcelBuffer, History.PNR);
-
-                // New AirLine column after PNR.
-                AddText(ExcelBuffer, GetAirLine(History));
-
-                AddInteger(ExcelBuffer, History."Revision No.");
                 AddText(
                     ExcelBuffer,
-                    Format(History."Transaction Type"));
+                    History."Cost Revision No.",
+                    IsOpening);
 
-                if History."Revision No." = 0 then
-                    AddBlank(ExcelBuffer)
+                AddDateTime(
+                    ExcelBuffer,
+                    History."Revision Date & Time",
+                    IsOpening);
+
+                AddText(
+                    ExcelBuffer,
+                    History.PNR,
+                    IsOpening);
+
+                AddText(
+                    ExcelBuffer,
+                    GetAirLine(History),
+                    IsOpening);
+
+                AddInteger(
+                    ExcelBuffer,
+                    History."Revision No.",
+                    IsOpening);
+
+                AddText(
+                    ExcelBuffer,
+                    Format(History."Transaction Type"),
+                    IsOpening);
+
+                if IsOpening then
+                    AddBlank(ExcelBuffer, true)
                 else
                     AddNumber(
                         ExcelBuffer,
-                        History."Previous Base Fare");
+                        History."Previous Base Fare",
+                        false);
 
                 AddNumber(
                     ExcelBuffer,
-                    History."Revised Base Fare");
+                    History."Revised Base Fare",
+                    IsOpening);
 
-                if History."Revision No." = 0 then
-                    AddBlank(ExcelBuffer)
+                if IsOpening then
+                    AddOpeningNumber(
+                        ExcelBuffer,
+                        History."Fare Difference")
                 else
-                    AddNumber(
+                    AddFareDifference(
                         ExcelBuffer,
                         History."Fare Difference");
 
-                AddInteger(ExcelBuffer, History."Total Pax");
+                AddInteger(
+                    ExcelBuffer,
+                    History."Total Pax",
+                    IsOpening);
 
-                if History."Revision No." = 0 then
-                    AddBlank(ExcelBuffer)
+                if IsOpening then
+                    AddBlank(ExcelBuffer, true)
                 else
                     AddNumber(
                         ExcelBuffer,
-                        History."Previous Other Charges");
+                        History."Previous Other Charges",
+                        false);
 
                 AddNumber(
                     ExcelBuffer,
-                    History."Revised Other Charges");
+                    History."Revised Other Charges",
+                    IsOpening);
 
-                if History."Revision No." = 0 then
-                    AddBlank(ExcelBuffer)
+                if IsOpening then
+                    AddBlank(ExcelBuffer, true)
                 else
                     AddNumber(
                         ExcelBuffer,
-                        History."Previous Rate");
+                        History."Previous Rate",
+                        false);
 
                 AddNumber(
                     ExcelBuffer,
-                    History."Revised Rate");
+                    History."Revised Rate",
+                    IsOpening);
 
-                if History."Revision No." = 0 then
-                    AddBlank(ExcelBuffer)
+                if IsOpening then
+                    AddBlank(ExcelBuffer, true)
                 else
                     AddNumber(
                         ExcelBuffer,
-                        History."Previous Total Amount");
+                        History."Previous Total Amount",
+                        false);
 
                 AddNumber(
                     ExcelBuffer,
-                    History."Revised Total Amount");
+                    History."Revised Total Amount",
+                    IsOpening);
 
                 AddText(
                     ExcelBuffer,
-                    History."Revision Source");
+                    History."Revision Source",
+                    IsOpening);
 
                 AddText(
                     ExcelBuffer,
-                    History."Changed By");
+                    History."Changed By",
+                    IsOpening);
 
                 AddText(
                     ExcelBuffer,
-                    History."Purchase Serial No.");
+                    History."Purchase Serial No.",
+                    IsOpening);
 
             until History.Next() = 0;
 
@@ -125,7 +162,6 @@ codeunit 50543 "AIRIQ Cost Revision Export"
         if History.AirLine <> '' then
             exit(History.AirLine);
 
-        // Fallback for history created before AirLine field existed.
         if Purchase.Get(History."Purchase Serial No.") then
             exit(Purchase.Airline);
 
@@ -163,55 +199,113 @@ codeunit 50543 "AIRIQ Cost Revision Export"
         Value: Text)
     begin
         Buffer.AddColumn(
-            Value, false, '', true, false, false, '',
+            Value,
+            false,
+            '',
+            true,
+            false,
+            false,
+            '',
             Buffer."Cell Type"::Text);
     end;
 
     local procedure AddBlank(
-        var Buffer: Record "Excel Buffer" temporary)
+        var Buffer: Record "Excel Buffer" temporary;
+        IsOpening: Boolean)
     begin
-        AddText(Buffer, '');
+        AddText(Buffer, '', IsOpening);
     end;
+
+
+
+
 
     local procedure AddText(
         var Buffer: Record "Excel Buffer" temporary;
-        Value: Text)
+        Value: Text;
+        IsOpening: Boolean)
+    var
+        ExcelFormat: Text[30];
     begin
+        ExcelFormat := '';
+
+        if IsOpening then
+            ExcelFormat := '[Blue]@';
+
         Buffer.AddColumn(
-            Value, false, '', false, false, false, '',
-            Buffer."Cell Type"::Text);
+            Value, false, '', IsOpening, false, false,
+            ExcelFormat, Buffer."Cell Type"::Text);
     end;
 
     local procedure AddInteger(
         var Buffer: Record "Excel Buffer" temporary;
-        Value: Integer)
+        Value: Integer;
+        IsOpening: Boolean)
+    var
+        ExcelFormat: Text[30];
     begin
+        if IsOpening then
+            ExcelFormat := '[Blue]0'
+        else
+            ExcelFormat := '0';
+
         Buffer.AddColumn(
-            Value, false, '', false, false, false, '0',
-            Buffer."Cell Type"::Number);
+            Value, false, '', IsOpening, false, false,
+            ExcelFormat, Buffer."Cell Type"::Number);
     end;
 
     local procedure AddNumber(
+        var Buffer: Record "Excel Buffer" temporary;
+        Value: Decimal;
+        IsOpening: Boolean)
+    var
+        ExcelFormat: Text[30];
+    begin
+        if IsOpening then
+            ExcelFormat := '[Blue]#,##0.00'
+        else
+            ExcelFormat := '#,##0.00';
+
+        Buffer.AddColumn(
+            Value, false, '', IsOpening, false, false,
+            ExcelFormat, Buffer."Cell Type"::Number);
+    end;
+
+    local procedure AddOpeningNumber(
+        var Buffer: Record "Excel Buffer" temporary;
+        Value: Decimal)
+    begin
+        Buffer.AddColumn(
+            Value, false, '', true, false, false,
+            '[Blue]#,##0.00',
+            Buffer."Cell Type"::Number);
+    end;
+
+    local procedure AddFareDifference(
         var Buffer: Record "Excel Buffer" temporary;
         Value: Decimal)
     begin
         Buffer.AddColumn(
             Value, false, '', false, false, false,
-            '#,##0.00;[Red](#,##0.00)',
+            '[Green]+0.00;[Red]-0.00',
             Buffer."Cell Type"::Number);
     end;
 
+
     local procedure AddDateTime(
         var Buffer: Record "Excel Buffer" temporary;
-        Value: DateTime)
+        Value: DateTime;
+        IsOpening: Boolean)
     begin
         if Value = 0DT then
-            AddText(Buffer, '')
+            AddText(Buffer, '', IsOpening)
         else
             AddText(
                 Buffer,
                 Format(
-                    Value, 0,
-                    '<Day,2>-<Month,2>-<Year4> <Hours24,2>:<Minutes,2>:<Seconds,2>'));
+                    Value,
+                    0,
+                    '<Day,2>-<Month,2>-<Year4> <Hours24,2>:<Minutes,2>:<Seconds,2>'),
+                IsOpening);
     end;
 }

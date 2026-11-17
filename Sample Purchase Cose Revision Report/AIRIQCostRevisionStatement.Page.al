@@ -11,7 +11,6 @@ page 50541 "AIRIQ Cost Revision Statement"
     InsertAllowed = false;
     ModifyAllowed = false;
     DeleteAllowed = true;
-   
 
     layout
     {
@@ -23,14 +22,17 @@ page 50541 "AIRIQ Cost Revision Statement"
                 {
                     ApplicationArea = All;
                 }
+
                 field("Revision Date & Time"; Rec."Revision Date & Time")
                 {
                     ApplicationArea = All;
                 }
+
                 field(PNR; Rec.PNR)
                 {
                     ApplicationArea = All;
                 }
+
                 field(AirLineDisplay; AirLineDisplay)
                 {
                     ApplicationArea = All;
@@ -38,63 +40,88 @@ page 50541 "AIRIQ Cost Revision Statement"
                     Editable = false;
                     ToolTip = 'Shows the airline stored in the revision, or the current purchase airline for older history entries.';
                 }
+
                 field("Revision No."; Rec."Revision No.")
                 {
                     ApplicationArea = All;
                 }
+
                 field("Transaction Type"; Rec."Transaction Type")
                 {
                     ApplicationArea = All;
+                    StyleExpr = TransactionTypeStyle;
                 }
+
                 field("Previous Base Fare"; Rec."Previous Base Fare")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Revised Base Fare"; Rec."Revised Base Fare")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Fare Difference"; Rec."Fare Difference")
                 {
                     ApplicationArea = All;
                     StyleExpr = FareStyle;
                 }
+
                 field("Total Pax"; Rec."Total Pax")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Previous Other Charges"; Rec."Previous Other Charges")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Revised Other Charges"; Rec."Revised Other Charges")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Previous Rate"; Rec."Previous Rate")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Revised Rate"; Rec."Revised Rate")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Previous Total Amount"; Rec."Previous Total Amount")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Revised Total Amount"; Rec."Revised Total Amount")
                 {
                     ApplicationArea = All;
+                    StyleExpr = OpeningValueStyle;
                 }
+
                 field("Revision Source"; Rec."Revision Source")
                 {
                     ApplicationArea = All;
                 }
+
                 field("Changed By"; Rec."Changed By")
                 {
                     ApplicationArea = All;
                 }
+
                 field("Purchase Serial No."; Rec."Purchase Serial No.")
                 {
                     ApplicationArea = All;
@@ -189,20 +216,46 @@ page 50541 "AIRIQ Cost Revision Statement"
 
     var
         FareStyle: Text;
+        OpeningValueStyle: Text;
+        TransactionTypeStyle: Text;
         AirLineDisplay: Text[100];
 
     trigger OnAfterGetRecord()
     var
         Purchase: Record "Sample Purchase";
     begin
-        if Rec."Fare Difference" > 0 then
-            FareStyle := 'Unfavorable'
-        else
-            if Rec."Fare Difference" < 0 then
-                FareStyle := 'Favorable'
-            else
-                FareStyle := 'Standard';
+        // Reset styles for every record.
+        FareStyle := 'Standard';
+        OpeningValueStyle := 'Standard';
+        TransactionTypeStyle := 'Standard';
 
+        // Opening row styling.
+        if Rec."Revision No." = 0 then begin
+
+            // Opening financial values: Blue + Bold.
+            OpeningValueStyle := 'StrongAccent';
+
+            // Opening transaction type: Bold.
+            TransactionTypeStyle := 'Strong';
+
+            // Opening fare difference: Blue + Bold.
+            FareStyle := 'StrongAccent';
+
+        end else begin
+
+            // Price Increase: Green.
+            if Rec."Fare Difference" > 0 then
+                FareStyle := 'Favorable'
+
+            // Price Decrease: Red.
+            else
+                if Rec."Fare Difference" < 0 then
+                    FareStyle := 'Unfavorable'
+                else
+                    FareStyle := 'Standard';
+        end;
+
+        // Airline display with fallback for old history.
         AirLineDisplay := Rec.AirLine;
 
         if AirLineDisplay = '' then
