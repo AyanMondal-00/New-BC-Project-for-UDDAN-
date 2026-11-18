@@ -217,5 +217,6 @@ permissionset 50300 GeneratedPermission
         codeunit "AIRIQ Cost Revision Export" = X,
         codeunit "AIRIQ Cost Revision Tracking" = X,
         page "AIRIQ Cost Revision Editor" = X,
-        page "AIRIQ Cost Revision Statement" = X;
+        page "AIRIQ Cost Revision Statement" = X,
+        page "AIRIQ PLB Calculator" = X;
 }

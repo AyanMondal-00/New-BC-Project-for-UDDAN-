@@ -62,6 +62,13 @@ page 50310 "Sample Purchase List"
                     ApplicationArea = All;
                 }
 
+                field("Cost Revision"; Rec."Cost Revision")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                    ToolTip = 'Yes means the staging price differs from the last processed purchase invoice and needs to be applied.';
+                }
+
                 field("Select"; Rec."Select")
                 {
                     ApplicationArea = All;
@@ -97,10 +104,7 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
 
-                    trigger OnValidate()
-                    begin
-                        AssertNoDirectTrackedCostEdit();
-                    end;
+
                 }
 
                 field("Travel Date"; Rec."Travel Date")
@@ -117,10 +121,7 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
 
-                    trigger OnValidate()
-                    begin
-                        AssertNoDirectTrackedCostEdit();
-                    end;
+
                 }
 
                 field("Other Charges"; Rec."Other Charges")
@@ -133,20 +134,14 @@ page 50310 "Sample Purchase List"
                 {
                     ApplicationArea = All;
 
-                    trigger OnValidate()
-                    begin
-                        AssertNoDirectTrackedCostEdit();
-                    end;
+
                 }
 
                 field("Total Amount"; Rec."Total Amount")
                 {
                     ApplicationArea = All;
 
-                    trigger OnValidate()
-                    begin
-                        AssertNoDirectTrackedCostEdit();
-                    end;
+
                 }
 
                 field(Type; Rec.Type)
@@ -213,77 +208,7 @@ page 50310 "Sample Purchase List"
             // DEDICATED COST REVISION EDITOR
             // ============================================
 
-            action(EditCostRevision)
-            {
-                Caption = 'Edit Cost Revision';
-                ApplicationArea = All;
-                Image = Edit;
-                Promoted = true;
-                PromotedCategory = Process;
-                ToolTip = 'Edit financial values in a temporary window. Only Save & Complete Revision writes to Sample Purchase and its history.';
-
-                trigger OnAction()
-                var
-                    Tracking: Codeunit "AIRIQ Cost Revision Tracking";
-                    Editor: Page "AIRIQ Cost Revision Editor";
-                    Original: Record "Sample Purchase";
-                    Edited: Record "Sample Purchase";
-                begin
-                    CurrPage.SaveRecord();
-
-                    if not Tracking.GetEnabled() then
-                        Error(
-                            'Turn on Cost Revision Enable before editing a cost revision.');
-
-                    Rec.TestField("Serial No.");
-
-                    Original.Get(Rec."Serial No.");
-
-                    Editor.LoadPurchase(Original);
-
-                    Commit();
-
-                    Editor.RunModal();
-
-                    if Editor.GetCompletedPurchase(Edited) then begin
-                        Tracking.SaveDedicatedRevision(
-                            Original,
-                            Edited);
-
-                        CurrPage.Update(false);
-                    end;
-                end;
-            }
-
-            // ============================================
-            // RECORD OPENING COST
-            // ============================================
-
-            action(RecordOpeningCostRevision)
-            {
-                Caption = 'Record Opening Cost';
-                ApplicationArea = All;
-                Image = New;
-                Promoted = true;
-                PromotedCategory = Process;
-                ToolTip = 'After completing a normal new purchase, record its initial full financial values as Opening once.';
-
-                trigger OnAction()
-                var
-                    Tracking: Codeunit "AIRIQ Cost Revision Tracking";
-                begin
-                    CurrPage.SaveRecord();
-
-                    Rec.TestField("Serial No.");
-
-                    Tracking.RecordInitialOpening(
-                        Rec."Serial No.");
-                end;
-            }
-
-            // ============================================
-            // COST REVISION STATEMENT
-            // ============================================
+            // Opening and revisions are now triggered by successful invoice operations.
 
             action(ViewCostRevisionStatement)
             {
@@ -466,7 +391,7 @@ page 50310 "Sample Purchase List"
                 Caption = 'Import For Cost Reversion';
                 Image = ImportExcel;
                 ToolTip =
-                    'Import fare values from Excel and update existing Sample Purchase records by PNR.';
+                    'Stage changed prices by PNR; history is recorded only after Create Purchase Invoice updates the draft invoice.';
 
                 trigger OnAction()
                 var
@@ -651,20 +576,4 @@ page 50310 "Sample Purchase List"
     // AFTER HISTORY EXISTS
     // ============================================
 
-    local procedure AssertNoDirectTrackedCostEdit()
-    var
-        RevisionHistory:
-            Record "AIRIQ Cost Revision History";
-    begin
-        if Rec."Serial No." = '' then
-            exit;
-
-        RevisionHistory.SetRange(
-            "Purchase Serial No.",
-            Rec."Serial No.");
-
-        if not RevisionHistory.IsEmpty() then
-            Error(
-                'This purchase already has cost revision history. Use Edit Cost Revision instead of directly changing financial fields.');
-    end;
 }

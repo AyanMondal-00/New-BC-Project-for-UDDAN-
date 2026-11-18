@@ -45,6 +45,9 @@ codeunit 50320 "Sample Purchase API Management"
         ImportedCount: Integer;
         SkippedCount: Integer;
         RecordCount: Integer;
+        RevisionTracking: Codeunit "AIRIQ Cost Revision Tracking";
+        RevisedCount: Integer;
+        BeforePurchase: Record "Sample Purchase";
         i: Integer;
     begin
         // ==========================================
@@ -172,12 +175,31 @@ codeunit 50320 "Sample Purchase API Management"
             ExistingPurchase.SetRange(PNR, PNRValue);
 
             if ExistingPurchase.FindFirst() then begin
+                if RevisionTracking.GetEnabled() and (not ExistingPurchase."Invoice Posted") then begin
+                    BeforePurchase := ExistingPurchase;
+                    ExistingPurchase.Rate := GetRequiredDecimal(RowObject, 'Price');
+                    ExistingPurchase."Base Fare" := GetRequiredDecimal(RowObject, 'BaseFare');
+                    ExistingPurchase."Total Amount" := GetRequiredDecimal(RowObject, 'Amount');
+                    // Match the original API mapping for Other Charges, unchanged.
+                    ExistingPurchase."Other Charges" := ExistingPurchase."Total Amount" -
+                        (ExistingPurchase."Base Fare" * ExistingPurchase."Total Pax");
+                    if (BeforePurchase.Rate <> ExistingPurchase.Rate) or
+                       (BeforePurchase."Base Fare" <> ExistingPurchase."Base Fare") or
+                       (BeforePurchase."Other Charges" <> ExistingPurchase."Other Charges") or
+                       (BeforePurchase."Total Amount" <> ExistingPurchase."Total Amount") then begin
+                        ExistingPurchase."Cost Revision" := true;
+                        ExistingPurchase.Modify(true);
+                        RevisedCount += 1;
+                    end else
+                        SkippedCount += 1;
+                end else begin
                 SkippedCount += 1;
 
                 if SkippedPNRs <> '' then
                     SkippedPNRs += ', ';
 
                 SkippedPNRs += PNRValue;
+                end;
             end else begin
                 Clear(SamplePurchase);
                 SamplePurchase.Init();
@@ -283,13 +305,15 @@ codeunit 50320 "Sample Purchase API Management"
             'Total API Records: %3\' +
             'Imported: %4\' +
             'Skipped: %5\' +
-            'Skipped PNRs: %6',
+            'Skipped PNRs: %6\' +
+            'Price revised (staging): %7',
             FromDateText,
             ToDateText,
             RecordCount,
             ImportedCount,
             SkippedCount,
-            SkippedPNRs
+            SkippedPNRs,
+            RevisedCount
         );
     end;
 

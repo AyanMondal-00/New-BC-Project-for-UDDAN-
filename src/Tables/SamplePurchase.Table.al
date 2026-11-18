@@ -101,6 +101,14 @@ table 50300 "Sample Purchase"
             Editable = false;
         }
 
+        field(21; "Cost Revision"; Boolean)
+        {
+            Caption = 'Cost Revision';
+            DataClassification = CustomerContent;
+            InitValue = false;
+            Editable = false;
+        }
+
         field(20; "Invoice Posted"; Boolean)
         {
             Caption = 'Invoice Posted';
@@ -231,10 +239,23 @@ table 50300 "Sample Purchase"
     end;
 
     trigger OnModify()
+    var
+        RevisionTracking: Codeunit "AIRIQ Cost Revision Tracking";
     begin
         // Prevent duplicate PNR even when modified by code
         Rec.PNR := UpperCase(DelChr(Rec.PNR, '<>', ' '));
         CheckDuplicatePNR();
+
+        // Staging changes become pending only when an unposted invoice exists.
+        // Never write history from table OnModify / per-field autosave.
+        if (Rec."Purchase Invoice No." <> '') and (not Rec."Invoice Posted") then
+            if (Rec."Base Fare" <> xRec."Base Fare") or
+               (Rec."Other Charges" <> xRec."Other Charges") or
+               (Rec.Rate <> xRec.Rate) or
+               (Rec."Total Amount" <> xRec."Total Amount") or
+               (Rec."Total Pax" <> xRec."Total Pax") then
+                if RevisionTracking.GetEnabled() then
+                    Rec."Cost Revision" := true;
     end;
 
     local procedure CalculatePurchaseAmount()

@@ -73,6 +73,8 @@ codeunit 50342 "Fare Alteration Import"
                     if SamplePurchase.Next() <> 0 then
                         Error('PNR %1 matches multiple Sample Purchase records. Import cannot choose one safely.', PNRValue);
                     SamplePurchase.FindFirst();
+                    if SamplePurchase."Invoice Posted" then
+                        Error('PNR %1 is already posted; cost revision import cannot update it.', PNRValue);
                     PreviousPurchase := SamplePurchase;
                     SamplePurchase.Validate(
                         Rate,
@@ -94,16 +96,28 @@ codeunit 50342 "Fare Alteration Import"
                         GetDecimalValue(
                             TempExcelBuffer, RowNo, TotalAmountColumnNo));
 
-                    SamplePurchase.Modify(true);
-                    RevisionTracking.RecordExcelRevision(PreviousPurchase, SamplePurchase);
-                    UpdatedCount += 1;
+                    if RevisionTracking.GetEnabled() and
+                       ((SamplePurchase."Base Fare" <> PreviousPurchase."Base Fare") or
+                        (SamplePurchase."Other Charges" <> PreviousPurchase."Other Charges") or
+                        (SamplePurchase.Rate <> PreviousPurchase.Rate) or
+                        (SamplePurchase."Total Amount" <> PreviousPurchase."Total Amount")) then begin
+                        SamplePurchase."Cost Revision" := true;
+                    end;
+                    if (SamplePurchase."Base Fare" <> PreviousPurchase."Base Fare") or
+                       (SamplePurchase."Other Charges" <> PreviousPurchase."Other Charges") or
+                       (SamplePurchase.Rate <> PreviousPurchase.Rate) or
+                       (SamplePurchase."Total Amount" <> PreviousPurchase."Total Amount") then begin
+                        SamplePurchase.Modify(true);
+                        UpdatedCount += 1;
+                    end else
+                        SkippedCount += 1;
                 end else
                     SkippedCount += 1;
             end;
         end;
 
         Message(
-            'Fare alteration import completed.\Updated records: %1\Skipped records (PNR not found): %2',
+            'Fare alteration import completed.\Updated records: %1\Skipped/unchanged records: %2',
             UpdatedCount,
             SkippedCount);
     end;

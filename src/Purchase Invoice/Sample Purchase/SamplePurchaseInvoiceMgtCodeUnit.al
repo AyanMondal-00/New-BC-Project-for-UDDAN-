@@ -19,91 +19,124 @@
         ProcessRec: Record "Sample Purchase";
         FreshRec: Record "Sample Purchase";
         CreatedCount: Integer;
-        DuplicateCount: Integer;
+        UpdatedCount: Integer;
+        UnchangedCount: Integer;
+        PostedSkippedCount: Integer;
         ErrorCount: Integer;
         ErrorDetails: Text;
-        SummaryMsg: Text;
         ExistingInvoiceNo: Code[20];
+        RevisionTracking: Codeunit "AIRIQ Cost Revision Tracking";
     begin
         ProcessRec.Copy(SelectedSamplePurchase);
-
         if ProcessRec.IsEmpty() then begin
             Message('No Sample Purchase records selected.');
             exit;
         end;
 
-        if ProcessRec.FindSet(true) then
+        if ProcessRec.FindSet() then
             repeat
-                ExistingInvoiceNo := '';
-
-                // Re-read latest state from database with record locking to prevent concurrent race conditions
                 if FreshRec.Get(ProcessRec."Serial No.") then begin
                     FreshRec.LockTable();
                     FreshRec.Get(ProcessRec."Serial No.");
+                    ExistingInvoiceNo := '';
 
-                    // Verify record has not already been invoiced or posted concurrently
-                    if (FreshRec."Purchase Invoice No." <> '') or FreshRec."Invoice Posted" then begin
-                        DuplicateCount += 1;
-                        FreshRec."Select" := false;
-                        FreshRec.Modify(true);
-                        Commit();
-                    end else if PNRInvoiceExists(FreshRec.PNR, ExistingInvoiceNo) then begin
-                        DuplicateCount += 1;
-
-                        if ExistingInvoiceNo <> '' then begin
-                            FreshRec."Purchase Invoice No." := ExistingInvoiceNo;
+                    if FreshRec."Invoice Posted" then begin
+                        PostedSkippedCount += 1;
+                    end else if (FreshRec."Purchase Invoice No." <> '') and
+                                PurchHeaderExists(FreshRec."Purchase Invoice No.") then begin
+                        if FreshRec."Cost Revision" then begin
+                            UpdateDraftInvoicePrice(FreshRec, FreshRec."Purchase Invoice No.");
+                            FreshRec."Cost Revision" := false;
                             FreshRec."Select" := false;
                             FreshRec.Modify(true);
+                            UpdatedCount += 1;
                             Commit();
-                        end;
+                        end else
+                            UnchangedCount += 1;
+                    end else if PNRInvoiceExists(FreshRec.PNR, ExistingInvoiceNo) then begin
+                        // PNR may be in another draft or a posted document.
+                        if (ExistingInvoiceNo <> '') and PurchHeaderExists(ExistingInvoiceNo) then begin
+                            FreshRec."Purchase Invoice No." := ExistingInvoiceNo;
+                            if FreshRec."Cost Revision" then begin
+                                UpdateDraftInvoicePrice(FreshRec, ExistingInvoiceNo);
+                                FreshRec."Cost Revision" := false;
+                                FreshRec."Select" := false;
+                                FreshRec.Modify(true);
+                                UpdatedCount += 1;
+                            end else begin
+                                FreshRec."Select" := false;
+                                FreshRec.Modify(true);
+                                UnchangedCount += 1;
+                            end;
+                            Commit();
+                        end else
+                            PostedSkippedCount += 1;
                     end else begin
-                        if CreateSinglePurchaseInvoice(
-                            FreshRec,
-                            ErrorDetails)
-                        then begin
-                            CreatedCount += 1;
-
+                        if CreateSinglePurchaseInvoice(FreshRec, ErrorDetails) then begin
+                            // Opening is based on the first successfully created draft invoice.
+                            RevisionTracking.RecordInvoiceOpening(FreshRec);
+                            FreshRec."Cost Revision" := false;
                             FreshRec."Select" := false;
                             FreshRec.Modify(true);
+                            CreatedCount += 1;
                             Commit();
                         end else
                             ErrorCount += 1;
                     end;
                 end;
-
             until ProcessRec.Next() = 0;
 
-        // Result
-        if (CreatedCount > 0) and
-           (DuplicateCount = 0) and
-           (ErrorCount = 0) then begin
+        Message(
+            'Purchase Invoice Summary:\New invoices created: %1\Existing draft invoices price-updated: %2\Unchanged: %3\Posted/closed skipped: %4\Failed: %5%6',
+            CreatedCount, UpdatedCount, UnchangedCount, PostedSkippedCount,
+            ErrorCount, ErrorDetails);
+    end;
 
-            Message(
-                'Success! %1 Purchase Invoice(s) created successfully.',
-                CreatedCount);
+    local procedure UpdateDraftInvoicePrice(var Purchase: Record "Sample Purchase"; InvoiceNo: Code[20])
+    var
+        Line: Record "Purchase Line";
+        OldPurchase: Record "Sample Purchase";
+        RevisionTracking: Codeunit "AIRIQ Cost Revision Tracking";
+    begin
+        Line.LockTable();
+        Line.SetRange("Document Type", Line."Document Type"::Invoice);
+        Line.SetRange("Document No.", InvoiceNo);
+        Line.SetRange(Description, Purchase.PNR);
+        if not Line.FindFirst() then
+            Error('Draft purchase invoice %1 has no line for PNR %2.', InvoiceNo, Purchase.PNR);
+        if Line.Next() <> 0 then
+            Error('Draft invoice %1 has multiple lines for PNR %2; cannot update ambiguously.', InvoiceNo, Purchase.PNR);
+        Line.FindFirst();
 
-        end else if (CreatedCount = 0) and
-                   (DuplicateCount > 0) and
-                   (ErrorCount = 0) then begin
+        // Old invoice values are used only for a pre-upgrade invoice without history.
+        OldPurchase := Purchase;
+        OldPurchase."Base Fare" := Line."Sample Base Fare";
+        OldPurchase."Other Charges" := Line."Sample Other Charges";
+        OldPurchase."Total Pax" := Round(Line.Quantity, 1, '=');
+        OldPurchase.Rate := Line."Direct Unit Cost";
+        OldPurchase."Total Amount" := Line."Line Amount";
 
-            Message(
-                'Already Invoiced! All %1 selected record(s) have already been invoiced.',
-                DuplicateCount);
+        if Purchase."Total Pax" <= 0 then
+            Error('Pax must be positive for PNR %1.', Purchase.PNR);
+        if Purchase."Base Fare" < 0 then
+            Error('Base Fare cannot be negative for PNR %1.', Purchase.PNR);
+        if Purchase."Other Charges" < 0 then
+            Error('Other Charges cannot be negative for PNR %1.', Purchase.PNR);
 
-        end else begin
-            SummaryMsg :=
-                StrSubstNo(
-                    'Purchase Invoice Creation Summary:\- Created: %1\- Already Invoiced: %2\- Errors: %3',
-                    CreatedCount,
-                    DuplicateCount,
-                    ErrorCount);
+        Line.Validate(Quantity, Purchase."Total Pax");
+        // Match the original invoice creation price rule.
+        if Purchase."Other Charges" <> 0 then begin
+            Line.Validate("Direct Unit Cost", Purchase."Base Fare" + Purchase."Other Charges");
+            Line.Validate("Line Amount", (Purchase."Base Fare" + Purchase."Other Charges") * Purchase."Total Pax");
+        end else
+            Line.Validate("Direct Unit Cost", Purchase.Rate);
 
-            if ErrorCount > 0 then
-                SummaryMsg +=
-                    StrSubstNo('\Details:%1', ErrorDetails);
+        Line."Sample Base Fare" := Purchase."Base Fare";
+        Line."Sample Other Charges" := Purchase."Other Charges";
+        Line.Modify(true);
 
-            Message(SummaryMsg);
-        end;
+        // SAME transaction as the invoice line and staging flag update.
+        RevisionTracking.RecordInvoiceUpdate(OldPurchase, Purchase);
     end;
 
     procedure CreateAndPostPurchaseInvoices()

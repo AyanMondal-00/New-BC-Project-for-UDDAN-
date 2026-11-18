@@ -1,379 +1,134 @@
-
 codeunit 50542 "AIRIQ Cost Revision Tracking"
 {
+    // History is recorded ONLY after successful purchase invoice create/update.
     procedure GetEnabled(): Boolean
-    var
-        Setup: Record "AIRIQ Cost Rev User Setup";
+    var Setup: Record "AIRIQ Cost Rev User Setup";
     begin
-        if Setup.Get(
-            CopyStr(UserId(), 1, MaxStrLen(Setup."User ID"))) then
+        if Setup.Get(CopyStr(UserId(), 1, MaxStrLen(Setup."User ID"))) then
             exit(Setup."Cost Revision Enable");
-
         exit(false);
     end;
 
     procedure SetEnabled(NewEnabled: Boolean)
-    var
-        Setup: Record "AIRIQ Cost Rev User Setup";
-        CurrentUser: Code[100];
+    var Setup: Record "AIRIQ Cost Rev User Setup";
+        UserKey: Code[100];
     begin
-        CurrentUser :=
-            CopyStr(UserId(), 1, MaxStrLen(Setup."User ID"));
-
-        if Setup.Get(CurrentUser) then begin
+        UserKey := CopyStr(UserId(), 1, MaxStrLen(Setup."User ID"));
+        if Setup.Get(UserKey) then begin
             Setup."Cost Revision Enable" := NewEnabled;
             Setup.Modify(true);
         end else begin
             Setup.Init();
-            Setup."User ID" := CurrentUser;
+            Setup."User ID" := UserKey;
             Setup."Cost Revision Enable" := NewEnabled;
             Setup.Insert(true);
         end;
     end;
 
-    procedure SaveDedicatedRevision(
-        var Original: Record "Sample Purchase";
-        var Edited: Record "Sample Purchase")
-    var
-        CurrentPurchase: Record "Sample Purchase";
-        History: Record "AIRIQ Cost Revision History";
+    procedure RecordInvoiceOpening(Purchase: Record "Sample Purchase")
+    var History: Record "AIRIQ Cost Revision History";
     begin
-        if not GetEnabled() then
-            Error(
-                'Cost Revision Enable must be ON to save a dedicated cost revision.');
-
-        CurrentPurchase.LockTable();
-        CurrentPurchase.Get(Original."Serial No.");
-
-        // Prevent saving over another user's changes.
-        if CurrentPurchase.SystemModifiedAt <>
-           Original.SystemModifiedAt then
-            Error(
-                'Purchase %1 was modified by another session. Reopen Edit Cost Revision and try again.',
-                Original."Serial No.");
-
-        if CurrentPurchase.PNR <> Edited.PNR then
-            Error(
-                'PNR cannot be changed in the cost revision window.');
-
-        // Only Base Fare can be changed in the editor.
-        if (Original."Total Pax" <= 0) or
-           (Edited."Base Fare" < 0) then
-            Error(
-                'Enter positive Pax and nonnegative Base Fare.');
-
-        // Do not Validate Base Fare here.
-        // Its existing OnValidate recalculates Other Charges
-        // using the old Total Amount.
-
-        CurrentPurchase."Base Fare" :=
-            Edited."Base Fare";
-
-        // Preserve the original Pax and Other Charges.
-        CurrentPurchase."Total Pax" :=
-            Original."Total Pax";
-
-        CurrentPurchase."Other Charges" :=
-            Original."Other Charges";
-
-        // Rate = Base Fare + Other Charges.
-        CurrentPurchase.Rate :=
-            CurrentPurchase."Base Fare" +
-            Original."Other Charges";
-
-        // Total Amount = Rate * Total Pax.
-        CurrentPurchase.Validate(
-            "Total Amount",
-            CurrentPurchase.Rate * Original."Total Pax");
-
-        if CurrentPurchase."Other Charges" <>
-           Original."Other Charges" then
-            Error(
-                'Other Charges must remain unchanged during a cost revision.');
-
-        ValidateComplete(CurrentPurchase);
-
-        if not FinancialChanged(
-            Original, CurrentPurchase) then begin
-            Message(
-                'No financial values changed. Nothing to save.');
-            exit;
-        end;
-
-        // One final database modification.
-        CurrentPurchase.Modify(true);
-
-        History.SetRange(
-            "Purchase Serial No.",
-            Original."Serial No.");
-
-        // First revision creates Opening if necessary.
-        if History.IsEmpty() then
-            InsertOpening(Original);
-
-        InsertRevision(
-            CurrentPurchase,
-            Original."Base Fare",
-            Original."Other Charges",
-            Original.Rate,
-            Original."Total Amount",
-            Original."Total Pax",
-            'Dedicated Edit');
-
-        Message(
-            'Cost revision saved once for PNR %1.',
-            CurrentPurchase.PNR);
-    end;
-
-    procedure RecordInitialOpening(
-        PurchaseSerialNo: Code[20])
-    var
-        Purchase: Record "Sample Purchase";
-    begin
-        if not GetEnabled() then
-            Error('Cost Revision Enable must be ON.');
-
-        Purchase.Get(PurchaseSerialNo);
-
         ValidateComplete(Purchase);
-        InsertOpening(Purchase);
-
-        Message(
-            'Opening recorded for PNR %1 (if not already present).',
-            Purchase.PNR);
-    end;
-
-    procedure RecordExcelRevision(
-        var BeforePurchase: Record "Sample Purchase";
-        var AfterPurchase: Record "Sample Purchase")
-    var
-        History: Record "AIRIQ Cost Revision History";
-    begin
-        if not GetEnabled() then
-            exit;
-
-        if not FinancialChanged(
-            BeforePurchase, AfterPurchase) then
-            exit;
-
-        ValidateComplete(AfterPurchase);
-
-        History.SetRange(
-            "Purchase Serial No.",
-            AfterPurchase."Serial No.");
-
-        if History.IsEmpty() then
-            InsertOpening(BeforePurchase);
-
-        InsertRevision(
-            AfterPurchase,
-            BeforePurchase."Base Fare",
-            BeforePurchase."Other Charges",
-            BeforePurchase.Rate,
-            BeforePurchase."Total Amount",
-            BeforePurchase."Total Pax",
-            'Cost Revision Excel');
-    end;
-
-    local procedure FinancialChanged(
-        OldPurchase: Record "Sample Purchase";
-        NewPurchase: Record "Sample Purchase"): Boolean
-    begin
-        exit(
-            (OldPurchase."Base Fare" <>
-             NewPurchase."Base Fare") or
-
-            (OldPurchase."Other Charges" <>
-             NewPurchase."Other Charges") or
-
-            (OldPurchase.Rate <>
-             NewPurchase.Rate) or
-
-            (OldPurchase."Total Amount" <>
-             NewPurchase."Total Amount") or
-
-            (OldPurchase."Total Pax" <>
-             NewPurchase."Total Pax"));
-    end;
-
-    local procedure ValidateComplete(
-        Purchase: Record "Sample Purchase")
-    begin
-        Purchase.TestField(PNR);
-        Purchase.TestField("Serial No.");
-
-        if Purchase."Total Pax" <= 0 then
-            Error(
-                'Total Pax must be greater than zero for PNR %1.',
-                Purchase.PNR);
-
-        if Purchase."Total Amount" <= 0 then
-            Error(
-                'Total Amount must be greater than zero for PNR %1.',
-                Purchase.PNR);
-
-        if Purchase.Rate <= 0 then
-            Error(
-                'Rate must be greater than zero for PNR %1.',
-                Purchase.PNR);
-
-        if Purchase."Base Fare" < 0 then
-            Error(
-                'Base Fare cannot be negative for PNR %1.',
-                Purchase.PNR);
-    end;
-
-    local procedure InsertOpening(
-        Purchase: Record "Sample Purchase")
-    var
-        History: Record "AIRIQ Cost Revision History";
-    begin
         History.LockTable();
-
-        History.SetRange(
-            "Purchase Serial No.",
-            Purchase."Serial No.");
-
+        History.SetRange("Purchase Serial No.", Purchase."Serial No.");
         if not History.IsEmpty() then
             exit;
-
         History.Init();
-
-        FillCommon(
-            History,
-            Purchase,
-            0);
-
-        History."Transaction Type" :=
-            History."Transaction Type"::Opening;
-
-        History."Revision Source" :=
-            'Initial Tracking';
-
+        FillCommon(History, Purchase, 0);
+        History."Transaction Type" := History."Transaction Type"::Opening;
+        History."Revision Source" := 'Purchase Invoice Created';
         InsertWithNoSeries(History);
     end;
 
-    local procedure InsertRevision(
-        Purchase: Record "Sample Purchase";
+    procedure RecordInvoiceUpdate(OldPurchase: Record "Sample Purchase"; NewPurchase: Record "Sample Purchase")
+    var History: Record "AIRIQ Cost Revision History";
+        RevisionNumber: Integer;
         OldBaseFare: Decimal;
         OldCharges: Decimal;
         OldRate: Decimal;
         OldTotal: Decimal;
         OldPax: Integer;
-        SourceName: Text[50])
-    var
-        History: Record "AIRIQ Cost Revision History";
-        RevisionNumber: Integer;
     begin
+        ValidateComplete(NewPurchase);
         History.LockTable();
-
-        History.SetCurrentKey(
-            "Purchase Serial No.",
-            "Revision No.");
-
-        History.SetRange(
-            "Purchase Serial No.",
-            Purchase."Serial No.");
-
-        if History.FindLast() then
-            RevisionNumber :=
-                History."Revision No." + 1
-        else
-            Error(
-                'Opening history missing for PNR %1.',
-                Purchase.PNR);
-
+        History.SetCurrentKey("Purchase Serial No.", "Revision No.");
+        History.SetRange("Purchase Serial No.", NewPurchase."Serial No.");
+        if History.FindLast() then begin
+            RevisionNumber := History."Revision No." + 1;
+            // Last successfully invoiced values are the baseline, not staged values.
+            OldBaseFare := History."Revised Base Fare";
+            OldCharges := History."Revised Other Charges";
+            OldRate := History."Revised Rate";
+            OldTotal := History."Revised Total Amount";
+            OldPax := History."Total Pax";
+        end else begin
+            // For an old pre-upgrade draft invoice, reconstruct opening from its line.
+            RecordInvoiceOpening(OldPurchase);
+            RevisionNumber := 1;
+            OldBaseFare := OldPurchase."Base Fare";
+            OldCharges := OldPurchase."Other Charges";
+            OldRate := OldPurchase.Rate;
+            OldTotal := OldPurchase."Total Amount";
+            OldPax := OldPurchase."Total Pax";
+        end;
+        if (OldBaseFare = NewPurchase."Base Fare") and
+           (OldCharges = NewPurchase."Other Charges") and
+           (OldRate = NewPurchase.Rate) and
+           (OldTotal = NewPurchase."Total Amount") and
+           (OldPax = NewPurchase."Total Pax") then
+            exit;
         History.Init();
-
-        FillCommon(
-            History,
-            Purchase,
-            RevisionNumber);
-
-        History."Previous Base Fare" :=
-            OldBaseFare;
-
-        History."Previous Other Charges" :=
-            OldCharges;
-
-        History."Previous Rate" :=
-            OldRate;
-
-        History."Previous Total Amount" :=
-            OldTotal;
-
-        History."Previous Total Pax" :=
-            OldPax;
-
-        History."Fare Difference" :=
-            Purchase."Base Fare" - OldBaseFare;
-
+        FillCommon(History, NewPurchase, RevisionNumber);
+        History."Previous Base Fare" := OldBaseFare;
+        History."Previous Other Charges" := OldCharges;
+        History."Previous Rate" := OldRate;
+        History."Previous Total Amount" := OldTotal;
+        History."Previous Total Pax" := OldPax;
+        History."Fare Difference" := NewPurchase."Base Fare" - OldBaseFare;
         if History."Fare Difference" > 0 then
-            History."Transaction Type" :=
-                History."Transaction Type"::Increase
+            History."Transaction Type" := History."Transaction Type"::Increase
+        else if History."Fare Difference" < 0 then
+            History."Transaction Type" := History."Transaction Type"::Decrease
         else
-            if History."Fare Difference" < 0 then
-                History."Transaction Type" :=
-                    History."Transaction Type"::Decrease
-            else
-                History."Transaction Type" :=
-                    History."Transaction Type"::Adjustment;
-
-        History."Revision Source" :=
-            SourceName;
-
+            History."Transaction Type" := History."Transaction Type"::Adjustment;
+        History."Revision Source" := 'Purchase Invoice Updated';
         InsertWithNoSeries(History);
     end;
 
-    local procedure FillCommon(
-        var History: Record "AIRIQ Cost Revision History";
-        Purchase: Record "Sample Purchase";
-        RevisionNumber: Integer)
+    local procedure ValidateComplete(Purchase: Record "Sample Purchase")
     begin
-        History."Revision Date & Time" :=
-            CurrentDateTime();
-
-        History.PNR := Purchase.PNR;
-
-        // Keep the AirLine history feature.
-        History.AirLine := Purchase.Airline;
-
-        History."Revision No." :=
-            RevisionNumber;
-
-        History."Total Pax" :=
-            Purchase."Total Pax";
-
-        History."Revised Base Fare" :=
-            Purchase."Base Fare";
-
-        History."Revised Other Charges" :=
-            Purchase."Other Charges";
-
-        History."Revised Rate" :=
-            Purchase.Rate;
-
-        History."Revised Total Amount" :=
-            Purchase."Total Amount";
-
-        History."Changed By" :=
-            CopyStr(
-                UserId(),
-                1,
-                MaxStrLen(History."Changed By"));
-
-        History."Purchase Serial No." :=
-            Purchase."Serial No.";
+        Purchase.TestField(PNR);
+        Purchase.TestField("Serial No.");
+        if Purchase."Total Pax" <= 0 then
+            Error('Total Pax must be positive for PNR %1.', Purchase.PNR);
+        if Purchase."Total Amount" <= 0 then
+            Error('Total Amount must be positive for PNR %1.', Purchase.PNR);
+        if Purchase.Rate < 0 then
+            Error('Rate cannot be negative for PNR %1.', Purchase.PNR);
+        if Purchase."Base Fare" < 0 then
+            Error('Base Fare cannot be negative for PNR %1.', Purchase.PNR);
     end;
 
-    local procedure InsertWithNoSeries(
-        var History: Record "AIRIQ Cost Revision History")
-    var
-        NoSeries: Codeunit "No. Series";
+    local procedure FillCommon(var History: Record "AIRIQ Cost Revision History";
+                              Purchase: Record "Sample Purchase"; RevisionNumber: Integer)
     begin
-        History."Cost Revision No." :=
-            NoSeries.GetNextNo('CR');
+        History."Revision Date & Time" := CurrentDateTime();
+        History.PNR := Purchase.PNR;
+        History.AirLine := Purchase.Airline;
+        History."Revision No." := RevisionNumber;
+        History."Total Pax" := Purchase."Total Pax";
+        History."Revised Base Fare" := Purchase."Base Fare";
+        History."Revised Other Charges" := Purchase."Other Charges";
+        History."Revised Rate" := Purchase.Rate;
+        History."Revised Total Amount" := Purchase."Total Amount";
+        History."Changed By" := CopyStr(UserId(), 1, MaxStrLen(History."Changed By"));
+        History."Purchase Serial No." := Purchase."Serial No.";
+    end;
 
+    local procedure InsertWithNoSeries(var History: Record "AIRIQ Cost Revision History")
+    var NoSeries: Codeunit "No. Series";
+    begin
+        History."Cost Revision No." := NoSeries.GetNextNo('CR');
         History.Insert(true);
     end;
 }

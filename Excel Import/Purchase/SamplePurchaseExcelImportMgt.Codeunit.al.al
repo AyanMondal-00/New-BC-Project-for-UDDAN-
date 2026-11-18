@@ -29,6 +29,9 @@ codeunit 50330 "Sample Purchase Excel Import"
         TotalAmountColumn: Integer;
         TypeColumn: Integer;
         PNRValue: Text;
+        RevisionTracking: Codeunit "AIRIQ Cost Revision Tracking";
+        UpdatedCount: Integer;
+        BeforePurchase: Record "Sample Purchase";
     begin
         if not UploadIntoStream(
             'Select Sample Purchase Excel File',
@@ -81,92 +84,113 @@ codeunit 50330 "Sample Purchase Excel Import"
                 SkippedCount += 1;
             end else
                 if not ExistingPurchase.IsEmpty() then begin
-                    DuplicatePNRCount += 1;
-                    SkippedCount += 1;
+                    if RevisionTracking.GetEnabled() then begin
+                        ExistingPurchase.FindFirst();
+                        if ExistingPurchase."Invoice Posted" then
+                            Error('PNR %1 is posted. No price update is allowed.', PNRValue);
+                        BeforePurchase := ExistingPurchase;
+                        ExistingPurchase.Rate := GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, RateColumn));
+                        ExistingPurchase."Base Fare" := GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, BaseFareColumn));
+                        ExistingPurchase."Other Charges" := GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, OtherChargesColumn));
+                        ExistingPurchase."Total Amount" := GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, TotalAmountColumn));
+                        if (BeforePurchase.Rate <> ExistingPurchase.Rate) or
+                           (BeforePurchase."Base Fare" <> ExistingPurchase."Base Fare") or
+                           (BeforePurchase."Other Charges" <> ExistingPurchase."Other Charges") or
+                           (BeforePurchase."Total Amount" <> ExistingPurchase."Total Amount") then begin
+                            ExistingPurchase."Cost Revision" := true;
+                            ExistingPurchase.Modify(true);
+                            UpdatedCount += 1;
+                        end else
+                            SkippedCount += 1;
+                    end else begin
+                        DuplicatePNRCount += 1;
+                        SkippedCount += 1;
+                    end;
                 end else begin
 
-                // IMPORTANT:
-                // Reset the record completely for each Excel row.
-                // Init() alone does not clear the primary key.
-                Clear(SamplePurchase);
-                SamplePurchase.Init();
+                    // IMPORTANT:
+                    // Reset the record completely for each Excel row.
+                    // Init() alone does not clear the primary key.
+                    Clear(SamplePurchase);
+                    SamplePurchase.Init();
 
-                // Excel Sl. No. is intentionally ignored.
-                // BC will generate Serial No. automatically.
-                SamplePurchase."Serial No." := '';
+                    // Excel Sl. No. is intentionally ignored.
+                    // BC will generate Serial No. automatically.
+                    SamplePurchase."Serial No." := '';
 
-                SamplePurchase.Validate(
-                    "Purchase Date",
-                    GetDateTimeValue(
-                        GetCellValue(TempExcelBuffer, RowNo, PurchaseDateColumn)));
+                    SamplePurchase.Validate(
+                        "Purchase Date",
+                        GetDateTimeValue(
+                            GetCellValue(TempExcelBuffer, RowNo, PurchaseDateColumn)));
 
-                SamplePurchase.Validate(
-                    "Entry Date",
-                    GetDateTimeValue(
-                        GetCellValue(TempExcelBuffer, RowNo, EntryDateColumn)));
+                    SamplePurchase.Validate(
+                        "Entry Date",
+                        GetDateTimeValue(
+                            GetCellValue(TempExcelBuffer, RowNo, EntryDateColumn)));
 
-                SamplePurchase.Validate(
-                    Airline,
-                    CopyStr(
-                        GetCellValue(TempExcelBuffer, RowNo, AirlineColumn),
-                        1, 100));
+                    SamplePurchase.Validate(
+                        Airline,
+                        CopyStr(
+                            GetCellValue(TempExcelBuffer, RowNo, AirlineColumn),
+                            1, 100));
 
-                SamplePurchase.Validate(
-                    "Supplier ID",
-                    CopyStr(
-                        GetCellValue(TempExcelBuffer, RowNo, SupplierIDColumn),
-                        1, 20));
+                    SamplePurchase.Validate(
+                        "Supplier ID",
+                        CopyStr(
+                            GetCellValue(TempExcelBuffer, RowNo, SupplierIDColumn),
+                            1, 20));
 
-                SamplePurchase.Validate(
-                    PNR,
-                    CopyStr(UpperCase(PNRValue), 1, 10));
+                    SamplePurchase.Validate(
+                        PNR,
+                        CopyStr(UpperCase(PNRValue), 1, 10));
 
-                SamplePurchase.Validate(
-                    "Total Pax",
-                    GetIntegerValue(
-                        GetCellValue(TempExcelBuffer, RowNo, TotalPaxColumn)));
+                    SamplePurchase.Validate(
+                        "Total Pax",
+                        GetIntegerValue(
+                            GetCellValue(TempExcelBuffer, RowNo, TotalPaxColumn)));
 
-                SamplePurchase.Validate(
-                    "Travel Date",
-                    GetDateTimeValue(
-                        GetCellValue(TempExcelBuffer, RowNo, TravelDateColumn)));
+                    SamplePurchase.Validate(
+                        "Travel Date",
+                        GetDateTimeValue(
+                            GetCellValue(TempExcelBuffer, RowNo, TravelDateColumn)));
 
-                SamplePurchase.Validate(
-                    Sector,
-                    CopyStr(
-                        GetCellValue(TempExcelBuffer, RowNo, SectorColumn),
-                        1, 200));
+                    SamplePurchase.Validate(
+                        Sector,
+                        CopyStr(
+                            GetCellValue(TempExcelBuffer, RowNo, SectorColumn),
+                            1, 200));
 
-                // Excel values are copied as-is: NO financial recalculation.
-                SamplePurchase.Rate :=
-                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, RateColumn));
-                SamplePurchase."Base Fare" :=
-                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, BaseFareColumn));
-                SamplePurchase."Other Charges" :=
-                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, OtherChargesColumn));
-                SamplePurchase."Total Amount" :=
-                    GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, TotalAmountColumn));
+                    // Excel values are copied as-is: NO financial recalculation.
+                    SamplePurchase.Rate :=
+                        GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, RateColumn));
+                    SamplePurchase."Base Fare" :=
+                        GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, BaseFareColumn));
+                    SamplePurchase."Other Charges" :=
+                        GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, OtherChargesColumn));
+                    SamplePurchase."Total Amount" :=
+                        GetDecimalValue(GetCellValue(TempExcelBuffer, RowNo, TotalAmountColumn));
 
-                SamplePurchase.Validate(
-                    Type,
-                    CopyStr(
-                        GetCellValue(TempExcelBuffer, RowNo, TypeColumn),
-                        1, 50));
+                    SamplePurchase.Validate(
+                        Type,
+                        CopyStr(
+                            GetCellValue(TempExcelBuffer, RowNo, TypeColumn),
+                            1, 50));
 
-                // Runs Sample Purchase OnInsert trigger.
-                // Generates Serial No. using AIR-IQ-SP.
-                SamplePurchase.Insert(true);
+                    // Runs Sample Purchase OnInsert trigger.
+                    // Generates Serial No. using AIR-IQ-SP.
+                    SamplePurchase.Insert(true);
 
-                ImportedCount += 1;
+                    ImportedCount += 1;
                 end;
         end;
 
         Message(
-            'Sample Purchase Excel import completed.\Imported: %1\Skipped: %2\Blank PNR: %3\Duplicate PNR: %4',
+            'Sample Purchase Excel import completed.\Imported: %1\Skipped: %2\Blank PNR: %3\Duplicate PNR (toggle OFF): %4\Revised staging: %5',
             ImportedCount,
             SkippedCount,
             BlankPNRCount,
-            DuplicatePNRCount);
+            DuplicatePNRCount,
+            UpdatedCount);
     end;
 
     local procedure GetHeaderColumn(
