@@ -5,11 +5,7 @@ pageextension 50351 "Vendor Commission Card Ext" extends "Vendor Card"
     {
         addafter("Balance (LCY)")
         {
-            field("Vendor Commision"; Rec."Vendor Commision")
-            {
-                ApplicationArea = All;
-                ToolTip = 'Specifies the vendor commission amount.';
-            }
+
 
             field(PLB; Rec.PLB)
             {

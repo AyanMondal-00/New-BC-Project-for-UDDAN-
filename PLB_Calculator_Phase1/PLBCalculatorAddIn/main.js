@@ -167,7 +167,7 @@
     var rule =
       '<div class="fields">' +
       inp("Airline", "airline", "text", "") +
-      inp("Airline IDs (comma separated)", "ids", "text", "") +
+      inp("Airline IDs (auto from Vendor)", "ids", "text", "") +
       sel("Commission basis", "basis", [
         ["booking", "Booking date"],
         ["travel", "Travel (flown) date"],
@@ -178,7 +178,7 @@
         ["yq", "Other Charges"],
         ["both", "Base fare + Other Charges"],
       ]) +
-      inp("Commission %", "pct", "number", "0") +
+      inp("Commission % (Vendor PLB)", "pct", "number", "0") +
       inp("TDS % on commission", "tdspct", "number", "2") +
       inp("GST % on commission", "gstpct", "number", "18") +
       sel("Our state", "ourstate", stateOpts) +
@@ -207,7 +207,7 @@
       '<div class="fields">' +
       sel("Amounts from", "src", [
         ["manual", "Manual totals"],
-        ["posted", "BC posted documents (Phase 2)"],
+        ["posted", "BC posted documents"],
       ]) +
       sel("Transaction", "ttype", [
         ["purchase", "Purchase"],
@@ -257,7 +257,7 @@
       inp("Received on", "recdate", "date") +
       inp("Received in (bank / ID)", "recin", "text") +
       "</div>" +
-      '<div class="actions"><button class="primary" data-act="add">Add to statement preview</button><button data-act="reset">Clear amounts</button></div></div>';
+      '<div class="actions"><button class="primary" data-act="fetch">Fetch BC Posted Data</button><button data-act="add">Add to statement preview</button><button data-act="reset">Clear amounts</button></div></div>';
     var cols = [
       "Ref",
       "Airline",
@@ -300,6 +300,7 @@
     ["ptotal", "rtotal", "nbase", "nyq", "ntotal"].forEach(function (k) {
       get(k).readOnly = true;
     });
+    get("ourstate").value = "West Bengal";
     root.addEventListener("input", function (e) {
       if (e.target.matches("input,select")) calculate();
     });
@@ -310,7 +311,8 @@
       var button = e.target.closest("button[data-act]");
       if (!button) return;
       var action = button.dataset.act;
-      if (action === "add") add();
+      if (action === "fetch") fetchPosted();
+      else if (action === "add") add();
       else if (action === "reset") reset();
       else if (action === "clear") {
         rows = [];
@@ -343,15 +345,15 @@
     toggle("net", mode === "both");
     toggle("reversal", mode !== "purchase");
     var posted = src === "posted";
+    get("gstpct").value = "18";
+    get("gstpct").readOnly = true;
+    get("ids").readOnly = true;
+    get("pct").readOnly = true;
+    get("airstate").disabled = false; // Allow manual state selection
     ["pbase", "pyq", "rbase", "ryq"].forEach(function (k) {
       get(k).readOnly = posted;
     });
-    if (posted) {
-      set(
-        "message",
-        "BC posted-document retrieval is a Phase 2 placeholder. Select Manual totals to calculate.",
-      );
-    }
+
     var pb = mode !== "return" ? read("pbase") : 0,
       py = mode !== "return" ? read("pyq") : 0;
     var rb = mode !== "purchase" ? read("rbase") : 0,
@@ -469,13 +471,6 @@
     calculate();
   }
   function add() {
-    if (get("src").value !== "manual") {
-      set(
-        "message",
-        "Cannot add an unimplemented posted-data calculation. Switch to Manual totals.",
-      );
-      return;
-    }
     var r = calculate();
     rows.push(r);
     get("recdate").value = "";
@@ -606,13 +601,69 @@
     } else set("message", "Clipboard is unavailable in this client.");
   }
   window.AIRIQPLBMount = mount;
-  // The AL procedure SetPostedData can call this function in Phase 2.
+  function fetchPosted() {
+    if (get("src").value !== "posted") {
+      set("message", "Select Amounts from: BC posted documents first.");
+      return;
+    }
+    var payload = {
+      airline: get("airline").value.trim(),
+      basis: get("basis").value,
+      ttype: get("ttype").value,
+      ref: get("ref").value.trim(),
+      bfrom: get("bfrom").value,
+      bto: get("bto").value,
+      ffrom: get("ffrom").value,
+      fto: get("fto").value,
+    };
+    if (!payload.airline) {
+      set("message", "Type the exact Vendor name in Airline.");
+      return;
+    }
+    if (!window.Microsoft || !Microsoft.Dynamics || !Microsoft.Dynamics.NAV) {
+      set("message", "Business Central add-in bridge is not available.");
+      return;
+    }
+    set("message", "Fetching posted purchase lines and credit memo lines...");
+    Microsoft.Dynamics.NAV.InvokeExtensibilityMethod("PostedDataRequested", [
+      JSON.stringify(payload),
+    ]);
+  }
+  window.AIRIQPLBMount = mount;
   window.SetPostedData = function (payload) {
     try {
       var d = JSON.parse(payload);
-      set("message", d.message || "BC data response received.");
+      if (!d.ok) {
+        set("message", d.message || "Posted data could not be fetched.");
+        return;
+      }
+      get("ids").value = d.vendorNo || "";
+      get("pct").value = d.plbPct == null ? 0 : d.plbPct;
+      if (d.airlineState) {
+        var rawState = String(d.airlineState).trim();
+        if (rawState.toUpperCase() === "WB") rawState = "West Bengal";
+        var option = Array.prototype.find.call(
+          get("airstate").options,
+          function (o) {
+            return o.value.toLowerCase() === rawState.toLowerCase();
+          },
+        );
+        get("airstate").value = option ? option.value : "";
+      } else get("airstate").value = "";
+      get("pbase").value = d.pbase || 0;
+      get("pyq").value = d.pyq || 0;
+      get("rbase").value = d.rbase || 0;
+      get("ryq").value = d.ryq || 0;
+      calculate();
+      set(
+        "message",
+        (d.message || "Posted data fetched.") +
+          (!get("airstate").value
+            ? " Vendor state could not be matched to the calculator state list; verify GST type before using the result."
+            : ""),
+      );
     } catch (e) {
-      set("message", "Invalid BC response.");
+      set("message", "Invalid BC data response: " + e.message);
     }
   };
 })();
