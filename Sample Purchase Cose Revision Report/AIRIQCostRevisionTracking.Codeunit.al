@@ -123,6 +123,7 @@ codeunit 50542 "AIRIQ Cost Revision Tracking"
         History."Revised Total Amount" := Purchase."Total Amount";
         History."Changed By" := CopyStr(UserId(), 1, MaxStrLen(History."Changed By"));
         History."Purchase Serial No." := Purchase."Serial No.";
+        History."Purchase Invoice No." := Purchase."Purchase Invoice No.";
     end;
 
     local procedure InsertWithNoSeries(var History: Record "AIRIQ Cost Revision History")

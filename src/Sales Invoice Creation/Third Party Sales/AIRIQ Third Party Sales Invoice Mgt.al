@@ -1,3 +1,4 @@
+
 codeunit 50438 "Third Party Sales Invoice Mgt"
 {
     procedure CreateThirdPartySalesInvoices(
@@ -6,7 +7,9 @@ codeunit 50438 "Third Party Sales Invoice Mgt"
         CreateSalesInvoice: Codeunit "Third Party Sales Invoice";
         CreatedCount: Integer;
     begin
-        ThirdPartySales.SetRange("Select", true);
+        // Native selected rows are received from
+        // CurrPage.SetSelectionFilter().
+        // Do not filter by the Select checkbox.
 
         if ThirdPartySales.IsEmpty() then
             Error('Please select at least one Third Party Sales record.');
@@ -20,6 +23,7 @@ codeunit 50438 "Third Party Sales Invoice Mgt"
 
                 CreateSalesInvoice.CreateThirdPartySalesInvoice(ThirdPartySales);
                 CreatedCount += 1;
+
             until ThirdPartySales.Next() = 0;
         end;
 

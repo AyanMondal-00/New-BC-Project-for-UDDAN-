@@ -119,6 +119,11 @@ table 50541 "AIRIQ Cost Revision History"
             Caption = 'AirLine';
             DataClassification = CustomerContent;
         }
+        field(21; "Purchase Invoice No."; Code[20])
+        {
+            Caption = 'Purchase Invoice No.';
+            DataClassification = CustomerContent;
+        }
     }
 
     keys

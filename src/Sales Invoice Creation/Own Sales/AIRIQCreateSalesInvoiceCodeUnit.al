@@ -12,6 +12,7 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
     procedure CreateOwnSalesInvoice(var NormalSales: Record "Normal Sales")
     var
         SalesHeader: Record "Sales Header";
+        NoSeries: Codeunit "No. Series";
         SalesLine: Record "Sales Line";
         Customer: Record Customer;
         Item: Record Item;
@@ -100,6 +101,10 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
 
         SalesHeader."Document Type" :=
             SalesHeader."Document Type"::Invoice;
+
+        // Own Sales invoices use their dedicated document number series.
+        SalesHeader."No. Series" := 'AIR-IQ-OSI';
+        SalesHeader."No." := NoSeries.GetNextNo(SalesHeader."No. Series");
 
         SalesHeader.Insert(true);
 

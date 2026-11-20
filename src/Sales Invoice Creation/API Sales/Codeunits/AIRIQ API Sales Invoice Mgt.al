@@ -1,3 +1,4 @@
+
 codeunit 50436 "AIRIQ API Sales Invoice Mgt"
 {
     procedure CreateAPISalesInvoices(var APISales: Record "API Sales Format")
@@ -5,7 +6,9 @@ codeunit 50436 "AIRIQ API Sales Invoice Mgt"
         CreateSalesInvoice: Codeunit "AIRIQ Create API Sales Invoice";
         CreatedCount: Integer;
     begin
-        APISales.SetRange("Select", true);
+        // Native selected rows are received from
+        // CurrPage.SetSelectionFilter().
+        // Do not filter by the Select checkbox.
 
         if APISales.IsEmpty() then
             Error('Please select at least one API Sales record.');
@@ -19,6 +22,7 @@ codeunit 50436 "AIRIQ API Sales Invoice Mgt"
 
                 CreateSalesInvoice.CreateAPISalesInvoice(APISales);
                 CreatedCount += 1;
+
             until APISales.Next() = 0;
         end;
 

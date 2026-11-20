@@ -122,9 +122,10 @@ page 50541 "AIRIQ Cost Revision Statement"
                     ApplicationArea = All;
                 }
 
-                field("Purchase Serial No."; Rec."Purchase Serial No.")
+                field("Purchase Invoice No."; Rec."Purchase Invoice No.")
                 {
                     ApplicationArea = All;
+                    Editable = false;
                 }
             }
         }

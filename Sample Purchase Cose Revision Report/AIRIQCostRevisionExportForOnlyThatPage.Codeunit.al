@@ -133,9 +133,9 @@ codeunit 50543 "AIRIQ Cost Revision Export"
                     IsOpening);
 
                 AddText(
-                    ExcelBuffer,
-                    History."Purchase Serial No.",
-                    IsOpening);
+                         ExcelBuffer,
+                          History."Purchase Invoice No.",
+                          IsOpening);
 
             until History.Next() = 0;
 

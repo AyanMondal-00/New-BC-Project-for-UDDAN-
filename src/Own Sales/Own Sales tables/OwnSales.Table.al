@@ -258,13 +258,17 @@ table 50400 "Normal Sales"
                 NoSeries.GetNextNo('AIR-IQ-OS');
 
         if "API Calculation" then
-            CalculateAmounts();
+            CalculateAmounts()
+        else
+            CalculateManualAmounts();
     end;
 
     trigger OnModify()
     begin
         if "API Calculation" then
-            CalculateAmounts();
+            CalculateAmounts()
+        else
+            CalculateManualAmounts();
     end;
 
     // ==========================================
@@ -349,10 +353,11 @@ table 50400 "Normal Sales"
 
         TotalGST := CGST + SGST + IGST;
 
-        // NEW: OTHER CHARGES PER PASSENGER
+        // Other Charges = [Total Amount - {(Base Fare + GST Per Pax) * Pax}] / Pax
+        // CGST, SGST and IGST are stored as totals for all passengers.
         "Other Charges" :=
             Round(
-                ("Total Amount" - TotalBaseFare - TotalGST) / Pax,
+                ("Total Amount" - (("Base Fare" + (TotalGST / Pax)) * Pax)) / Pax,
                 0.01);
     end;
 
@@ -404,10 +409,11 @@ table 50400 "Normal Sales"
 
         TotalGST := CGST + SGST + IGST;
 
-        // NEW: OTHER CHARGES PER PASSENGER
+        // Other Charges = [Total Amount - {(Base Fare + GST Per Pax) * Pax}] / Pax
+        // CGST, SGST and IGST are stored as totals for all passengers.
         "Other Charges" :=
             Round(
-                ("Total Amount" - TotalBaseFare - TotalGST) / Pax,
+                ("Total Amount" - (("Base Fare" + (TotalGST / Pax)) * Pax)) / Pax,
                 0.01);
     end;
 
