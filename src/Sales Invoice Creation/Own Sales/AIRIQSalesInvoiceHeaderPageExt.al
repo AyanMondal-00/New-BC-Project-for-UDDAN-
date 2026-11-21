@@ -21,6 +21,12 @@ pageextension 50427 "Sales Invoice Header PgExt" extends "Sales Invoice"
                 ApplicationArea = All;
                 Editable = false;
             }
+            field("Invoice Number"; Rec."Invoice Number")
+            {
+                ApplicationArea = All;
+                Caption = 'Invoice Number';
+                Editable = false;
+            }
         }
     }
 }

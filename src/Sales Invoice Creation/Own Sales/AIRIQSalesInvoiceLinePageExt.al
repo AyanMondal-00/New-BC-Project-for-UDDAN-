@@ -50,6 +50,7 @@ pageextension 50428 "AIRIQ Sales Invoice Line PgExt"
                 ApplicationArea = All;
                 Editable = false;
             }
+
         }
     }
 }

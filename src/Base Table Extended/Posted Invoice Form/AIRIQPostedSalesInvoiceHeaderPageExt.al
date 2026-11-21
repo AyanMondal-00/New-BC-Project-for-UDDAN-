@@ -18,6 +18,12 @@ pageextension 50432 "AIRIQ Posted Sales Inv Header" extends "Posted Sales Invoic
             {
                 ApplicationArea = All;
             }
+            field("Invoice Number"; Rec."Invoice Number")
+            {
+                ApplicationArea = All;
+                Caption = 'Invoice Number';
+                Editable = false;
+            }
         }
     }
 }

@@ -240,41 +240,9 @@ codeunit 50333 "Sales Return Excel Import"
                             Cell(ExcelBuffer, RowNo, 23),
                             RowNo, 23);
 
-                    // Column 24: Base Fare
-                    SalesReturn."Base Fare" :=
-                        ParseDecimal(
-                            Cell(ExcelBuffer, RowNo, 24),
-                            RowNo, 24);
-
-                    // Column 25: Other Charges
-                    SalesReturn."Other Charges" :=
-                        ParseDecimal(
-                            Cell(ExcelBuffer, RowNo, 25),
-                            RowNo, 25);
-
-                    // Column 26: Taxable Value
-                    SalesReturn."Taxable Value" :=
-                        ParseDecimal(
-                            Cell(ExcelBuffer, RowNo, 26),
-                            RowNo, 26);
-
-                    // Column 27: CGST
-                    SalesReturn.CGST :=
-                        ParseDecimal(
-                            Cell(ExcelBuffer, RowNo, 27),
-                            RowNo, 27);
-
-                    // Column 28: SGST
-                    SalesReturn.SGST :=
-                        ParseDecimal(
-                            Cell(ExcelBuffer, RowNo, 28),
-                            RowNo, 28);
-
-                    // Column 29: IGST
-                    SalesReturn.IGST :=
-                        ParseDecimal(
-                            Cell(ExcelBuffer, RowNo, 29),
-                            RowNo, 29);
+                    // Columns 24-29 are legacy Excel fields. They are
+                    // intentionally ignored: actual financial data comes
+                    // from the matching Posted Sales Invoice on Insert(true).
 
                     // Column 30: Sold Value
                     SalesReturn."Sold Value" :=

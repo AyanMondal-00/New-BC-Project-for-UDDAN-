@@ -17,7 +17,12 @@ tableextension 50429 "AIRIQ Posted Sales Header Ext" extends "Sales Invoice Head
         field(50426; "Sales Type"; Option)
         {
             Caption = 'Sales Type';
-            OptionMembers = "Own Sales", "API Sales", "Third Party Sales";
+            OptionMembers = "Own Sales","API Sales","Third Party Sales";
+            DataClassification = CustomerContent;
+        }
+        field(50434; "Invoice Number"; Text[50])
+        {
+            Caption = 'Invoice Number';
             DataClassification = CustomerContent;
         }
     }

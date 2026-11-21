@@ -127,6 +127,8 @@ codeunit 50426 "AIRIQ Create Sales Invoice"
 
         SalesHeader."Sales Type" :=
             SalesHeader."Sales Type"::"Own Sales";
+        SalesHeader."Invoice Number" :=
+            NormalSales."Invoice Number";
 
         SalesHeader.Modify(true);
 

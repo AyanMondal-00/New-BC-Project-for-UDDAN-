@@ -49,6 +49,8 @@ codeunit 50437 "Third Party Sales Invoice"
         SalesHeader."AQ Number" := AQNumber;
         SalesHeader."Agency ID" := ThirdPartySales."Agency ID";
         SalesHeader."Sales Type" := SalesHeader."Sales Type"::"Third Party Sales";
+        SalesHeader."Invoice Number" :=
+        ThirdPartySales."Invoice Number";
         SalesHeader.Modify(true);
 
         Passenger.Reset();

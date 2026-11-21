@@ -9,6 +9,7 @@ table 50715 "AIRIQ SR Return Registry"
         {
             DataClassification = CustomerContent;
         }
+
         field(2; "Serial No."; Integer)
         {
             DataClassification = SystemMetadata;
@@ -123,7 +124,18 @@ codeunit 50716 "AIRIQ SR Integrity"
                 'Sales Return linked to Credit Memo %1 cannot be deleted.',
                 Rec."AIRIQ Memo No.");
 
+        // Remove passenger records when the staging parent is deleted.
+        RemovePassengers(Rec);
         Release(Rec);
+    end;
+
+    local procedure RemovePassengers(Source: Record "Sales Return")
+    var
+        Passenger: Record "Sales Return Passenger Name";
+    begin
+        Passenger.SetRange("Return No.", Source."Return No.");
+        Passenger.SetRange(PNR, Source.PNR);
+        Passenger.DeleteAll(true);
     end;
 
     [EventSubscriber(ObjectType::Table, Database::"Sales Return", 'OnAfterRenameEvent', '', false, false)]
@@ -179,5 +191,6 @@ permissionset 50715 "AIRIQ SALES RETURN"
         codeunit "AIRIQ SR Posting" = X,
         table "AIRIQ SR Return Registry" = X,
         tabledata "AIRIQ SR Return Registry" = Rimd,
-        tabledata "Sales Return" = Rm;
+        tabledata "Sales Return" = Rimd,
+        tabledata "Sales Return Passenger Name" = Rimd;
 }

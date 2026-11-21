@@ -100,6 +100,8 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         // Dynamic Sales Type
         SalesHeader."Sales Type" :=
             SalesHeader."Sales Type"::"API Sales";
+        SalesHeader."Invoice Number" :=
+          APISales."Invoice Number";
 
         SalesHeader.Modify(true);
 

@@ -24,7 +24,11 @@ codeunit 50471 "AIRIQ Posted Sales Invoice Mgt"
             SalesHeader."Agency ID";
 
         SalesInvHeader."Sales Type" :=
-            SalesHeader."Sales Type";
+        SalesHeader."Sales Type";
+
+        // Transfer Invoice Number to Posted Invoice
+        SalesInvHeader."Invoice Number" :=
+            SalesHeader."Invoice Number";
 
         SalesInvHeader.Modify(true);
     end;

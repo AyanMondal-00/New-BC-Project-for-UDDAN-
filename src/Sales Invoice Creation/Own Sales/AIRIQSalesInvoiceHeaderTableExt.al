@@ -20,5 +20,10 @@ tableextension 50424 "AIRIQ Sales Header Ext" extends "Sales Header"
             OptionMembers = "Own Sales","API Sales","Third Party Sales";
             DataClassification = CustomerContent;
         }
+        field(50434; "Invoice Number"; Text[50])
+        {
+            Caption = 'Invoice Number';
+            DataClassification = CustomerContent;
+        }
     }
 }

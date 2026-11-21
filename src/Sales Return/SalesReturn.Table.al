@@ -41,6 +41,11 @@ table 50403 "Sales Return"
         {
             Caption = 'Bill No.';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                RefreshPostedInvoiceData();
+            end;
         }
 
         field(4; "Invoice No."; Code[50])
@@ -95,11 +100,6 @@ table 50403 "Sales Return"
         {
             Caption = 'Type';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                CalculateGST();
-            end;
         }
 
         field(13; "Travel Date"; DateTime)
@@ -149,6 +149,11 @@ table 50403 "Sales Return"
         {
             Caption = 'PNR';
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                RefreshPostedInvoiceData();
+            end;
         }
 
         field(31; "Passenger Name"; Text[100])
@@ -176,7 +181,7 @@ table 50403 "Sales Return"
 
             trigger OnValidate()
             begin
-                CalculateGST();
+                RefreshPostedInvoiceData();
             end;
         }
 
@@ -184,22 +189,14 @@ table 50403 "Sales Return"
         {
             Caption = 'Base Fare';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                CalculateGST();
-            end;
+            Editable = false;
         }
 
         field(33; "Other Charges"; Decimal)
         {
             Caption = 'Other Charges';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-                CalculateGST();
-            end;
+            Editable = false;
         }
 
         field(22; "Taxable Value"; Decimal)
@@ -233,7 +230,6 @@ table 50403 "Sales Return"
         field(26; "Sold Value"; Decimal)
         {
             Caption = 'Sold Value';
-            Editable = false;
             DataClassification = CustomerContent;
         }
 
@@ -273,37 +269,21 @@ table 50403 "Sales Return"
 
     trigger OnInsert()
     begin
-        // Generate Serial No. centrally in the table.
         "Serial No." := GetNextSerialNo();
-        CalculateGST();
+        RefreshPostedInvoiceData();
     end;
 
     trigger OnModify()
     begin
-        CalculateGST();
+        // Also retry when an older unmatched record is edited.
+        RefreshPostedInvoiceData();
     end;
 
-    procedure CalculateGST()
+    procedure RefreshPostedInvoiceData()
     var
-        TotalBaseFare: Decimal;
-        TotalOtherCharges: Decimal;
+        Fetcher: Codeunit "AIRIQ SR Posted Invoice Fetch";
     begin
-        TotalBaseFare := "Base Fare" * PAX;
-        TotalOtherCharges := "Other Charges" * PAX;
-
-        if UpperCase(DelChr(Type, '<>', ' ')) = 'DOMESTIC' then begin
-            "Taxable Value" := TotalBaseFare * 0.05;
-            CGST := "Taxable Value" * 0.09;
-            SGST := "Taxable Value" * 0.09;
-            IGST := 0;
-        end else begin
-            "Taxable Value" := TotalBaseFare * 0.10;
-            CGST := 0;
-            SGST := 0;
-            IGST := "Taxable Value" * 0.18;
-        end;
-
-        "Sold Value" := TotalBaseFare + TotalOtherCharges;
+        Fetcher.Fetch(Rec);
     end;
 
     local procedure GetNextSerialNo(): Integer

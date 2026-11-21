@@ -6,6 +6,7 @@ page 50413 "Sales Return List"
     SourceTable = "Sales Return";
     ApplicationArea = All;
     UsageCategory = Lists;
+    DeleteAllowed = true;
 
     layout
     {
@@ -193,6 +194,21 @@ page 50413 "Sales Return List"
     {
         area(Processing)
         {
+            action("Refresh Posted Invoice Values")
+            {
+                ApplicationArea = All;
+                Caption = 'Refresh Posted Invoice Values';
+                Image = Refresh;
+                ToolTip = 'Retry Bill No. and PNR matching against the posted sales invoice without blocking an unmatched record.';
+
+                trigger OnAction()
+                begin
+                    Rec.RefreshPostedInvoiceData();
+                    Rec.Modify(true);
+                    CurrPage.Update(false);
+                end;
+            }
+
             action("Import from Excel")
             {
                 ApplicationArea = All;
