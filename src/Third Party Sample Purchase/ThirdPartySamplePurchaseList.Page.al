@@ -39,9 +39,12 @@ page 50662 "TP Sample Purchase List"
         {
             action(ImportExcel)
             {
-                Caption = 'Import from Excel'; ApplicationArea = All; Image = ImportExcel;
+                Caption = 'Import from Excel';
+                ApplicationArea = All;
+                Image = ImportExcel;
                 trigger OnAction()
-                var Importer: Codeunit "TP Purchase Excel Import";
+                var
+                    Importer: Codeunit "TP Purchase Excel Import";
                 begin
                     Importer.ImportFromExcel();
                     CurrPage.Update(false);
@@ -49,9 +52,13 @@ page 50662 "TP Sample Purchase List"
             }
             action(CreateItems)
             {
-                Caption = 'Create Items'; ApplicationArea = All; Image = NewItem;
+                Caption = 'Create Items';
+                ApplicationArea = All;
+                Image = NewItem;
                 trigger OnAction()
-                var Purchase: Record "Third Party Sample Purchase"; ItemMgt: Codeunit "Third Party Purchase Item Mgt";
+                var
+                    Purchase: Record "Third Party Sample Purchase";
+                    ItemMgt: Codeunit "Third Party Purchase Item Mgt";
                 begin
                     GetSelectedPurchases(Purchase);
                     ItemMgt.CreateItems(Purchase);
@@ -60,9 +67,13 @@ page 50662 "TP Sample Purchase List"
             }
             action(CreateInvoices)
             {
-                Caption = 'Create Purchase Invoice'; ApplicationArea = All; Image = CreateDocument;
+                Caption = 'Create Purchase Invoice';
+                ApplicationArea = All;
+                Image = CreateDocument;
                 trigger OnAction()
-                var Purchase: Record "Third Party Sample Purchase"; InvoiceMgt: Codeunit "TP Purchase Invoice Mgt";
+                var
+                    Purchase: Record "Third Party Sample Purchase";
+                    InvoiceMgt: Codeunit "TP Purchase Invoice Mgt";
                 begin
                     GetSelectedPurchases(Purchase);
                     InvoiceMgt.CreatePurchaseInvoices(Purchase);
@@ -71,54 +82,20 @@ page 50662 "TP Sample Purchase List"
             }
             action(CreateAndPost)
             {
-                Caption = 'Create & Post Purchase Invoices'; ApplicationArea = All; Image = Post;
+                Caption = 'Create & Post Purchase Invoices';
+                ApplicationArea = All;
+                Image = Post;
                 trigger OnAction()
-                var Purchase: Record "Third Party Sample Purchase"; InvoiceMgt: Codeunit "TP Purchase Invoice Mgt";
+                var
+                    Purchase: Record "Third Party Sample Purchase";
+                    InvoiceMgt: Codeunit "TP Purchase Invoice Mgt";
                 begin
                     GetSelectedPurchases(Purchase);
                     InvoiceMgt.CreateAndPostPurchaseInvoices(Purchase);
                     CurrPage.Update(false);
                 end;
             }
-            action(SelectByEntryDate)
-            {
-                Caption = 'Select by Entry Date'; ApplicationArea = All; Image = SelectField;
-                trigger OnAction()
-                var DateDialog: Page "TP Purchase Date Dialog"; Purchase: Record "Third Party Sample Purchase"; FromDate: Date; ToDate: Date; Count: Integer;
-                begin
-                    if DateDialog.RunModal() <> Action::OK then exit;
-                    DateDialog.GetDates(FromDate, ToDate);
-                    Purchase.SetRange("Entry Date", CreateDateTime(FromDate, 0T), CreateDateTime(ToDate, 235959.999T));
-                    if Purchase.FindSet(true) then
-                        repeat
-                            if not Purchase.Select then begin
-                                Purchase.Select := true;
-                                Purchase.Modify(true);
-                                Count += 1;
-                            end;
-                        until Purchase.Next() = 0;
-                    CurrPage.Update(false);
-                    Message('%1 record(s) selected.', Count);
-                end;
-            }
-            action(DeselectAll)
-            {
-                Caption = 'Deselect All'; ApplicationArea = All; Image = CancelAllLines;
-                trigger OnAction()
-                var Purchase: Record "Third Party Sample Purchase"; Count: Integer;
-                begin
-                    Purchase.SetRange(Select, true);
-                    if Purchase.FindSet(true) then
-                        repeat
-                            Purchase.Select := false;
-                            Purchase.Modify(true);
-                            Count += 1;
-                        until Purchase.Next() = 0;
-                    CurrPage.Update(false);
-                    Message('%1 record(s) deselected.', Count);
-                end;
-            }
-        }
+        }   
     }
 
     local procedure GetSelectedPurchases(var Purchase: Record "Third Party Sample Purchase")
@@ -128,9 +105,4 @@ page 50662 "TP Sample Purchase List"
             Error('Select at least one Third Party Sample Purchase record.');
     end;
 
-    trigger OnNewRecord(BelowxRec: Boolean)
-    begin
-        if Rec."Serial No." = 0 then
-            Rec."Serial No." := Rec.PreviewNextSerialNo();
-    end;
 }

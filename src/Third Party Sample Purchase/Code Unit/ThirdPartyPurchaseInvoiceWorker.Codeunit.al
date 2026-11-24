@@ -1,7 +1,11 @@
+
 codeunit 50668 "TP Purchase Inv Worker"
 {
     TableNo = "Third Party Sample Purchase";
-    Permissions = tabledata "Purchase Header" = rimd, tabledata "Purchase Line" = rimd;
+
+    Permissions =
+        tabledata "Purchase Header" = rimd,
+        tabledata "Purchase Line" = rimd;
 
     trigger OnRun()
     var
@@ -13,103 +17,246 @@ codeunit 50668 "TP Purchase Inv Worker"
         InvoiceNoMgt: Codeunit "AIRIQ Invoice No. Mgt";
         ExistingNo: Code[20];
     begin
+        // STEP 1: GET SELECTED PURCHASE RECORD
         Purchase.LockTable();
         Purchase.Get(Rec."Serial No.");
-        if Purchase."Invoice Posted" or (Purchase."Purchase Invoice No." <> '') then
-            Error('Serial No. %1 already has purchase invoice %2.', Purchase."Serial No.", Purchase."Purchase Invoice No.");
-        Purchase.ValidateSource();
-        ResolveVendor(Purchase, Vendor);
-        ResolveItem(Purchase, Item);
-        if ConflictingInvoiceExists(Purchase, '', ExistingNo) then
-            Error('A purchase invoice for PNR %1 already exists: %2.', Purchase.PNR, ExistingNo);
 
+        // STEP 2: PREVENT DUPLICATE INVOICE
+        if Purchase."Invoice Posted" or
+           (Purchase."Purchase Invoice No." <> '') then
+            Error(
+                'Serial No. %1 already has purchase invoice %2.',
+                Purchase."Serial No.",
+                Purchase."Purchase Invoice No.");
+
+        // STEP 3: FINAL VALIDATION
+        // Incomplete manual entries are allowed in staging.
+        // Mandatory validation runs only during invoice creation.
+        Purchase.ValidateSource();
+
+        // STEP 4: RESOLVE VENDOR
+        ResolveVendor(Purchase, Vendor);
+
+        // STEP 5: RESOLVE ITEM
+        ResolveItem(Purchase, Item);
+
+        // STEP 6: CHECK EXISTING INVOICES
+        if ConflictingInvoiceExists(Purchase, '', ExistingNo) then
+            Error(
+                'A purchase invoice for PNR %1 already exists: %2.',
+                Purchase.PNR,
+                ExistingNo);
+
+        // STEP 7: CREATE PURCHASE INVOICE HEADER
         Header.Init();
-        Header."Document Type" := Header."Document Type"::Invoice;
+
+        Header."Document Type" :=
+            Header."Document Type"::Invoice;
+
+        // Standard BC Purchase Invoice No. Series
         Header.Insert(true);
-        Header.Validate("Buy-from Vendor No.", Vendor."No.");
-        Header.Validate("Document Date", DT2Date(Purchase."Purchase Date"));
-        Header.Validate("Vendor Invoice No.", InvoiceNoMgt.GetNextInvoiceNo());
+
+        Header.Validate(
+            "Buy-from Vendor No.",
+            Vendor."No.");
+
+        Header.Validate(
+            "Document Date",
+            DT2Date(Purchase."Purchase Date"));
+
+        // Existing Vendor Invoice Number Logic
+        Header.Validate(
+            "Vendor Invoice No.",
+            InvoiceNoMgt.GetNextInvoiceNo());
+
         Header.Modify(true);
 
+        // STEP 8: CREATE PURCHASE INVOICE LINE
         Line.Init();
-        Line."Document Type" := Header."Document Type";
-        Line."Document No." := Header."No.";
+
+        Line."Document Type" :=
+            Header."Document Type";
+
+        Line."Document No." :=
+            Header."No.";
+
         Line."Line No." := 10000;
+
         Line.Insert(true);
-        Line.Validate(Type, Line.Type::Item);
-        Line.Validate("No.", Item."No.");
+
+        Line.Validate(
+            Type,
+            Line.Type::Item);
+
+        Line.Validate(
+            "No.",
+            Item."No.");
+
         Line.Description := Purchase.PNR;
-        Line.Validate("Location Code", 'SILIGURI');
-        Line.Validate(Quantity, Purchase."Total Pax");
-        Line.Validate("Direct Unit Cost", Purchase.Rate);
-        Line."Sample Purchase Date" := Purchase."Purchase Date";
-        Line."Sample Entry Date" := Purchase."Entry Date";
-        Line."Sample Travel Date" := Purchase."Travel Date";
-        Line."Sample Airline" := Purchase.Airline;
-        Line."Sample Sector" := Purchase.Sector;
-        Line."Sample Flight Type" := Purchase.Type;
-        Line."Sample Supplier ID" := Purchase."Supplier ID";
+
+        Line.Validate(
+            "Location Code",
+            'SILIGURI');
+
+        Line.Validate(
+            Quantity,
+            Purchase."Total Pax");
+
+        Line.Validate(
+            "Direct Unit Cost",
+            Purchase.Rate);
+
+        // STEP 9: PURCHASE DETAILS MAPPING
+        Line."Sample Purchase Date" :=
+            Purchase."Purchase Date";
+
+        Line."Sample Entry Date" :=
+            Purchase."Entry Date";
+
+        Line."Sample Travel Date" :=
+            Purchase."Travel Date";
+
+        Line."Sample Airline" :=
+            Purchase.Airline;
+
+        Line."Sample Sector" :=
+            Purchase.Sector;
+
+        Line."Sample Flight Type" :=
+            Purchase.Type;
+
+        Line."Sample Supplier ID" :=
+            Purchase."Supplier ID";
+
         Line.Modify(true);
 
-        Purchase."Purchase Invoice No." := Header."No.";
+        // STEP 10: UPDATE STAGING STATUS
+        Purchase."Purchase Invoice No." :=
+            Header."No.";
+
         Purchase."Invoice Created" := true;
         Purchase."Item Created" := true;
         Purchase."Select" := false;
+
         Purchase.Modify(true);
+
         Rec := Purchase;
     end;
 
-    local procedure ResolveVendor(Purchase: Record "Third Party Sample Purchase"; var Vendor: Record Vendor)
+    // ==========================================
+    // VENDOR RESOLUTION
+    // ==========================================
+
+    local procedure ResolveVendor(
+        Purchase: Record "Third Party Sample Purchase";
+        var Vendor: Record Vendor)
     begin
-        if Vendor.Get(Purchase."Supplier ID") then exit;
+        if Vendor.Get(Purchase."Supplier ID") then
+            exit;
+
         Vendor.SetRange(Name, Purchase.Airline);
+
         if not Vendor.FindFirst() then
-            Error('Vendor not found for Supplier ID %1 or Airline %2.', Purchase."Supplier ID", Purchase.Airline);
+            Error(
+                'Vendor not found for Supplier ID %1 or Airline %2.',
+                Purchase."Supplier ID",
+                Purchase.Airline);
     end;
 
-    local procedure ResolveItem(Purchase: Record "Third Party Sample Purchase"; var Item: Record Item)
+    // ==========================================
+    // ITEM RESOLUTION
+    // ==========================================
+
+    local procedure ResolveItem(
+        Purchase: Record "Third Party Sample Purchase";
+        var Item: Record Item)
     begin
-        if Item.Get(Purchase.PNR) then exit;
+        if Item.Get(Purchase.PNR) then
+            exit;
+
         Item.SetRange(Description, Purchase.PNR);
+
         if not Item.FindFirst() then
-            Error('Item for PNR %1 not found. Run Create Items first.', Purchase.PNR);
+            Error(
+                'Item for PNR %1 not found. Run Create Items first.',
+                Purchase.PNR);
     end;
 
-    procedure ConflictingInvoiceExists(Purchase: Record "Third Party Sample Purchase"; CurrentInvoiceNo: Code[20]; var ExistingNo: Code[20]): Boolean
+    // ==========================================
+    // DUPLICATE INVOICE PROTECTION
+    // ==========================================
+
+    procedure ConflictingInvoiceExists(
+        Purchase: Record "Third Party Sample Purchase";
+        CurrentInvoiceNo: Code[20];
+        var ExistingNo: Code[20]): Boolean
     var
         Sample: Record "Sample Purchase";
         Other: Record "Third Party Sample Purchase";
         OpenLine: Record "Purchase Line";
         PostedLine: Record "Purch. Inv. Line";
     begin
+        // Check Normal Sample Purchase
         Sample.SetRange(PNR, Purchase.PNR);
-        Sample.SetFilter("Purchase Invoice No.", '<>%1', '');
+
+        Sample.SetFilter(
+            "Purchase Invoice No.",
+            '<>%1',
+            '');
+
         if Sample.FindFirst() then begin
             ExistingNo := Sample."Purchase Invoice No.";
             exit(true);
         end;
+
+        // Check Other Third-Party Purchase Records
         Other.SetRange(PNR, Purchase.PNR);
-        Other.SetFilter("Serial No.", '<>%1', Purchase."Serial No.");
-        Other.SetFilter("Purchase Invoice No.", '<>%1', '');
+
+        Other.SetFilter(
+            "Serial No.",
+            '<>%1',
+            Purchase."Serial No.");
+
+        Other.SetFilter(
+            "Purchase Invoice No.",
+            '<>%1',
+            '');
+
         if Other.FindFirst() then begin
             ExistingNo := Other."Purchase Invoice No.";
             exit(true);
         end;
-        OpenLine.SetRange("Document Type", OpenLine."Document Type"::Invoice);
-        OpenLine.SetRange(Description, Purchase.PNR);
+
+        // Check Unposted Purchase Invoice Lines
+        OpenLine.SetRange(
+            "Document Type",
+            OpenLine."Document Type"::Invoice);
+
+        OpenLine.SetRange(
+            Description,
+            Purchase.PNR);
+
         if CurrentInvoiceNo <> '' then
-            OpenLine.SetFilter("Document No.", '<>%1', CurrentInvoiceNo);
-        if OpenLine.FindSet() then
-            repeat
-                ExistingNo := OpenLine."Document No.";
-                exit(true);
-            until OpenLine.Next() = 0;
-        PostedLine.SetRange(Description, Purchase.PNR);
-        if PostedLine.FindSet() then
-            repeat
-                ExistingNo := PostedLine."Document No.";
-                exit(true);
-            until PostedLine.Next() = 0;
+            OpenLine.SetFilter(
+                "Document No.",
+                '<>%1',
+                CurrentInvoiceNo);
+
+        if OpenLine.FindFirst() then begin
+            ExistingNo := OpenLine."Document No.";
+            exit(true);
+        end;
+
+        // Check Posted Purchase Invoice Lines
+        PostedLine.SetRange(
+            Description,
+            Purchase.PNR);
+
+        if PostedLine.FindFirst() then begin
+            ExistingNo := PostedLine."Document No.";
+            exit(true);
+        end;
+
         exit(false);
     end;
 }

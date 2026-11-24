@@ -71,17 +71,14 @@ codeunit 50663 "TP Purchase Excel Import"
     [TryFunction]
     local procedure ParseRow(var Buffer: Record "Excel Buffer" temporary; RowNo: Integer; var Purchase: Record "Third Party Sample Purchase")
     var
-        ImportedSerial: Integer;
         SuppliedTotal: Decimal;
         HasTotal: Boolean;
         Item: Record Item;
         PNRText: Text;
     begin
         Purchase.Init();
-        if Cell(Buffer, RowNo, 1) <> '' then
-            if not Evaluate(ImportedSerial, Cell(Buffer, RowNo, 1)) then
-                Error('Serial No. must be an integer.');
-        // Source serial is read for validation, then independently allocated on insert.
+        // Column A (Serial No.) is intentionally ignored.
+        // The table generates the TP-P number during Insert(true).
         Purchase.Validate("Purchase Date", DateTimeCell(Cell(Buffer, RowNo, 2)));
         Purchase.Validate("Entry Date", DateTimeCell(Cell(Buffer, RowNo, 3)));
         Purchase.Airline := CopyStr(Cell(Buffer, RowNo, 4), 1, MaxStrLen(Purchase.Airline));
@@ -121,11 +118,22 @@ codeunit 50663 "TP Purchase Excel Import"
         Header: Text;
         Col: Integer;
     begin
-        Headers.Add('Serial No.'); Headers.Add('Purchase Date'); Headers.Add('Entry Date');
-        Headers.Add('Airline'); Headers.Add('Supplier ID'); Headers.Add('Select');
-        Headers.Add('Invoice Created'); Headers.Add('Invoice Posted'); Headers.Add('Item Created');
-        Headers.Add('PNR'); Headers.Add('Total Pax'); Headers.Add('Travel Date');
-        Headers.Add('Sector'); Headers.Add('Type'); Headers.Add('Rate'); Headers.Add('Total Amount');
+        Headers.Add('Serial No.');
+        Headers.Add('Purchase Date');
+        Headers.Add('Entry Date');
+        Headers.Add('Airline');
+        Headers.Add('Supplier ID');
+        Headers.Add('Select');
+        Headers.Add('Invoice Created');
+        Headers.Add('Invoice Posted');
+        Headers.Add('Item Created');
+        Headers.Add('PNR');
+        Headers.Add('Total Pax');
+        Headers.Add('Travel Date');
+        Headers.Add('Sector');
+        Headers.Add('Type');
+        Headers.Add('Rate');
+        Headers.Add('Total Amount');
         for Col := 1 to 16 do begin
             Header := Headers.Get(Col);
             if UpperCase(Cell(Buffer, 1, Col)) <> UpperCase(Header) then
@@ -134,7 +142,8 @@ codeunit 50663 "TP Purchase Excel Import"
     end;
 
     local procedure IsBlankRow(var Buffer: Record "Excel Buffer" temporary; RowNo: Integer): Boolean
-    var Col: Integer;
+    var
+        Col: Integer;
     begin
         for Col := 1 to 16 do
             if Cell(Buffer, RowNo, Col) <> '' then exit(false);
@@ -149,14 +158,16 @@ codeunit 50663 "TP Purchase Excel Import"
     end;
 
     local procedure IntegerCell(Value: Text): Integer
-    var Result: Integer;
+    var
+        Result: Integer;
     begin
         if not Evaluate(Result, Value) then Error('Invalid integer "%1".', Value);
         exit(Result);
     end;
 
     local procedure DecimalCell(Value: Text): Decimal
-    var Result: Decimal;
+    var
+        Result: Decimal;
     begin
         if not Evaluate(Result, Value) then Error('Invalid decimal "%1".', Value);
         exit(Result);
@@ -165,9 +176,12 @@ codeunit 50663 "TP Purchase Excel Import"
     local procedure BooleanCell(Value: Text): Boolean
     begin
         case UpperCase(Value) of
-            '', 'NO', 'FALSE', '0': exit(false);
-            'YES', 'TRUE', '1': exit(true);
-            else Error('Invalid status "%1". Use Yes or No.', Value);
+            '', 'NO', 'FALSE', '0':
+                exit(false);
+            'YES', 'TRUE', '1':
+                exit(true);
+            else
+                Error('Invalid status "%1". Use Yes or No.', Value);
         end;
     end;
 
@@ -200,8 +214,11 @@ codeunit 50663 "TP Purchase Excel Import"
                 ClockParts := TimePart.Split(':');
                 if (Parts.Count <> 3) or (ClockParts.Count < 2) or (ClockParts.Count > 3) then
                     Error('Invalid date/time "%1".', Value);
-                DayNo := IntegerCell(Parts.Get(1)); MonthNo := IntegerCell(Parts.Get(2)); YearNo := IntegerCell(Parts.Get(3));
-                HourNo := IntegerCell(ClockParts.Get(1)); MinuteNo := IntegerCell(ClockParts.Get(2));
+                DayNo := IntegerCell(Parts.Get(1));
+                MonthNo := IntegerCell(Parts.Get(2));
+                YearNo := IntegerCell(Parts.Get(3));
+                HourNo := IntegerCell(ClockParts.Get(1));
+                MinuteNo := IntegerCell(ClockParts.Get(2));
                 if ClockParts.Count = 3 then SecondNo := IntegerCell(ClockParts.Get(3));
                 if (HourNo > 23) or (MinuteNo > 59) or (SecondNo > 59) or (HourNo < 0) or (MinuteNo < 0) or (SecondNo < 0) then
                     Error('Invalid time "%1".', TimePart);
