@@ -158,7 +158,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>e-Invoice  ·  SAMPLE — NOT VALID FOR GST</Value>
+                    <Value>=IIF(Len(Trim(First(Fields!IRN.Value, "DataSet_Result") &amp; "")) &gt; 0, "e-Invoice · IRN available", "IRN not available")</Value>
                     <Style>
                       <FontFamily>DejaVu Sans</FontFamily>
                       <FontSize>6pt</FontSize>
@@ -406,7 +406,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value>e-Invoice status</Value>
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>7.2pt</FontSize>
@@ -432,7 +432,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value>=First(Fields!EInvoiceStatus.Value, "DataSet_Result")</Value>
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>7.2pt</FontSize>
@@ -477,7 +477,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value>QR Code</Value>
+                        <Value>QR Code not displayed</Value>
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>5.25pt</FontSize>
@@ -894,7 +894,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value />
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>8.25pt</FontSize>
@@ -907,7 +907,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value />
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>8.25pt</FontSize>
@@ -943,7 +943,7 @@
                         </Style>
                       </TextRun>
                       <TextRun>
-                        <Value></Value>
+                        <Value />
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>7.5pt</FontSize>
@@ -1071,7 +1071,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value />
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>8.25pt</FontSize>
@@ -1084,7 +1084,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value />
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>8.25pt</FontSize>
@@ -1120,7 +1120,7 @@
                         </Style>
                       </TextRun>
                       <TextRun>
-                        <Value></Value>
+                        <Value />
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>7.5pt</FontSize>
@@ -2735,7 +2735,7 @@
                   <Paragraph>
                     <TextRuns>
                       <TextRun>
-                        <Value></Value>
+                        <Value>=First(Fields!BankIFSC.Value, "DataSet_Result")</Value>
                         <Style>
                           <FontFamily>DejaVu Sans</FontFamily>
                           <FontSize>7.5pt</FontSize>
@@ -3377,7 +3377,7 @@
             </Filters>
           </Tablix>
         </ReportItems>
-        <Style></Style>
+        <Style />
       </Body>
       <Width>21.0cm</Width>
       <Page>
@@ -3451,6 +3451,12 @@
         </Field>
         <Field Name="BankAccount">
           <DataField>BankAccount</DataField>
+        </Field>
+        <Field Name="BankIFSC">
+          <DataField>BankIFSC</DataField>
+        </Field>
+        <Field Name="EInvoiceStatus">
+          <DataField>EInvoiceStatus</DataField>
         </Field>
         <Field Name="Website">
           <DataField>Website</DataField>

@@ -35,7 +35,23 @@ tableextension 50425 "AIRIQ Sales Line Ext" extends "Sales Line"
             trigger OnValidate()
             var
                 CalculateTax: Codeunit "Calculate Tax";
+                NormalizedFlightType: Text[50];
             begin
+                // AIRIQ GST FIX:
+                // Normalize Flight Type before GST calculation.
+                NormalizedFlightType :=
+                    UpperCase(
+                        DelChr(Rec.FlightType, '<>', ' '));
+
+                case NormalizedFlightType of
+                    'DOMESTIC':
+                        Rec.FlightType := 'Domestic';
+
+                    'INTERNATIONAL':
+                        Rec.FlightType := 'International';
+                end;
+
+                // Existing GST calculation logic.
                 if Rec.IsTemporary() then
                     exit;
 
