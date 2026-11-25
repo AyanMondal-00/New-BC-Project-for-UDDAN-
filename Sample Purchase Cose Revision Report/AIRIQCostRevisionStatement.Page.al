@@ -1,7 +1,7 @@
 
 page 50541 "AIRIQ Cost Revision Statement"
 {
-    Caption = 'AIR IQ Reconcilation Statement';
+    Caption = 'AIRIQ Cost Revision Statement';
     PageType = List;
     SourceTable = "AIRIQ Cost Revision History";
     SourceTableView = sorting(PNR, "Revision No.") order(ascending);
