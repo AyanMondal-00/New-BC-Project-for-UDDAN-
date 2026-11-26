@@ -12,6 +12,11 @@ codeunit 50432 "Third Party Sales Excel Import"
         RowNo: Integer;
         LastRowNo: Integer;
         ImportedCount: Integer;
+        ExcelValidation: Codeunit "AIRIQ Excel Validation Mgt.";
+        PrecheckPassenger: Record "Third Party Passenger Name";
+        PrecheckPNR: Text;
+        PrecheckLinkText: Text;
+        PrecheckLinkValid: Boolean;
         SkippedCount: Integer;
         DuplicateCount: Integer;
         DateColumn: Integer;
@@ -57,6 +62,31 @@ codeunit 50432 "Third Party Sales Excel Import"
             UploadInStream, SheetName);
 
         TempExcelBuffer.ReadSheet();
+
+        // Phase 1A: collect all header errors without writing business records.
+        ExcelValidation.Initialize();
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Date', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Invoice Number', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Agency ID', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Agency Name', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Ref No./AQ Number', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Select', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Sales Invoice Created', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'PNR', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'View Passenger', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Passenger ID', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Passenger Type', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Pax', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Travel Date', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Sector', false, false, false);
+        ExcelValidation.CheckHeaderName(TempExcelBuffer, 'Type', false, false, false);
+        ExcelValidation.CheckRateHeader(TempExcelBuffer);
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(TempExcelBuffer, 'Third Party Sales', FileName, SheetName);
+            TempExcelBuffer.CloseBook();
+            exit;
+        end;
+
 
         TempExcelBuffer.Reset();
 
@@ -120,6 +150,39 @@ codeunit 50432 "Third Party Sales Excel Import"
             GetRateHeaderColumn(TempExcelBuffer);
 
         // Import Excel rows.
+        // Phase 1B: scan the complete data sheet before allocating serial numbers or inserting records.
+        // Existing blank/instruction-row handling is preserved. Duplicate rows are validated too;
+        // the original duplicate skip logic below still decides which valid rows are inserted.
+        for RowNo := 2 to LastRowNo do begin
+            PrecheckPNR := DelChr(GetCellValue(TempExcelBuffer, RowNo, PNRColumn), '<>', ' ');
+            PrecheckLinkText := GetCellValue(TempExcelBuffer, RowNo, RefNoColumn);
+            if PrecheckPNR <> '' then begin
+                ExcelValidation.CheckPassengerRow(RowNo, PrecheckPNR, GetCellValue(TempExcelBuffer, RowNo, PaxColumn), GetCellValue(TempExcelBuffer, RowNo, PassengerColumn), GetCellValue(TempExcelBuffer, RowNo, PassengerIDColumn), GetCellValue(TempExcelBuffer, RowNo, PassengerTypeColumn), PaxColumn, PassengerColumn, PassengerIDColumn, PassengerTypeColumn);
+                PrecheckLinkValid := Evaluate(RefNoValue, PrecheckLinkText);
+                if PrecheckLinkValid then
+                    PrecheckLinkValid := RefNoValue <> 0;
+                if not PrecheckLinkValid then
+                    ExcelValidation.AddIssue(RowNo, RefNoColumn, PrecheckPNR, 0, 'Ref No./AQ Number', PrecheckLinkText, 'Reference number is invalid, blank or zero.', 'Enter a valid non-zero reference number.');
+                if PrecheckLinkValid then begin
+                    ExistingThirdPartySales.Reset();
+                    ExistingThirdPartySales.SetRange("Ref No./AQ Number", RefNoValue);
+                    if ExistingThirdPartySales.IsEmpty() then begin
+                        PrecheckPassenger.Reset();
+                        PrecheckPassenger.SetRange("Ref No./AQ Number", RefNoValue);
+                        PrecheckPassenger.SetRange(PNR, CopyStr(PrecheckPNR, 1, 10));
+                        if not PrecheckPassenger.IsEmpty() then
+                            ExcelValidation.AddIssue(RowNo, PassengerColumn, PrecheckPNR, 0, 'Existing Passenger Records', PrecheckLinkText, 'Passenger records already exist for this reference and PNR.', 'Resolve the existing passenger records in BC before importing.');
+                    end;
+                end;
+            end;
+        end;
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(TempExcelBuffer, 'Third Party Sales', FileName, SheetName);
+            TempExcelBuffer.CloseBook();
+            exit;
+        end;
+
+        // Phase 2: original import logic. Do not skip a late passenger validation failure.
         for RowNo := 2 to LastRowNo do begin
 
             PNRValue := DelChr(
@@ -176,11 +239,8 @@ codeunit 50432 "Third Party Sales Excel Import"
                             PassengerTypeColumn);
 
                     // Validate passenger counts and values.
-                    CheckPassengers(
-                        PassengerNamesValue,
-                        PassengerIDsValue,
-                        PassengerTypesValue,
-                        RowNo);
+                    if not TryCheckPassengerRow(GetCellValue(TempExcelBuffer, RowNo, PaxColumn), PassengerNamesValue, PassengerIDsValue, PassengerTypesValue, RowNo, RefNoValue, CopyStr(PNRValue, 1, 10)) then
+                        Error('Excel row %1: %2', RowNo, GetLastErrorText());
 
                     Clear(ThirdPartySales);
                     ThirdPartySales.Init();
@@ -717,6 +777,25 @@ codeunit 50432 "Third Party Sales Excel Import"
     end;
 
     // Validate passenger Name, ID and Type.
+    [TryFunction]
+    local procedure TryCheckPassengerRow(PaxText: Text; NamesText: Text; IDsText: Text; TypesText: Text; RowNo: Integer; LinkNo: BigInteger; PNRValue: Text[10])
+    var
+        PaxValue: Integer;
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+        ExistingPassenger: Record "Third Party Passenger Name";
+        Names: List of [Text];
+    begin
+        if not Evaluate(PaxValue, PaxText) then
+            Error('Invalid or blank PAX.');
+        CheckPassengers(NamesText, IDsText, TypesText, RowNo);
+        Names := SplitValues(NamesText);
+        PaxValidation.CheckExactCount(PaxValue, Names.Count());
+        ExistingPassenger.SetRange("Ref No./AQ Number", LinkNo);
+        ExistingPassenger.SetRange(PNR, PNRValue);
+        if not ExistingPassenger.IsEmpty() then
+            Error('Passenger records already exist for this reference and PNR. Resolve existing records before importing.');
+    end;
+
     local procedure CheckPassengers(
         NamesText: Text;
         IDsText: Text;
@@ -778,6 +857,9 @@ codeunit 50432 "Third Party Sales Excel Import"
                     IDValue,
                     RowNo,
                     I);
+
+            if NumericID <= 0 then
+                Error('Passenger ID must be greater than 0 at Excel row %1, passenger %2.', RowNo, I);
         end;
     end;
 

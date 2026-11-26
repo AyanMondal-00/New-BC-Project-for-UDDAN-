@@ -105,14 +105,22 @@ page 50413 "Sales Return List"
                     ApplicationArea = All;
                     Caption = 'View Passenger';
                     Editable = false;
+                    DrillDown = true;
 
                     trigger OnDrillDown()
                     var
                         PassengerList: Page "Sales Return Passenger List";
                     begin
+                        if Rec.Pax <= 0 then
+                            Error('First enter Pax count.');
+
+                        if Rec."Return No." = '' then
+                            Error('Return No. is blank.');
+
                         PassengerList.SetReturnNoAndPNR(
                             Rec."Return No.",
                             Rec.PNR);
+                        PassengerList.SetExpectedPax(Rec.Pax);
                         PassengerList.RunModal();
                     end;
                 }
@@ -130,6 +138,18 @@ page 50413 "Sales Return List"
                 field(PAX; Rec.PAX)
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    var
+                        Passenger: Record "Sales Return Passenger Name";
+                        PaxValidation: Codeunit "AIRIQ Pax Validation";
+                    begin
+                        if (Rec.Pax <> xRec.Pax) and (Rec."Return No." <> '') then begin
+                            Passenger.SetRange("Return No.", Rec."Return No.");
+                            Passenger.SetRange(PNR, Rec.PNR);
+                            PaxValidation.NotifyPaxChange(Rec.Pax, Passenger.Count());
+                        end;
+                    end;
                 }
 
                 field("Base Fare"; Rec."Base Fare")

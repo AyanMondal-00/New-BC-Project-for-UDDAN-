@@ -4,6 +4,11 @@ permissionset 50300 GeneratedPermission
 {
     Assignable = true;
     Permissions =
+        codeunit "AIRIQ Pax Validation" = X,
+        table "AIRIQ Excel Validation Buffer" = X,
+        tabledata "AIRIQ Excel Validation Buffer" = RIMD,
+        page "AIRIQ Excel Validation Errors" = X,
+        codeunit "AIRIQ Excel Validation Mgt." = X,
         tabledata "AIRIQ AQPR Reservation" = RIMD,
         tabledata "AIRIQ SR Return Registry" = RIMD,
         tabledata "AIRIQ Invoice Counter" = RIMD,

@@ -12,6 +12,11 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         RowNo: Integer;
         LastRowNo: Integer;
         ImportedCount: Integer;
+        ExcelValidation: Codeunit "AIRIQ Excel Validation Mgt.";
+        PrecheckPassenger: Record "Own Sales Passenger Name";
+        PrecheckPNR: Text;
+        PrecheckLinkText: Text;
+        PrecheckLinkValid: Boolean;
         SkippedCount: Integer;
         DuplicateCount: Integer;
         PNRValue: Text;
@@ -42,6 +47,38 @@ codeunit 50430 "Own Sales Excel Import Mgt."
 
         TempExcelBuffer.ReadSheet();
 
+        // Phase 1A: collect all header errors without writing business records.
+        ExcelValidation.Initialize();
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 1, 'Serial No.', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 2, 'Date', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 3, 'Invoice Number', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 4, 'Agency ID', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 5, 'Agency Name', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 6, 'Ref No./AQ Number', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 7, 'Select', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 8, 'Sales Invoice Created', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 9, 'PNR', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 10, 'View Passenger', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 11, 'Passenger ID', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 12, 'Passenger Type', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 13, 'Pax', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 14, 'Travel Date', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 15, 'Sector', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 16, 'Type', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 17, 'Base Fare', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 18, 'Other Charges', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 19, 'Taxable Basis', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 20, 'CGST', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 21, 'SGST', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 22, 'IGST', false);
+        ExcelValidation.CheckHeaderPosition(TempExcelBuffer, 23, 'Total Amount', false);
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(TempExcelBuffer, 'Own Sales', FileName, SheetName);
+            TempExcelBuffer.CloseBook();
+            exit;
+        end;
+
+
         CheckHeaders(TempExcelBuffer);
 
         TempExcelBuffer.Reset();
@@ -55,6 +92,39 @@ codeunit 50430 "Own Sales Excel Import Mgt."
             Error(
                 'No data rows found. Row 1 must contain the column headers.');
 
+        // Phase 1B: scan the complete data sheet before allocating serial numbers or inserting records.
+        // Existing blank/instruction-row handling is preserved. Duplicate rows are validated too;
+        // the original duplicate skip logic below still decides which valid rows are inserted.
+        for RowNo := 2 to LastRowNo do begin
+            PrecheckPNR := GetCellValue(TempExcelBuffer, RowNo, 9);
+            PrecheckLinkText := GetCellValue(TempExcelBuffer, RowNo, 6);
+            if PrecheckPNR <> '' then begin
+                ExcelValidation.CheckPassengerRow(RowNo, PrecheckPNR, GetCellValue(TempExcelBuffer, RowNo, 13), GetCellValue(TempExcelBuffer, RowNo, 10), GetCellValue(TempExcelBuffer, RowNo, 11), GetCellValue(TempExcelBuffer, RowNo, 12), 13, 10, 11, 12);
+                PrecheckLinkValid := Evaluate(RefNoValue, PrecheckLinkText);
+                if PrecheckLinkValid then
+                    PrecheckLinkValid := RefNoValue <> 0;
+                if not PrecheckLinkValid then
+                    ExcelValidation.AddIssue(RowNo, 6, PrecheckPNR, 0, 'Ref No./AQ Number', PrecheckLinkText, 'Reference number is invalid, blank or zero.', 'Enter a valid non-zero reference number.');
+                if PrecheckLinkValid then begin
+                    ExistingNormalSales.Reset();
+                    ExistingNormalSales.SetRange("Ref No./AQ Number", RefNoValue);
+                    if ExistingNormalSales.IsEmpty() then begin
+                        PrecheckPassenger.Reset();
+                        PrecheckPassenger.SetRange("Ref No./AQ Number", RefNoValue);
+                        PrecheckPassenger.SetRange(PNR, CopyStr(PrecheckPNR, 1, 10));
+                        if not PrecheckPassenger.IsEmpty() then
+                            ExcelValidation.AddIssue(RowNo, 10, PrecheckPNR, 0, 'Existing Passenger Records', PrecheckLinkText, 'Passenger records already exist for this reference and PNR.', 'Resolve the existing passenger records in BC before importing.');
+                    end;
+                end;
+            end;
+        end;
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(TempExcelBuffer, 'Own Sales', FileName, SheetName);
+            TempExcelBuffer.CloseBook();
+            exit;
+        end;
+
+        // Phase 2: original import logic. Do not skip a late passenger validation failure.
         for RowNo := 2 to LastRowNo do begin
 
             PNRValue := GetCellValue(
@@ -98,11 +168,8 @@ codeunit 50430 "Own Sales Excel Import Mgt."
                             TempExcelBuffer, RowNo, 12);
 
                     // Validate all passenger values first
-                    CheckPassengers(
-                        PassengerNamesValue,
-                        PassengerIDsValue,
-                        PassengerTypesValue,
-                        RowNo);
+                    if not TryCheckPassengerRow(GetCellValue(TempExcelBuffer, RowNo, 13), PassengerNamesValue, PassengerIDsValue, PassengerTypesValue, RowNo, RefNoValue, CopyStr(PNRValue, 1, 10)) then
+                        Error('Excel row %1: %2', RowNo, GetLastErrorText());
 
                     Clear(NormalSales);
                     NormalSales.Init();
@@ -457,6 +524,25 @@ codeunit 50430 "Own Sales Excel Import Mgt."
         exit(Result);
     end;
 
+    [TryFunction]
+    local procedure TryCheckPassengerRow(PaxText: Text; NamesText: Text; IDsText: Text; TypesText: Text; RowNo: Integer; LinkNo: BigInteger; PNRValue: Text[10])
+    var
+        PaxValue: Integer;
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+        ExistingPassenger: Record "Own Sales Passenger Name";
+        Names: List of [Text];
+    begin
+        if not Evaluate(PaxValue, PaxText) then
+            Error('Invalid or blank PAX.');
+        CheckPassengers(NamesText, IDsText, TypesText, RowNo);
+        Names := SplitValues(NamesText);
+        PaxValidation.CheckExactCount(PaxValue, Names.Count());
+        ExistingPassenger.SetRange("Ref No./AQ Number", LinkNo);
+        ExistingPassenger.SetRange(PNR, PNRValue);
+        if not ExistingPassenger.IsEmpty() then
+            Error('Passenger records already exist for this reference and PNR. Resolve existing records before importing.');
+    end;
+
     local procedure CheckPassengers(
         NamesText: Text;
         IDsText: Text;
@@ -513,6 +599,9 @@ codeunit 50430 "Own Sales Excel Import Mgt."
                 Error(
                     'Invalid Passenger ID "%1" at Excel row %2, passenger %3.',
                     IDValue, RowNo, I);
+
+            if NumericID <= 0 then
+                Error('Passenger ID must be greater than 0 at Excel row %1, passenger %2.', RowNo, I);
         end;
     end;
 

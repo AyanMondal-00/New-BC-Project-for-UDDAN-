@@ -10,6 +10,8 @@ codeunit 50420 "Own Sales API Mgt."
         RecordCount: Integer;
         ImportedCount: Integer;
         SkippedCount: Integer;
+        PassengerRejectedCount: Integer;
+        PassengerRejectReasons: Text;
         RefNoValue: Integer;
         ResponseText: Text;
         SkippedRefNos: Text;
@@ -126,6 +128,13 @@ codeunit 50420 "Own Sales API Mgt."
             );
 
             if ExistingNormalSales.FindFirst() then begin
+                if not TempPassengerMgt.TryValidatePassengerRow(RowObject, RefNoValue, true, ExistingNormalSales.Pax, ExistingNormalSales.PNR) then begin
+                    PassengerRejectedCount += 1;
+                    PassengerRejectReasons += StrSubstNo('Ref No. %1: %2\', RefNoValue, GetLastErrorText());
+                    ClearLastError();
+                    continue;
+                end;
+
                 // Skip existing record
                 SkippedCount += 1;
 
@@ -151,6 +160,13 @@ codeunit 50420 "Own Sales API Mgt."
                     PnrText
                 );
             end else begin
+                if not TempPassengerMgt.TryValidatePassengerRow(RowObject, RefNoValue, false, 0, '') then begin
+                    PassengerRejectedCount += 1;
+                    PassengerRejectReasons += StrSubstNo('Ref No. %1: %2\', RefNoValue, GetLastErrorText());
+                    ClearLastError();
+                    continue;
+                end;
+
                 // Clear previous record state
                 Clear(NormalSales);
                 NormalSales.Reset();
@@ -290,5 +306,8 @@ codeunit 50420 "Own Sales API Mgt."
                 ToDateText,
                 ImportedCount
             );
+
+        if PassengerRejectedCount > 0 then
+            Message('Passenger validation rejected %1 API row(s):\%2', PassengerRejectedCount, PassengerRejectReasons);
     end;
 }

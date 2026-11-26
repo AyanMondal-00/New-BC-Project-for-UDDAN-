@@ -12,6 +12,11 @@ codeunit 50475 "TP Sales Return Excel Import"
         RowNo: Integer;
         LastRowNo: Integer;
         ImportedCount: Integer;
+        ExcelValidation: Codeunit "AIRIQ Excel Validation Mgt.";
+        PrecheckPassenger: Record "TP Sales Return Passenger";
+        PrecheckPNR: Text;
+        PrecheckLinkText: Text;
+        PrecheckLinkValid: Boolean;
         DuplicateCount: Integer;
         SkippedCount: Integer;
         ReturnNoValue: Code[50];
@@ -40,6 +45,43 @@ codeunit 50475 "TP Sales Return Excel Import"
         ExcelBuffer.OpenBookStream(UploadStream, SheetName);
         ExcelBuffer.ReadSheet();
 
+        // Phase 1A: collect all header errors without writing business records.
+        ExcelValidation.Initialize();
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 1, 'Serial No.', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 2, 'Entry Date', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 3, 'Bill No.', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 4, 'Invoice No.', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 5, 'Return No.', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 6, 'Agency ID', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 7, 'A/C Name', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 8, 'Country', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 9, 'State', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 10, 'City', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 11, 'Sector', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 12, 'Type', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 13, 'Travel Date', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 14, 'Time', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 15, 'Airline', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 16, 'Airline Code', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 17, 'PNR', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 18, 'View Passenger', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 19, 'Passenger ID', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 20, 'Passenger Type', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 21, 'Narration', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 22, 'PAX', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 23, 'RATE', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 24, 'Sold Value', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 25, 'XXLN Charges', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 26, 'Refund Amount', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 27, 'Sale Type', false);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 28, 'Supplier', false);
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(ExcelBuffer, 'Third Party Sales Return', FileName, SheetName);
+            ExcelBuffer.CloseBook();
+            exit;
+        end;
+
+
         CheckHeaders(ExcelBuffer);
 
         ExcelBuffer.Reset();
@@ -50,6 +92,40 @@ codeunit 50475 "TP Sales Return Excel Import"
 
         LastRowNo := ExcelBuffer."Row No.";
 
+        // Phase 1B: scan the complete data sheet before allocating serial numbers or inserting records.
+        // Existing blank/instruction-row handling is preserved. Duplicate rows are validated too;
+        // the original duplicate skip logic below still decides which valid rows are inserted.
+        for RowNo := 2 to LastRowNo do begin
+            PrecheckPNR := GetCellValue(ExcelBuffer, RowNo, 17);
+            PrecheckLinkText := GetCellValue(ExcelBuffer, RowNo, 5);
+            if (not IsBlankRow(ExcelBuffer, RowNo)) and (not IsInstructionRow(ExcelBuffer, RowNo)) then begin
+                ExcelValidation.CheckPassengerRow(RowNo, PrecheckPNR, GetCellValue(ExcelBuffer, RowNo, 22), GetCellValue(ExcelBuffer, RowNo, 18), GetCellValue(ExcelBuffer, RowNo, 19), GetCellValue(ExcelBuffer, RowNo, 20), 22, 18, 19, 20);
+                ReturnNoValue := CopyStr(PrecheckLinkText, 1, MaxStrLen(ReturnNoValue));
+                PrecheckLinkValid := ReturnNoValue <> '';
+                if not PrecheckLinkValid then
+                    ExcelValidation.AddIssue(RowNo, 5, PrecheckPNR, 0, 'Return No.', PrecheckLinkText, 'Return No. is blank.', 'Enter the return number.');
+                if PrecheckLinkValid then begin
+                    ExistingReturn.Reset();
+                    ExistingReturn.SetRange("Return No.", ReturnNoValue);
+                    if ExistingReturn.IsEmpty() then begin
+                        if PrecheckPNR = '' then
+                            ExcelValidation.AddIssue(RowNo, 17, PrecheckPNR, 0, 'PNR', '', 'PNR is blank.', 'Enter the PNR.');
+                        PrecheckPassenger.Reset();
+                        PrecheckPassenger.SetRange("Return No.", ReturnNoValue);
+                        PrecheckPassenger.SetRange(PNR, CopyStr(PrecheckPNR, 1, 50));
+                        if not PrecheckPassenger.IsEmpty() then
+                            ExcelValidation.AddIssue(RowNo, 18, PrecheckPNR, 0, 'Existing Passenger Records', PrecheckLinkText, 'Passenger records already exist for this reference and PNR.', 'Resolve the existing passenger records in BC before importing.');
+                    end;
+                end;
+            end;
+        end;
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(ExcelBuffer, 'Third Party Sales Return', FileName, SheetName);
+            ExcelBuffer.CloseBook();
+            exit;
+        end;
+
+        // Phase 2: original import logic. Do not skip a late passenger validation failure.
         for RowNo := 2 to LastRowNo do begin
             if not IsBlankRow(ExcelBuffer, RowNo) then begin
 
@@ -91,11 +167,9 @@ codeunit 50475 "TP Sales Return Excel Import"
                         TypesValue :=
                             GetCellValue(ExcelBuffer, RowNo, 20);
 
-                        CheckPassengers(
-                            NamesValue,
-                            IDsValue,
-                            TypesValue,
-                            RowNo);
+                        if not TryCheckPassengerRow(GetCellValue(ExcelBuffer, RowNo, 22), NamesValue, IDsValue, TypesValue, RowNo, ReturnNoValue, PNRValue) then
+
+                            Error('Excel row %1: %2', RowNo, GetLastErrorText());
 
                         Clear(SalesReturn);
                         SalesReturn.Init();
@@ -543,6 +617,25 @@ codeunit 50475 "TP Sales Return Excel Import"
         exit(Result);
     end;
 
+    [TryFunction]
+    local procedure TryCheckPassengerRow(PaxText: Text; NamesText: Text; IDsText: Text; TypesText: Text; RowNo: Integer; LinkNo: Code[50]; PNRValue: Text[50])
+    var
+        PaxValue: Integer;
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+        ExistingPassenger: Record "TP Sales Return Passenger";
+        Names: List of [Text];
+    begin
+        if not Evaluate(PaxValue, PaxText) then
+            Error('Invalid or blank PAX.');
+        CheckPassengers(NamesText, IDsText, TypesText, RowNo);
+        Names := SplitValues(NamesText);
+        PaxValidation.CheckExactCount(PaxValue, Names.Count());
+        ExistingPassenger.SetRange("Return No.", LinkNo);
+        ExistingPassenger.SetRange(PNR, PNRValue);
+        if not ExistingPassenger.IsEmpty() then
+            Error('Passenger records already exist for this reference and PNR. Resolve existing records before importing.');
+    end;
+
     local procedure CheckPassengers(
         NamesText: Text;
         IDsText: Text;
@@ -597,6 +690,9 @@ codeunit 50475 "TP Sales Return Excel Import"
                 Error(
                     'Invalid Passenger ID %1 at row %2.',
                     IDValue, RowNo);
+
+            if NumericID <= 0 then
+                Error('Passenger ID must be greater than 0 at Excel row %1, passenger %2.', RowNo, I);
         end;
     end;
 

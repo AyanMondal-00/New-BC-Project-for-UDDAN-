@@ -14,6 +14,11 @@ codeunit 50453 "API Sales Excel Import Mgt."
         RowNo: Integer;
         LastRow: Integer;
         ImportedCount: Integer;
+        ExcelValidation: Codeunit "AIRIQ Excel Validation Mgt.";
+        PrecheckPassenger: Record "API Sales Passenger Name";
+        PrecheckPNR: Text;
+        PrecheckLinkText: Text;
+        PrecheckLinkValid: Boolean;
         DuplicateCount: Integer;
         BlankCount: Integer;
         AQNumber: BigInteger;
@@ -44,6 +49,33 @@ codeunit 50453 "API Sales Excel Import Mgt."
         ExcelBuffer.OpenBookStream(InStream, SheetName);
         ExcelBuffer.ReadSheet();
 
+        // Phase 1A: collect all header errors without writing business records.
+        ExcelValidation.Initialize();
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 1, 'Serial No.', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 2, 'Date', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 3, 'Invoice Number', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 4, 'Agency ID', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 5, 'Agency Name', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 6, 'Ref No./AQ Number', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 7, 'Select', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 8, 'Sales Invoice Created', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 9, 'PNR', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 10, 'View Passenger', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 11, 'Passenger ID', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 12, 'Passenger Type', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 13, 'Pax', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 14, 'Travel Date', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 15, 'Sector', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 16, 'Type', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 17, 'Rate', true);
+        ExcelValidation.CheckHeaderPosition(ExcelBuffer, 18, 'Total Amount', true);
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(ExcelBuffer, 'API Sales', FileName, SheetName);
+            ExcelBuffer.CloseBook();
+            exit;
+        end;
+
+
         CheckHeaders(ExcelBuffer);
 
         ExcelBuffer.Reset();
@@ -56,6 +88,45 @@ codeunit 50453 "API Sales Excel Import Mgt."
         if LastRow < 2 then
             Error('No data rows found in Excel.');
 
+        // Phase 1B: scan the complete data sheet before allocating serial numbers or inserting records.
+        // Existing blank/instruction-row handling is preserved. Duplicate rows are validated too;
+        // the original duplicate skip logic below still decides which valid rows are inserted.
+        for RowNo := 2 to LastRow do begin
+            PrecheckPNR := CopyStr(GetCellText(ExcelBuffer, RowNo, 9), 1, 10);
+            PrecheckLinkText := GetCellText(ExcelBuffer, RowNo, 6);
+            if (PrecheckPNR <> '') or (PrecheckLinkText <> '') then begin
+                ExcelValidation.CheckPassengerRow(RowNo, PrecheckPNR, GetCellText(ExcelBuffer, RowNo, 13), GetCellText(ExcelBuffer, RowNo, 10), GetCellText(ExcelBuffer, RowNo, 11), GetCellText(ExcelBuffer, RowNo, 12), 13, 10, 11, 12);
+                PrecheckLinkValid := Evaluate(AQNumber, PrecheckLinkText);
+                if PrecheckLinkValid then
+                    PrecheckLinkValid := AQNumber <> 0;
+                if not PrecheckLinkValid then
+                    ExcelValidation.AddIssue(RowNo, 6, PrecheckPNR, 0, 'Ref No./AQ Number', PrecheckLinkText, 'Reference number is invalid, blank or zero.', 'Enter a valid non-zero reference number.');
+                if PrecheckPNR = '' then
+                    ExcelValidation.AddIssue(RowNo, 9, PrecheckPNR, 0, 'PNR', '', 'PNR is blank.', 'Enter the PNR.');
+                if PrecheckLinkValid then begin
+                    ExistingSales.Reset();
+                    ExistingSales.SetRange("Ref No./AQ Number", AQNumber);
+                    if ExistingSales.IsEmpty() then begin
+                        ExistingSales.Reset();
+                        ExistingSales.SetRange(PNR, CopyStr(PrecheckPNR, 1, 10));
+                        if ExistingSales.IsEmpty() then begin
+                            PrecheckPassenger.Reset();
+                            PrecheckPassenger.SetRange("Ref No./AQ Number", AQNumber);
+                            PrecheckPassenger.SetRange(PNR, CopyStr(PrecheckPNR, 1, 10));
+                            if not PrecheckPassenger.IsEmpty() then
+                                ExcelValidation.AddIssue(RowNo, 10, PrecheckPNR, 0, 'Existing Passenger Records', PrecheckLinkText, 'Passenger records already exist for this reference and PNR.', 'Resolve the existing passenger records in BC before importing.');
+                        end;
+                    end;
+                end;
+            end;
+        end;
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(ExcelBuffer, 'API Sales', FileName, SheetName);
+            ExcelBuffer.CloseBook();
+            exit;
+        end;
+
+        // Phase 2: original import logic. Do not skip a late passenger validation failure.
         for RowNo := 2 to LastRow do begin
 
             PNRValue := CopyStr(
@@ -111,11 +182,8 @@ codeunit 50453 "API Sales Excel Import Mgt."
                             GetCellText(ExcelBuffer, RowNo, 12);
 
                         // Validate passenger data before insert.
-                        PassengerCount := CheckPassengers(
-                            NamesText,
-                            IDsText,
-                            TypesText,
-                            RowNo);
+                        if not TryCheckPassengerRow(GetCellText(ExcelBuffer, RowNo, 13), NamesText, IDsText, TypesText, RowNo, AQNumber, PNRValue, PassengerCount) then
+                            Error('Excel row %1: %2', RowNo, GetLastErrorText());
 
                         // Prevent cross-table AQ Number duplicates.
                         NormalSales.Reset();
@@ -315,6 +383,23 @@ codeunit 50453 "API Sales Excel Import Mgt."
                 ActualHeader);
     end;
 
+    [TryFunction]
+    local procedure TryCheckPassengerRow(PaxText: Text; NamesText: Text; IDsText: Text; TypesText: Text; RowNo: Integer; LinkNo: BigInteger; PNRValue: Text[10]; var PassengerCount: Integer)
+    var
+        PaxValue: Integer;
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+        ExistingPassenger: Record "API Sales Passenger Name";
+    begin
+        if not Evaluate(PaxValue, PaxText) then
+            Error('Invalid or blank PAX.');
+        PassengerCount := CheckPassengers(NamesText, IDsText, TypesText, RowNo);
+        PaxValidation.CheckExactCount(PaxValue, PassengerCount);
+        ExistingPassenger.SetRange("Ref No./AQ Number", LinkNo);
+        ExistingPassenger.SetRange(PNR, PNRValue);
+        if not ExistingPassenger.IsEmpty() then
+            Error('Passenger records already exist for this reference and PNR. Resolve existing records before importing.');
+    end;
+
     local procedure CheckPassengers(
         NamesText: Text;
         IDsText: Text;
@@ -390,6 +475,9 @@ codeunit 50453 "API Sales Excel Import Mgt."
                 Error(
                     'Passenger Type exceeds 50 characters at Excel row %1, passenger %2.',
                     RowNo, I);
+
+            if PassengerID <= 0 then
+                Error('Passenger ID must be greater than 0 at Excel row %1, passenger %2.', RowNo, I);
         end;
 
         exit(NamesList.Count);

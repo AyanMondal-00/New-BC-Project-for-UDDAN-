@@ -75,6 +75,9 @@ page 50410 "Normal Sales List"
                     var
                         PassengerList: Page "Own Sales Passenger List Name";
                     begin
+                        if Rec.Pax <= 0 then
+                            Error('First enter Pax count.');
+
                         if Rec."Ref No./AQ Number" = 0 then
                             Error('Ref No./AQ Number is blank.');
 
@@ -84,6 +87,7 @@ page 50410 "Normal Sales List"
                             Rec."Ref No./AQ Number",
                             Rec.PNR);
 
+                        PassengerList.SetExpectedPax(Rec.Pax);
                         PassengerList.RunModal();
                     end;
                 }
@@ -91,6 +95,18 @@ page 50410 "Normal Sales List"
                 field(Pax; Rec.Pax)
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    var
+                        Passenger: Record "Own Sales Passenger Name";
+                        PaxValidation: Codeunit "AIRIQ Pax Validation";
+                    begin
+                        if (Rec.Pax <> xRec.Pax) and (Rec."Ref No./AQ Number" <> 0) then begin
+                            Passenger.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+                            Passenger.SetRange(PNR, Rec.PNR);
+                            PaxValidation.NotifyPaxChange(Rec.Pax, Passenger.Count());
+                        end;
+                    end;
                 }
 
                 field("Travel Date"; Rec."Travel Date")

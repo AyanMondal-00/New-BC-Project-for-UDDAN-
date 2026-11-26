@@ -20,7 +20,7 @@ tableextension 50716 "AIRIQ SR Line" extends "Sales Line"
     fields
     {
         field(50715; "AIRIQ Taxable Value"; Decimal) { DataClassification = CustomerContent; }
-        field(50716; "AIRIQ Source CGST"; Decimal) { DataClassification = CustomerContent; }
+        field(50716; "AIRIQ Source CGST"; Decimal) { DataClassification = CustomerContent; } 
         field(50717; "AIRIQ Source SGST"; Decimal) { DataClassification = CustomerContent; }
         field(50718; "AIRIQ Source IGST"; Decimal) { DataClassification = CustomerContent; }
         field(50719; "AIRIQ Sold Value"; Decimal) { DataClassification = CustomerContent; }

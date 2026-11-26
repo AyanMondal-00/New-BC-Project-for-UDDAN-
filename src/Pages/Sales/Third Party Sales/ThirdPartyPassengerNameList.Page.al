@@ -70,6 +70,45 @@ page 50416 "Third Party Name List"
             Rec."SL No." := 1;
     end;
 
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        Passenger: Record "Third Party Passenger Name";
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+    begin
+        if EnforcePaxValidation then begin
+            Passenger.LockTable();
+            Passenger.SetRange("Ref No./AQ Number", CurrentRefNoAQNumber);
+            Passenger.SetRange(PNR, CurrentPNR);
+            PaxValidation.CheckInsertLimit(ExpectedPax, Passenger.Count());
+        end;
+        exit(true);
+    end;
+
+    trigger OnQueryClosePage(CloseAction: Action): Boolean
+    var
+        Passenger: Record "Third Party Passenger Name";
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+    begin
+        if not EnforcePaxValidation then
+            exit(true);
+
+        Passenger.SetRange("Ref No./AQ Number", CurrentRefNoAQNumber);
+        Passenger.SetRange(PNR, CurrentPNR);
+        if Passenger.FindSet() then
+            repeat
+                PaxValidation.CheckFields(Passenger."Passenger Name", Passenger.ID, Passenger.Type, Passenger."SL No.");
+            until Passenger.Next() = 0;
+
+        PaxValidation.CheckExactCount(ExpectedPax, Passenger.Count());
+        exit(true);
+    end;
+
+    procedure SetExpectedPax(PaxCount: Integer)
+    begin
+        ExpectedPax := PaxCount;
+        EnforcePaxValidation := true;
+    end;
+
     procedure SetRefNoAQNumber(
         AQNumber: BigInteger;
         PNRNo: Text[10])
@@ -79,10 +118,13 @@ page 50416 "Third Party Name List"
 
         Rec.FilterGroup(2);
         Rec.SetRange("Ref No./AQ Number", CurrentRefNoAQNumber);
+        Rec.SetRange(PNR, CurrentPNR);
         Rec.FilterGroup(0);
     end;
 
     var
+        ExpectedPax: Integer;
+        EnforcePaxValidation: Boolean;
         CurrentRefNoAQNumber: BigInteger;
         CurrentPNR: Text[10];
 }

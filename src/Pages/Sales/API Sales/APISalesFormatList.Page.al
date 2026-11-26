@@ -71,16 +71,24 @@ page 50411 "API Sales Format List"
                     ApplicationArea = All;
                     Caption = 'View Passenger';
                     Editable = false;
+                    DrillDown = true;
 
                     trigger OnDrillDown()
                     var
                         PassengerList:
                             Page "API Sales Passenger Name List";
                     begin
+                        if Rec.Pax <= 0 then
+                            Error('First enter Pax count.');
+
+                        if Rec."Ref No./AQ Number" = 0 then
+                            Error('Ref No./AQ Number is blank.');
+
                         PassengerList.SetRefNoAQNumber(
                             Rec."Ref No./AQ Number",
                             Rec.PNR);
 
+                        PassengerList.SetExpectedPax(Rec.Pax);
                         PassengerList.RunModal();
                     end;
                 }
@@ -90,7 +98,15 @@ page 50411 "API Sales Format List"
                     ApplicationArea = All;
 
                     trigger OnValidate()
+                    var
+                        Passenger: Record "API Sales Passenger Name";
+                        PaxValidation: Codeunit "AIRIQ Pax Validation";
                     begin
+                        if (Rec.Pax <> xRec.Pax) and (Rec."Ref No./AQ Number" <> 0) then begin
+                            Passenger.SetRange("Ref No./AQ Number", Rec."Ref No./AQ Number");
+                            Passenger.SetRange(PNR, Rec.PNR);
+                            PaxValidation.NotifyPaxChange(Rec.Pax, Passenger.Count());
+                        end;
                         CurrPage.Update(true);
                     end;
                 }

@@ -18,6 +18,11 @@ codeunit 50333 "Sales Return Excel Import"
         LastRow: Integer;
         RowNo: Integer;
         ImportedCount: Integer;
+        ExcelValidation: Codeunit "AIRIQ Excel Validation Mgt.";
+        PrecheckPassenger: Record "Sales Return Passenger Name";
+        PrecheckPNR: Text;
+        PrecheckLinkText: Text;
+        PrecheckLinkValid: Boolean;
         DuplicateCount: Integer;
         BlankCount: Integer;
         Names: List of [Text];
@@ -42,6 +47,50 @@ codeunit 50333 "Sales Return Excel Import"
         ExcelBuffer.OpenBookStream(InStream, SheetName);
         ExcelBuffer.ReadSheet();
 
+        // Phase 1A: collect all header errors without writing business records.
+        ExcelValidation.Initialize();
+        ExcelValidation.CheckDuplicateHeaders(ExcelBuffer, true);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Serial No.', true, true, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Entry Date', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Bill No.', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Invoice No.', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Return No.', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Agency ID', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'A/C Name', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Country', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'State', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'City', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Sector', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Type', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Travel Date', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Time', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Airline', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Airline Code', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'PNR', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'View Passenger', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Passenger ID', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Passenger Type', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Reference', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Narration', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'PAX', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Base Fare', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Other Charges', true, true, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Taxable Value', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'CGST', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'SGST', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'IGST', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Sold Value', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'XXLN Charges', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Refund Amount', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Sale Type', true, false, false);
+        ExcelValidation.CheckHeaderName(ExcelBuffer, 'Supplier', true, false, false);
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(ExcelBuffer, 'Own Sales Return', FileName, SheetName);
+            ExcelBuffer.CloseBook();
+            exit;
+        end;
+
+
         CheckHeaders(ExcelBuffer);
 
         ExcelBuffer.Reset();
@@ -51,6 +100,38 @@ codeunit 50333 "Sales Return Excel Import"
 
         LastRow := ExcelBuffer."Row No.";
 
+        // Phase 1B: scan the complete data sheet before allocating serial numbers or inserting records.
+        // Existing blank/instruction-row handling is preserved. Duplicate rows are validated too;
+        // the original duplicate skip logic below still decides which valid rows are inserted.
+        for RowNo := 2 to LastRow do begin
+            PrecheckPNR := Cell(ExcelBuffer, RowNo, 17);
+            PrecheckLinkText := Cell(ExcelBuffer, RowNo, 5);
+            if not IsBlankRow(ExcelBuffer, RowNo) then begin
+                ExcelValidation.CheckPassengerRow(RowNo, PrecheckPNR, Cell(ExcelBuffer, RowNo, 23), Cell(ExcelBuffer, RowNo, 18), Cell(ExcelBuffer, RowNo, 19), Cell(ExcelBuffer, RowNo, 20), ImportColumns.Get(23), ImportColumns.Get(18), ImportColumns.Get(19), ImportColumns.Get(20));
+                ReturnNo := CopyStr(PrecheckLinkText, 1, MaxStrLen(ReturnNo));
+                PrecheckLinkValid := ReturnNo <> '';
+                if not PrecheckLinkValid then
+                    ExcelValidation.AddIssue(RowNo, ImportColumns.Get(5), PrecheckPNR, 0, 'Return No.', PrecheckLinkText, 'Return No. is blank.', 'Enter the return number.');
+                if PrecheckLinkValid then begin
+                    ExistingSalesReturn.Reset();
+                    ExistingSalesReturn.SetRange("Return No.", ReturnNo);
+                    if ExistingSalesReturn.IsEmpty() then begin
+                        PrecheckPassenger.Reset();
+                        PrecheckPassenger.SetRange("Return No.", ReturnNo);
+                        PrecheckPassenger.SetRange(PNR, CopyStr(PrecheckPNR, 1, 10));
+                        if not PrecheckPassenger.IsEmpty() then
+                            ExcelValidation.AddIssue(RowNo, ImportColumns.Get(18), PrecheckPNR, 0, 'Existing Passenger Records', PrecheckLinkText, 'Passenger records already exist for this reference and PNR.', 'Resolve the existing passenger records in BC before importing.');
+                    end;
+                end;
+            end;
+        end;
+        if ExcelValidation.HasErrors() then begin
+            ExcelValidation.ShowErrors(ExcelBuffer, 'Own Sales Return', FileName, SheetName);
+            ExcelBuffer.CloseBook();
+            exit;
+        end;
+
+        // Phase 2: original import logic. Do not skip a late passenger validation failure.
         for RowNo := 2 to LastRow do begin
 
             if IsBlankRow(ExcelBuffer, RowNo) then
@@ -94,8 +175,8 @@ codeunit 50333 "Sales Return Excel Import"
                         Cell(ExcelBuffer, RowNo, 20));
 
                     // Validate before inserting main record.
-                    CheckPassengers(
-                        Names, Ids, Types, RowNo);
+                    if not TryCheckPassengerRow(Cell(ExcelBuffer, RowNo, 23), Names, Ids, Types, RowNo, ReturnNo, CopyStr(Cell(ExcelBuffer, RowNo, 17), 1, 10)) then
+                        Error('Excel row %1: %2', RowNo, GetLastErrorText());
 
                     SalesReturn.Init();
 
@@ -381,6 +462,7 @@ codeunit 50333 "Sales Return Excel Import"
                     Error('Required Excel header "%1" is missing from row 1.', Expected);
         end;
     end;
+
     local procedure IsBlankRow(
         var ExcelBuffer: Record "Excel Buffer" temporary;
         RowNo: Integer): Boolean
@@ -437,6 +519,23 @@ codeunit 50333 "Sales Return Excel Import"
         exit(Result);
     end;
 
+    [TryFunction]
+    local procedure TryCheckPassengerRow(PaxText: Text; Names: List of [Text]; Ids: List of [Text]; Types: List of [Text]; RowNo: Integer; LinkNo: Code[50]; PNRValue: Text[10])
+    var
+        PaxValue: Integer;
+        PaxValidation: Codeunit "AIRIQ Pax Validation";
+        ExistingPassenger: Record "Sales Return Passenger Name";
+    begin
+        if not Evaluate(PaxValue, PaxText) then
+            Error('Invalid or blank PAX.');
+        CheckPassengers(Names, Ids, Types, RowNo);
+        PaxValidation.CheckExactCount(PaxValue, Names.Count());
+        ExistingPassenger.SetRange("Return No.", LinkNo);
+        ExistingPassenger.SetRange(PNR, PNRValue);
+        if not ExistingPassenger.IsEmpty() then
+            Error('Passenger records already exist for this reference and PNR. Resolve existing records before importing.');
+    end;
+
     local procedure CheckPassengers(
         Names: List of [Text];
         Ids: List of [Text];
@@ -486,6 +585,9 @@ codeunit 50333 "Sales Return Excel Import"
                 Error(
                     'Invalid numeric Passenger ID "%1" at Excel row %2, passenger %3.',
                     IdText, RowNo, I);
+
+            if PassengerId <= 0 then
+                Error('Passenger ID must be greater than 0 at Excel row %1, passenger %2.', RowNo, I);
         end;
     end;
 
