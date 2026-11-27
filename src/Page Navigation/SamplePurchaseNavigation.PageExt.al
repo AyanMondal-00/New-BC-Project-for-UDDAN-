@@ -5,7 +5,7 @@ pageextension 50320 "Sample Purchase Navigation" extends "Business Manager Role 
     {
         addlast(Action41)
         {
-            group(SamplePurchaseFormats)
+            group("AIR IQ Purchase Formats")
             {
                 Caption = 'AIR IQ Purchase Format';
 
@@ -31,15 +31,27 @@ pageextension 50320 "Sample Purchase Navigation" extends "Business Manager Role 
                 }
             }
 
-            group("Posted Purchase Invoices")
+            group("AIR IQ Purchase Return")
             {
-                Caption = 'Posted Purchase Invoices';
+                Caption = 'AIR IQ Purchase Return';
 
-                action("Purchase Return")
+                action("Normal Purchase Return")
                 {
                     ApplicationArea = All;
-                    Caption = 'Purchase Return';
+                    Caption = 'Normal Purchase Return';
                     RunObject = page "Purchase Return";
+                }
+                action("Third Party Purchase Return")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Third Party Purchase Return';
+                    RunObject = page "Third Party Purchase Return";
+                }
+                action("API Purchase Return")
+                {
+                    ApplicationArea = All;
+                    Caption = 'API Purchase Return';
+                    RunObject = page "API Purchase Return";
                 }
             }
         }

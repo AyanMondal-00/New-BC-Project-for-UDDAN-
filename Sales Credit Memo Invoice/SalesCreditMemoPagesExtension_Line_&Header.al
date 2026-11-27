@@ -86,12 +86,7 @@ pageextension 50716 "AIRIQ SR Memo Lines" extends "Sales Cr. Memo Subform"
                 Editable = true;
                 ToolTip = 'Specifies the source return information.';
             }
-            field("AIRIQ Passenger SL"; Rec."AIRIQ Passenger SL")
-            {
-                ApplicationArea = All;
-                Editable = true;
-                ToolTip = 'Specifies the source return information.';
-            }
+
             field("AIRIQ Taxable Value"; Rec."AIRIQ Taxable Value")
             {
                 ApplicationArea = All;

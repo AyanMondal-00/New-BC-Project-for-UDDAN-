@@ -27,7 +27,8 @@ table 50715 "AIRIQ SR Return Registry"
 
 codeunit 50716 "AIRIQ SR Integrity"
 {
-    Permissions = tabledata "AIRIQ SR Return Registry" = rimd;
+    Permissions =
+        tabledata "AIRIQ SR Return Registry" = rimd;
 
     procedure Audit()
     var
@@ -46,7 +47,8 @@ codeunit 50716 "AIRIQ SR Integrity"
         Registry: Record "AIRIQ SR Return Registry";
         Other: Record "Sales Return";
     begin
-        if Source.IsTemporary() or (Source."Return No." = '') then
+        if Source.IsTemporary() or
+           (Source."Return No." = '') then
             exit;
 
         Registry.LockTable();
@@ -63,8 +65,14 @@ codeunit 50716 "AIRIQ SR Integrity"
             Registry.Insert();
         end;
 
-        Other.SetRange("Return No.", Source."Return No.");
-        Other.SetFilter("Serial No.", '<>%1', Source."Serial No.");
+        Other.SetRange(
+            "Return No.",
+            Source."Return No.");
+
+        Other.SetFilter(
+            "Serial No.",
+            '<>%1',
+            Source."Serial No.");
 
         if not Other.IsEmpty() then
             Error(
@@ -76,7 +84,8 @@ codeunit 50716 "AIRIQ SR Integrity"
     var
         Registry: Record "AIRIQ SR Return Registry";
     begin
-        if Source.IsTemporary() or (Source."Return No." = '') then
+        if Source.IsTemporary() or
+           (Source."Return No." = '') then
             exit;
 
         Registry.LockTable();
@@ -86,13 +95,27 @@ codeunit 50716 "AIRIQ SR Integrity"
                 Registry.Delete();
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Sales Return", 'OnAfterInsertEvent', '', false, false)]
-    local procedure Inserted(var Rec: Record "Sales Return"; RunTrigger: Boolean)
+    [EventSubscriber(
+        ObjectType::Table,
+        Database::"Sales Return",
+        'OnAfterInsertEvent',
+        '',
+        false,
+        false)]
+    local procedure Inserted(
+        var Rec: Record "Sales Return";
+        RunTrigger: Boolean)
     begin
         Claim(Rec);
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Sales Return", 'OnAfterModifyEvent', '', false, false)]
+    [EventSubscriber(
+        ObjectType::Table,
+        Database::"Sales Return",
+        'OnAfterModifyEvent',
+        '',
+        false,
+        false)]
     local procedure Modified(
         var Rec: Record "Sales Return";
         var xRec: Record "Sales Return";
@@ -113,32 +136,54 @@ codeunit 50716 "AIRIQ SR Integrity"
         Claim(Rec);
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Sales Return", 'OnAfterDeleteEvent', '', false, false)]
-    local procedure Deleted(var Rec: Record "Sales Return"; RunTrigger: Boolean)
+    [EventSubscriber(
+        ObjectType::Table,
+        Database::"Sales Return",
+        'OnAfterDeleteEvent',
+        '',
+        false,
+        false)]
+    local procedure Deleted(
+        var Rec: Record "Sales Return";
+        RunTrigger: Boolean)
     begin
         if Rec.IsTemporary() then
             exit;
 
-        if Rec."AIRIQ Memo Created" then
-            Error(
-                'Sales Return linked to Credit Memo %1 cannot be deleted.',
-                Rec."AIRIQ Memo No.");
+        // MODIFIED:
+        // Allow deletion even after Credit Memo creation.
+        // The Credit Memo itself is NOT deleted.
 
-        // Remove passenger records when the staging parent is deleted.
+        // Remove passenger staging details.
         RemovePassengers(Rec);
+
+        // Release Return No. from custom registry.
         Release(Rec);
     end;
 
-    local procedure RemovePassengers(Source: Record "Sales Return")
+    local procedure RemovePassengers(
+        Source: Record "Sales Return")
     var
         Passenger: Record "Sales Return Passenger Name";
     begin
-        Passenger.SetRange("Return No.", Source."Return No.");
-        Passenger.SetRange(PNR, Source.PNR);
+        Passenger.SetRange(
+            "Return No.",
+            Source."Return No.");
+
+        Passenger.SetRange(
+            PNR,
+            Source.PNR);
+
         Passenger.DeleteAll(true);
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Sales Return", 'OnAfterRenameEvent', '', false, false)]
+    [EventSubscriber(
+        ObjectType::Table,
+        Database::"Sales Return",
+        'OnAfterRenameEvent',
+        '',
+        false,
+        false)]
     local procedure Renamed(
         var Rec: Record "Sales Return";
         var xRec: Record "Sales Return";

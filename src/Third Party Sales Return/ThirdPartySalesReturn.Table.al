@@ -177,24 +177,21 @@ table 50467 "Third Party Sales Return"
 
     trigger OnInsert()
     var
-        LastReturn: Record "Third Party Sales Return";
+        NoSeries: Codeunit "No. Series";
+        NextNoText: Code[20];
         NextNo: Integer;
     begin
-        LastReturn.LockTable();
-        LastReturn.Reset();
-        LastReturn.SetCurrentKey("Serial No.");
+        // Validate before requesting a number from the series.
+        CheckDuplicateReturnNo();
 
-        if LastReturn.FindLast() then
-            NextNo := LastReturn."Serial No." + 1
-        else
-            NextNo := 1;
+        NextNoText := NoSeries.GetNextNo('TP-SALES');
 
-        while LastReturn.Get(NextNo) do
-            NextNo += 1;
+        if not Evaluate(NextNo, NextNoText) then
+            Error(
+                'No. Series TP-SALES must generate numeric values. Value received: %1.',
+                NextNoText);
 
         "Serial No." := NextNo;
-
-        CheckDuplicateReturnNo();
     end;
 
     trigger OnModify()

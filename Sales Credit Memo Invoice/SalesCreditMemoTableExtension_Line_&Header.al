@@ -34,7 +34,7 @@ tableextension 50716 "AIRIQ SR Line" extends "Sales Line"
         field(50727; "AIRIQ Airline Code"; Code[20]) { DataClassification = CustomerContent; }
         field(50728; "AIRIQ Reference"; Text[100]) { DataClassification = CustomerContent; }
         field(50729; "AIRIQ Passenger Type"; Text[50]) { DataClassification = CustomerContent; }
-        field(50730; "AIRIQ Passenger SL"; Integer) { DataClassification = CustomerContent; }
+        
     }
 }
 

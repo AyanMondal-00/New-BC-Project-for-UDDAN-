@@ -1,4 +1,3 @@
-
 report 50390 "AIRIQ Sales Invoice"
 {
     Caption = 'AIRIQ Sales Invoice';
@@ -38,6 +37,7 @@ report 50390 "AIRIQ Sales Invoice"
             column(AckNo; "Acknowledgement No.") { }
             column(AckDate; "Acknowledgement Date") { }
             column(QRImage; "QR Code") { }
+            column(PassengerTotal; PassengerTotal) { }
 
             dataitem(InvoiceLine; "Sales Invoice Line")
             {
@@ -52,6 +52,7 @@ report 50390 "AIRIQ Sales Invoice"
                 column(Rate; InclusiveRate) { }
                 column(Amount; InclusiveAmount) { }
                 column(RowNumber; "Line No.") { }
+                column(PassengerSequence; PassengerSequence) { }
 
                 trigger OnAfterGetRecord()
                 begin
@@ -62,6 +63,8 @@ report 50390 "AIRIQ Sales Invoice"
                         CurrReport.Skip();
                         exit;
                     end;
+
+                    PassengerSequence += 1;
 
                     InclusiveAmount :=
                         Amount + GetLineGST(Invoice, "Line No.");
@@ -107,6 +110,9 @@ report 50390 "AIRIQ Sales Invoice"
                 if Count() <> 1 then
                     Error(
                         'Select exactly one posted Own Sales invoice using the No. filter.');
+
+                PassengerSequence := 0;
+                PassengerTotal := CountPrintablePassengerLines(Invoice);
 
                 CalcFields(
                     Amount,
@@ -194,6 +200,8 @@ report 50390 "AIRIQ Sales Invoice"
         InclusiveAmount: Decimal;
         EInvoiceStatusText: Text;
         BankIFSCText: Text;
+        PassengerTotal: Integer;
+        PassengerSequence: Integer;
 
     local procedure PrepareInvoiceAmounts(
         Header: Record "Sales Invoice Header";
@@ -333,6 +341,28 @@ report 50390 "AIRIQ Sales Invoice"
                 GSTTotal,
                 NetTotal + GSTTotal,
                 OriginalInvoiceAmount);
+    end;
+
+    local procedure CountPrintablePassengerLines(
+        Header: Record "Sales Invoice Header"): Integer
+    var
+        PostedLine: Record "Sales Invoice Line";
+        Result: Integer;
+    begin
+        PostedLine.SetRange(
+            "Document No.",
+            Header."No.");
+
+        if PostedLine.FindSet() then
+            repeat
+                if not ((PostedLine.Quantity = 0) and
+                        (PostedLine.Amount = 0) and
+                        (GetLineGST(Header, PostedLine."Line No.") = 0))
+                then
+                    Result += 1;
+            until PostedLine.Next() = 0;
+
+        exit(Result);
     end;
 
     local procedure SetGSTFilters(
