@@ -1,13 +1,12 @@
-
 codeunit 50435 "AIRIQ Create API Sales Invoice"
 {
     procedure CreateAPISalesInvoice(var APISales: Record "API Sales Format")
     var
         SalesHeader: Record "Sales Header";
-        SalesLine: Record "Sales Line";
         Customer: Record Customer;
         Item: Record Item;
-        Passenger: Record "API Sales Passenger Name";
+        PassengerNames: List of [Text];
+        PassengerName: Text;
         NoSeries: Codeunit "No. Series";
         AQNumber: BigInteger;
         LineNo: Integer;
@@ -67,6 +66,10 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
 
         SalesHeader.Reset();
 
+        // Resolve and validate passenger names
+        // before consuming invoice numbering.
+        GetPassengerNames(APISales, PassengerNames);
+
         // STEP 4: CREATE SALES INVOICE HEADER
         SalesHeader.Init();
 
@@ -88,9 +91,10 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         SalesHeader.Validate(
             "Document Date",
             Today());
+
         SalesHeader.Validate(
-          "Location Code",
-           'SILIGURI');
+            "Location Code",
+            'SILIGURI');
 
         SalesHeader."AQ Number" := AQNumber;
 
@@ -100,50 +104,25 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         // Dynamic Sales Type
         SalesHeader."Sales Type" :=
             SalesHeader."Sales Type"::"API Sales";
+
         SalesHeader."Invoice Number" :=
-          APISales."Invoice Number";
+            APISales."Invoice Number";
 
         SalesHeader.Modify(true);
 
-        // STEP 5: FILTER PASSENGERS
-        Passenger.Reset();
-
-        Passenger.SetRange(
-            "Ref No./AQ Number",
-            AQNumber);
-
-        Passenger.SetRange(PNR, APISales.PNR);
-
-        Passenger.SetCurrentKey(
-            "Ref No./AQ Number",
-            PNR,
-            "SL No.");
-
+        // STEP 5-6: CREATE ONE SALES LINE PER PASSENGER
         LineNo := 10000;
 
-        // STEP 6: CREATE PASSENGER-WISE SALES LINES
-        if Passenger.FindSet() then begin
-            repeat
-                CreateAPISalesInvoiceLine(
-                    SalesHeader,
-                    APISales,
-                    Item,
-                    Passenger."Passenger Name",
-                    LineNo,
-                    1);
-
-                LineNo += 10000;
-
-            until Passenger.Next() = 0;
-        end else begin
-            // Fallback when no passenger details exist
+        foreach PassengerName in PassengerNames do begin
             CreateAPISalesInvoiceLine(
                 SalesHeader,
                 APISales,
                 Item,
-                APISales.Passenger,
+                CopyStr(PassengerName, 1, 100),
                 LineNo,
-                APISales.Pax);
+                1);
+
+            LineNo += 10000;
         end;
 
         // STEP 7: UPDATE STAGING RECORD
@@ -156,6 +135,77 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
             'Sales Invoice %1 created successfully for AQ Number %2.',
             SalesHeader."No.",
             AQNumber);
+    end;
+
+    // ============================================
+    // FETCH AND VALIDATE INDIVIDUAL PASSENGER NAMES
+    // ============================================
+
+    local procedure GetPassengerNames(
+        APISales: Record "API Sales Format";
+        var PassengerNames: List of [Text])
+    var
+        Passenger: Record "API Sales Passenger Name";
+        StagingNames: List of [Text];
+        PassengerName: Text;
+    begin
+        Clear(PassengerNames);
+
+        Passenger.SetCurrentKey(
+            "Ref No./AQ Number",
+            PNR,
+            "SL No.");
+
+        Passenger.SetRange(
+            "Ref No./AQ Number",
+            APISales."Ref No./AQ Number");
+
+        Passenger.SetRange(
+            PNR,
+            APISales.PNR);
+
+        // PRIMARY SOURCE:
+        // Fetch passengers from API Sales Passenger Table.
+        if Passenger.FindSet() then begin
+            repeat
+                PassengerNames.Add(
+                    DelChr(
+                        Passenger."Passenger Name",
+                        '<>',
+                        ' '));
+            until Passenger.Next() = 0;
+        end else begin
+
+            // FALLBACK SOURCE:
+            // Split comma-separated passenger names
+            // from the existing API Sales staging table.
+
+            StagingNames := APISales.Passenger.Split(',');
+
+            foreach PassengerName in StagingNames do
+                PassengerNames.Add(
+                    DelChr(
+                        PassengerName,
+                        '<>',
+                        ' '));
+        end;
+
+        // VALIDATE PASSENGER COUNT WITH PAX
+        if PassengerNames.Count() <> APISales.Pax then
+            Error(
+                'Passenger count mismatch for AQ Number %1, PNR %2. PAX: %3, passenger names: %4. Check View Passenger before creating the invoice.',
+                APISales."Ref No./AQ Number",
+                APISales.PNR,
+                APISales.Pax,
+                PassengerNames.Count());
+
+        // VALIDATE BLANK PASSENGER NAME
+        foreach PassengerName in PassengerNames do
+            if PassengerName = '' then
+                Error(
+                    'Passenger Name cannot be blank for AQ Number %1, PNR %2. Check View Passenger before creating the invoice.',
+                    APISales."Ref No./AQ Number",
+                    APISales.PNR);
     end;
 
     // ============================================
@@ -215,6 +265,7 @@ codeunit 50435 "AIRIQ Create API Sales Invoice"
         // Item validation may populate GST setup.
         // Remove it on this API invoice line only.
         // The Item Card itself is not modified.
+
         SalesLine.Validate(
             "GST Group Code",
             '');

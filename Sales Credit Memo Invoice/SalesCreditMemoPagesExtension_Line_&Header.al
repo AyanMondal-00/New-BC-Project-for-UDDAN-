@@ -21,6 +21,16 @@ pageextension 50715 "AIRIQ SR Memo Page" extends "Sales Credit Memo"
                     Editable = true;
                     ToolTip = 'Specifies the source return information.';
                 }
+                field("AIRIQ API Return Serial"; Rec."AIRIQ API Return Serial")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
+                field("AIRIQ TP Return Serial"; Rec."AIRIQ TP Return Serial")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
                 field("AIRIQ Bill No."; Rec."AIRIQ Bill No.")
                 {
                     ApplicationArea = All;
@@ -74,6 +84,12 @@ pageextension 50716 "AIRIQ SR Memo Lines" extends "Sales Cr. Memo Subform"
     {
         addafter(Description)
         {
+            field("AIRIQ Rate"; Rec."AIRIQ Rate")
+            {
+                ApplicationArea = All;
+                Editable = false;
+                ToolTip = 'Specifies the original Third Party per-passenger rate.';
+            }
             field("Passenger Name"; Rec."Passenger Name")
             {
                 ApplicationArea = All;

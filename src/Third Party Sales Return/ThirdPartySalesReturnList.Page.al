@@ -173,6 +173,37 @@ page 50470 "Third Party Sales Return"
     {
         area(Processing)
         {
+            action(AIRIQCreateTPMemo)
+            {
+                Caption = 'Create Sales Credit Memo';
+                ApplicationArea = All;
+                Image = CreditMemo;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'Creates an unposted sales credit memo for the current Third Party Sales Return.';
+
+                trigger OnAction()
+                var
+                    Creator: Codeunit "AIRIQ TP SR Create Memo";
+                    Header: Record "Sales Header";
+                begin
+                    CurrPage.SaveRecord();
+                    Creator.Create(Rec."Serial No.", Header);
+                    CurrPage.Update(false);
+                    Page.Run(Page::"Sales Credit Memo", Header);
+                end;
+            }
+            action("Refresh Posted Invoice Values")
+            {
+                ApplicationArea = All;
+                Image = Refresh;
+                trigger OnAction()
+                begin
+                    Rec.RefreshPostedInvoiceData();
+                    Rec.Modify(true);
+                    CurrPage.Update(false);
+                end;
+            }
             action(ImportExcel)
             {
                 Caption = 'Import Excel';

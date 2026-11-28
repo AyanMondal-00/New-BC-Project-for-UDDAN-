@@ -23,6 +23,16 @@ pageextension 50720 "AIRIQ Posted SR Memo Page"
                     Editable = false;
                 }
 
+                field("AIRIQ API Return Serial"; Rec."AIRIQ API Return Serial")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
+                field("AIRIQ TP Return Serial"; Rec."AIRIQ TP Return Serial")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
                 field("AIRIQ Bill No."; Rec."AIRIQ Bill No.")
                 {
                     ApplicationArea = All;
@@ -79,6 +89,12 @@ pageextension 50721 "AIRIQ Posted SR Memo Lines"
     {
         addafter(Description)
         {
+            field("AIRIQ Rate"; Rec."AIRIQ Rate")
+            {
+                ApplicationArea = All;
+                Editable = false;
+                ToolTip = 'Specifies the original Third Party per-passenger rate.';
+            }
             field("Passenger Name"; Rec."Passenger Name")
             {
                 ApplicationArea = All;

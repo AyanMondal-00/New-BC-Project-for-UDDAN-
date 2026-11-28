@@ -2,6 +2,20 @@ tableextension 50718 "AIRIQ SR Posted Header" extends "Sales Cr.Memo Header"
 {
     fields
     {
+        field(50731; "AIRIQ API Return Serial"; Code[20])
+        {
+            Caption = 'API Return Serial No.';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+
+        field(50730; "AIRIQ TP Return Serial"; Code[20])
+        {
+            Caption = 'Third Party Return Serial No.';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+
         field(50715; "AIRIQ Return No."; Code[50])
         {
             Caption = 'AIRIQ Return No.';
@@ -54,7 +68,7 @@ tableextension 50718 "AIRIQ SR Posted Header" extends "Sales Cr.Memo Header"
         {
             Caption = 'AIRIQ Sale Type';
             DataClassification = CustomerContent;
-            OptionMembers = Own,ThirdParty;
+            OptionMembers = Own,ThirdParty,API;
         }
     }
 }
@@ -64,6 +78,13 @@ tableextension 50719 "AIRIQ SR Posted Line" extends "Sales Cr.Memo Line"
 {
     fields
     {
+        field(50730; "AIRIQ Rate"; Decimal)
+        {
+            Caption = 'Rate';
+            DataClassification = CustomerContent;
+            DecimalPlaces = 0 : 5;
+        }
+
         // =========================================
         // ORIGINAL SALES LINE CUSTOM FIELDS
         // =========================================

@@ -25,6 +25,12 @@ codeunit 50719 "AIRIQ SR Posting"
         if SalesHeader."AIRIQ Return No." = '' then
             exit;
 
+        if SalesHeader."AIRIQ API Return Serial" <> '' then
+            SalesCrMemoHeader."AIRIQ API Return Serial" := SalesHeader."AIRIQ API Return Serial";
+
+        if SalesHeader."AIRIQ TP Return Serial" <> '' then
+            SalesCrMemoHeader."AIRIQ TP Return Serial" := SalesHeader."AIRIQ TP Return Serial";
+
         SalesCrMemoHeader."AIRIQ Return No." :=
             SalesHeader."AIRIQ Return No.";
 
@@ -84,6 +90,10 @@ codeunit 50719 "AIRIQ SR Posting"
         // =========================================
         // ORIGINAL LINE INFORMATION
         // =========================================
+
+        if (SalesHeader."AIRIQ TP Return Serial" <> '') or
+           (SalesHeader."AIRIQ API Return Serial" <> '') then
+            SalesCrMemoLine."AIRIQ Rate" := SalesLine."AIRIQ Rate";
 
         SalesCrMemoLine."Travel Date" :=
             SalesLine."Travel Date";

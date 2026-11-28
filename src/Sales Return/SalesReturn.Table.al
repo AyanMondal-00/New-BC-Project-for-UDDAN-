@@ -1,4 +1,3 @@
-
 table 50403 "Sales Return"
 {
     Caption = 'Sales Return';
@@ -10,6 +9,7 @@ table 50403 "Sales Return"
         {
             Caption = 'Serial No.';
             DataClassification = SystemMetadata;
+            Editable = false;
         }
 
         field(2; "Entry Date"; DateTime)
@@ -270,6 +270,7 @@ table 50403 "Sales Return"
     trigger OnInsert()
     begin
         "Serial No." := GetNextSerialNo();
+
         RefreshPostedInvoiceData();
     end;
 
@@ -288,37 +289,27 @@ table 50403 "Sales Return"
 
     local procedure GetNextSerialNo(): Integer
     var
-        SerialCounter: Record "Sales Return Serial Counter";
+        NoSeries: Codeunit "No. Series";
+        NextNoText: Code[20];
+        NextNo: Integer;
         SalesReturn: Record "Sales Return";
-        LastUsedNo: Integer;
     begin
-        SerialCounter.LockTable();
-        SalesReturn.LockTable();
+        NextNoText := NoSeries.GetNextNo('N-SR');
 
-        SalesReturn.Reset();
-        SalesReturn.SetCurrentKey("Serial No.");
+        if not Evaluate(NextNo, NextNoText) then
+            Error(
+                'No. Series N-SR must generate numeric values. Value received: %1.',
+                NextNoText);
 
-        if not SerialCounter.Get('DEFAULT') then begin
-            SerialCounter.Init();
-            SerialCounter."Primary Key" := 'DEFAULT';
-            SerialCounter."Last Serial No." := 0;
-            SerialCounter.Insert();
-        end;
+        if NextNo <= 0 then
+            Error(
+                'No. Series N-SR must generate a positive Serial No.');
 
-        if SalesReturn.FindLast() then
-            if SalesReturn."Serial No." >
-               SerialCounter."Last Serial No." then
-                SerialCounter."Last Serial No." :=
-                    SalesReturn."Serial No.";
+        if SalesReturn.Get(NextNo) then
+            Error(
+                'Serial No. %1 already exists. Please check No. Series N-SR setup.',
+                NextNo);
 
-        LastUsedNo := SerialCounter."Last Serial No.";
-
-        if LastUsedNo >= 2147483647 then
-            Error('Sales Return Serial No. limit reached.');
-
-        SerialCounter."Last Serial No." := LastUsedNo + 1;
-        SerialCounter.Modify();
-
-        exit(LastUsedNo + 1);
+        exit(NextNo);
     end;
 }

@@ -3,6 +3,20 @@ tableextension 50715 "AIRIQ SR Header" extends "Sales Header"
 {
     fields
     {
+        field(50731; "AIRIQ API Return Serial"; Code[20])
+        {
+            Caption = 'API Return Serial No.';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+
+        field(50730; "AIRIQ TP Return Serial"; Code[20])
+        {
+            Caption = 'Third Party Return Serial No.';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+
         field(50715; "AIRIQ Return No."; Code[50]) { DataClassification = CustomerContent; }
         field(50716; "AIRIQ Return Serial"; Integer) { DataClassification = CustomerContent; }
         field(50717; "AIRIQ Bill No."; Code[50]) { DataClassification = CustomerContent; }
@@ -11,7 +25,7 @@ tableextension 50715 "AIRIQ SR Header" extends "Sales Header"
         field(50720; "AIRIQ Reference"; Text[100]) { DataClassification = CustomerContent; }
         field(50721; "AIRIQ Narration"; Text[250]) { DataClassification = CustomerContent; }
         field(50722; "AIRIQ Supplier"; Code[30]) { DataClassification = CustomerContent; }
-        field(50723; "AIRIQ Sale Type"; Option) { DataClassification = CustomerContent; OptionMembers = Own,ThirdParty; }
+        field(50723; "AIRIQ Sale Type"; Option) { DataClassification = CustomerContent; OptionMembers = Own,ThirdParty,API; }
     }
 }
 
@@ -19,6 +33,13 @@ tableextension 50716 "AIRIQ SR Line" extends "Sales Line"
 {
     fields
     {
+        field(50730; "AIRIQ Rate"; Decimal)
+        {
+            Caption = 'Rate';
+            DataClassification = CustomerContent;
+            DecimalPlaces = 0 : 5;
+        }
+
         field(50715; "AIRIQ Taxable Value"; Decimal) { DataClassification = CustomerContent; }
         field(50716; "AIRIQ Source CGST"; Decimal) { DataClassification = CustomerContent; } 
         field(50717; "AIRIQ Source SGST"; Decimal) { DataClassification = CustomerContent; }
